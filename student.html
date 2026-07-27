@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal · Study With Rameen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-overlay" id="authOverlay" hidden>Checking your session…</div>
+
+  <!-- ============ TOP NAV ============ -->
+  <header class="topnav">
+    <a class="brand" href="index.html">
+      <img src="logo.png" class="logo" alt="Study With Rameen">
+      <span class="brand-text">
+        <strong>Study With Rameen</strong>
+        <small>Student Portal</small>
+      </span>
+    </a>
+
+    <div class="topnav-right">
+      <button class="icon-btn" aria-label="Notifications, 2 unread">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="badge">2</span>
+      </button>
+      <div class="divider-v"></div>
+      <button class="user-chip">
+        <span class="avatar-initials">AK</span>
+        <span class="user-chip-name">Ayesha Khan</span>
+        <svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ COHORT STRIP (fixed for students) ============ -->
+  <div class="cohort-bar">
+    <span class="cohort-label">Your Cohort</span>
+    <span class="pill active static" id="cohortPillLabel">May/June 2026</span>
+    <span class="cohort-meta">Next deadline: <strong id="cohortDeadline">Mock Test 4 · 12 Jul</strong></span>
+  </div>
+
+  <div class="layout">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" aria-label="Portal navigation">
+      <nav class="snav">
+        <a href="#dashboard" class="snav-item" data-view="dashboard">
+          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="#vault" class="snav-item" data-view="vault">
+          <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+          <span>Lecture Vault</span>
+        </a>
+        <a href="#notes" class="snav-item" data-view="notes">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          <span>Notes</span>
+        </a>
+        <a href="#quiz" class="snav-item" data-view="quiz">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span>Practice Quizzes</span>
+        </a>
+        <a href="#weekly" class="snav-item" data-view="weekly">
+          <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm.01 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          <span>Weekly Test</span>
+        </a>
+        <a href="#assignments" class="snav-item" data-view="assignments">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          <span>Assignments</span>
+        </a>
+        <a href="#grades" class="snav-item" data-view="grades">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <span>My Grades</span>
+        </a>
+        <a href="#scoreboard" class="snav-item" data-view="scoreboard">
+          <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+          <span>Scoreboard</span>
+        </a>
+        <a href="#settings" class="snav-item" data-view="settings">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Settings</span>
+        </a>
+        <div class="snav-sep"></div>
+        <a href="index.html" class="snav-item logout">
+          <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <span>Log out</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1 id="viewTitle">Dashboard</h1>
+          <p id="todaySub"></p>
+        </div>
+      </div>
+
+      <!-- ================= VIEW: DASHBOARD ================= -->
+      <section class="view" data-view="dashboard">
+
+        <div class="welcome-banner">
+          <div>
+            <h2 id="welcomeHeading">Welcome back, Ayesha 👋</h2>
+            <p>Next Live Class: <strong>Tonight 8:30 PM</strong> (Meeting link will be shared in our WhatsApp group).</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Syllabus Tracker</h2>
+            <span class="panel-hint">Completion per subject, based on lectures you've watched</span>
+          </div>
+          <div class="ring-grid" data-list="rings"></div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Leaderboard</h2>
+              <a class="jump" href="#scoreboard">Full scoreboard →</a>
+            </div>
+            <div class="podium mini" data-list="mini-podium"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Announcement Board</h2>
+              <span class="panel-hint">From Miss Rameen</span>
+            </div>
+            <ul class="ann-list" data-list="announcements"></ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= VIEW: LECTURE VAULT ================= -->
+      <section class="view" data-view="vault" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Lecture Vault</h2>
+            <span class="panel-hint">Pick a subject, open a chapter, press play — toggle any lecture for offline study</span>
+          </div>
+
+          <div class="subject-grid" data-subjects="vault"></div>
+          <div data-chapters="vault"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: NOTES ================= -->
+      <section class="view" data-view="notes" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Notes</h2>
+            <span class="panel-hint">Targeted PDFs for every chapter — download any for offline study</span>
+          </div>
+          <div class="subject-grid" data-subjects="notes"></div>
+          <div data-chapters="notes"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: PRACTICE QUIZZES ================= -->
+      <section class="view" data-view="quiz" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Practice Quizzes</h2>
+            <span class="panel-hint">Self-marked practice — Miss Rameen can see your results on your report</span>
+          </div>
+          <div id="quizArea"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: WEEKLY TEST ================= -->
+      <section class="view" data-view="weekly" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>This Week's Test</h2>
+            <span class="panel-hint">Download, solve on paper, submit on WhatsApp</span>
+          </div>
+          <div id="weeklyArea"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: ASSIGNMENTS & HOMEWORK ================= -->
+      <section class="view" data-view="assignments" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Assignments &amp; Homework</h2>
+            <span class="panel-hint">Upload photos or PDFs of your work before the deadline — marks appear here once checked</span>
+          </div>
+          <div id="assignmentsArea"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: MY GRADES ================= -->
+      <section class="view" data-view="grades" hidden>
+
+        <div class="stats" aria-label="Grade summary">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="sGradeLatest"></span>
+              <span class="stat-label">Latest Grade</span>
+              <span class="stat-sub" id="sGradeLatestSub"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="sGradeTaken"></span>
+              <span class="stat-label">Graded So Far</span>
+              <span class="stat-sub" id="sGradeTakenSub"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="sGradeTrend"></span>
+              <span class="stat-label">Progress Trend</span>
+              <span class="stat-sub" id="sGradeTrendSub"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="sAttendancePct"></span>
+              <span class="stat-label">Attendance</span>
+              <span class="stat-sub" id="sAttendanceSub"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Marks over time</h2>
+            <span class="panel-hint">Every graded item, in order</span>
+          </div>
+          <div id="sGradeChart"></div>
+          <p class="empty-note" id="sGradeChartEmpty" hidden>No graded work yet — your chart appears once Miss Rameen marks something.</p>
+          <div class="report-bands-legend">
+            <div class="band-chip"><span class="grade-chip">A*</span><span class="band-range">90–100</span></div>
+            <div class="band-chip"><span class="grade-chip">A</span><span class="band-range">80–89</span></div>
+            <div class="band-chip"><span class="grade-chip mid">B</span><span class="band-range">70–79</span></div>
+            <div class="band-chip"><span class="grade-chip mid">C</span><span class="band-range">60–69</span></div>
+            <div class="band-chip"><span class="grade-chip mid">D</span><span class="band-range">50–59</span></div>
+            <div class="band-chip"><span class="grade-chip risk">U</span><span class="band-range">0–49</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Grading Tracker</h2>
+            <span class="panel-hint">🔒 Private — only you and your teacher can see this</span>
+          </div>
+          <div class="table-wrap">
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Submitted</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Grade</th>
+                  <th scope="col">Feedback</th>
+                </tr>
+              </thead>
+              <tbody id="gradeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= VIEW: SCOREBOARD ================= -->
+      <section class="view" data-view="scoreboard" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Monthly Scoreboard 🏆</h2>
+            <span class="panel-hint">Computed live from marked work this month</span>
+          </div>
+
+          <p class="rank-callout" id="sRankCallout"></p>
+
+          <div class="podium" id="sPodium"></div>
+
+          <p class="score-note" id="scoreNote" hidden>Top performers are celebrated by rank only — marks are never shown. A fresh scoreboard starts on the 1st of every month.</p>
+          <p class="empty-note" id="podiumEmpty" hidden>No scoreboard yet — the first monthly ranking is published after the first marked assignment.</p>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: SETTINGS ================= -->
+      <section class="view" data-view="settings" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Settings</h2>
+            <span class="panel-hint">Email is your login ID — ask Miss Rameen if it needs to change</span>
+          </div>
+          <form class="settings-form" id="settingsForm">
+            <label for="setName">Display name</label>
+            <input type="text" id="setName" required>
+            <label for="setEmail">Email</label>
+            <input type="email" id="setEmail" readonly>
+            <label for="setQuality">Offline download quality</label>
+            <select id="setQuality" class="tool-select">
+              <option>Auto (recommended)</option>
+              <option>720p — best quality</option>
+              <option>480p — saves data</option>
+              <option>Audio only</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+        </div>
+      </section>
+
+      <footer class="foot">© 2026 Study With Rameen · Student Portal</footer>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+    <div>
+      <strong id="toastTitle"></strong>
+      <small id="toastMsg"></small>
+    </div>
+  </div>
+
+<script src="data.js"></script>
+<script src="student.js"></script>
+<script src="owl.js"></script>
+<script type="module" src="auth-guard.js"></script>
+</body>
+</html>

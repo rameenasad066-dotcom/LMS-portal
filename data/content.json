@@ -1,0 +1,9 @@
+{
+  "_comment": "Subjects for the student portal. Chapters used to live here but are now real and teacher-managed — created directly in the Teacher Portal's Upload Notes page, stored in Supabase (table `chapters`). See data/README.md.",
+
+  "subjects": [
+    { "id": "history",   "name": "History",   "paper": "Pakistan Studies · Paper 1" },
+    { "id": "geography", "name": "Geography", "paper": "Pakistan Studies · Paper 2" },
+    { "id": "islamiyat", "name": "Islamiyat", "paper": "Syllabus 2058" }
+  ]
+}

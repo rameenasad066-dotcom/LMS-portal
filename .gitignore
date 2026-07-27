@@ -1,0 +1,13 @@
+# Source material for content-building — not part of the live site.
+# These are real exam papers and personal notes; publishing them as static
+# files on Netlify would make them world-readable at a predictable URL.
+Past papers for pak studies/
+source-notes/
+notes-20260724T205539Z-1-001.zip
+
+# Unused leftover logo exports — logo.png (referenced in the HTML) is kept.
+rameen asad logo (1).jpg
+rameen asad logo2 (1).png
+
+# Local Claude Code tooling config — not part of the deployed site.
+.claude/

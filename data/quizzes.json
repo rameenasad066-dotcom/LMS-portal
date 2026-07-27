@@ -1,0 +1,769 @@
+{
+  "_comment": "Practice quizzes for Study With Rameen. History & Geography quizzes are from Rameen's own lecture notes (2059 syllabus). Islamiyat quizzes (2058 syllabus) are drafted from her own exam notes but NOT yet reviewed by her for religious accuracy — do not treat as final until she has checked them. Every question keeps 'topic' and 'question_type' for future flexibility. How to edit: see data/README.md.",
+
+  "quizzes": [
+    {
+      "id": "quiz-history-mughal",
+      "subject": "history",
+      "title": "The Mughal Empire & Its Decline",
+      "questions": [
+        {
+          "topic": "Decline during Aurangzeb",
+          "question_type": "mcq",
+          "question": "In which year did Aurangzeb re-impose the Jizya Tax on non-Muslims?",
+          "options": ["1707", "1679", "1761", "1757"],
+          "correct": 1
+        },
+        {
+          "topic": "Decline after Aurangzeb",
+          "question_type": "mcq",
+          "question": "Who defeated the Mughals in 1738–39, looted the treasury, and carried off the Peacock Throne?",
+          "options": ["Robert Clive", "Nadir Shah", "Ahmed Shah Durrani", "The Marathas"],
+          "correct": 1
+        },
+        {
+          "topic": "Decline after Aurangzeb",
+          "question_type": "mcq",
+          "question": "The British victories at the Battle of Plassey (1757) and the Battle of Buxar (1764) gave them the riches of which region?",
+          "options": ["Punjab", "Sindh", "Bengal", "The Deccan"],
+          "correct": 2
+        },
+        {
+          "topic": "Decline during Aurangzeb",
+          "question_type": "mcq",
+          "question": "Roughly how long did Aurangzeb's wars against the Marathas in the Deccan last?",
+          "options": ["10 years", "5 years", "25 years", "50 years"],
+          "correct": 2
+        },
+        {
+          "topic": "Decline during Aurangzeb",
+          "question_type": "mcq",
+          "question": "What was 'Suttee', the practice that Aurangzeb banned?",
+          "options": [
+            "A protection tax on non-Muslims",
+            "A Maratha war tactic",
+            "A Mughal court ceremony",
+            "A Hindu tradition in which a widow was burnt alive with her husband's body"
+          ],
+          "correct": 3
+        },
+        {
+          "topic": "Decline during Aurangzeb",
+          "question_type": "short_answer",
+          "question": "Give four reasons for the decline of the Mughal Empire DURING the reign of Aurangzeb.",
+          "model_answer": [
+            "The Maratha / Deccan wars lasted 25 years, drained the treasury and forced higher taxes",
+            "Economic decline through extravagance — luxurious palaces and mosques (e.g. the Pearl Mosque)",
+            "Intolerance towards non-Muslims — re-imposing the Jizya Tax (1679), causing the Rajputs to revolt",
+            "Intolerance towards non-Muslims — destruction of Hindu temples",
+            "Intolerance towards non-Muslims — banning of Suttee",
+            "Intolerance towards Muslims — the law taxing men who did not keep a set beard length",
+            "Failing to educate his sons in the art of ruling (Bahadur Shah I became ruler at 63 with no experience)"
+          ],
+          "marking_note": "Any four points earn full marks — extra points are listed so every valid answer is covered."
+        },
+        {
+          "topic": "Decline after Aurangzeb",
+          "question_type": "short_answer",
+          "question": "Give four reasons for the decline of the Mughal Empire AFTER the death of Aurangzeb.",
+          "model_answer": [
+            "Succession disputes — there was no law of succession, so sons fought costly wars for the throne",
+            "Administrative weakness — the empire was too large; Bengal and Bihar declared independence",
+            "Pleasure-seeking, extravagant emperors who ignored administration",
+            "Foreign invaders — Nadir Shah (1738–39) and Ahmed Shah Durrani weakened and shrank the empire",
+            "British superiority — the Industrial Revolution and victories at Plassey (1757) and Buxar (1764)"
+          ],
+          "marking_note": "Any four points earn full marks."
+        },
+        {
+          "topic": "Decline during Aurangzeb",
+          "question_type": "short_answer",
+          "question": "What was the Jizya Tax? (4 marks)",
+          "model_answer": [
+            "A tax re-imposed by Aurangzeb in 1679",
+            "A protection tax levied on non-Muslims",
+            "Charged in return for protecting their temples and places of worship",
+            "It was resented by non-Muslims",
+            "It led the Rajputs to revolt against the Mughals"
+          ],
+          "marking_note": "Any four points earn full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-history-british-expansion",
+      "subject": "history",
+      "title": "The East India Company & British Expansion",
+      "questions": [
+        {
+          "topic": "The East India Company",
+          "question_type": "mcq",
+          "question": "In which year was the East India Company (EIC) formed, after Queen Elizabeth I granted permission?",
+          "options": ["1757", "1600", "1612", "1608"],
+          "correct": 1
+        },
+        {
+          "topic": "The East India Company",
+          "question_type": "mcq",
+          "question": "Where did the first EIC ship land in India in 1608?",
+          "options": ["Calcutta", "Bombay", "Surat", "Madras"],
+          "correct": 2
+        },
+        {
+          "topic": "British expansion",
+          "question_type": "mcq",
+          "question": "Who led the British to victory at the Battle of Plassey (1757), helped by the treachery of Mir Jafar?",
+          "options": ["Warren Hastings", "Nadir Shah", "Robert Clive", "Tipu Sultan"],
+          "correct": 2
+        },
+        {
+          "topic": "British expansion",
+          "question_type": "mcq",
+          "question": "In 1834, which language replaced Persian as the official language of administration in India?",
+          "options": ["Urdu", "English", "Hindi", "Bengali"],
+          "correct": 1
+        },
+        {
+          "topic": "Indian resistance",
+          "question_type": "mcq",
+          "question": "Which traitor helped the British defeat Tipu Sultan and capture Mysore in 1799?",
+          "options": ["Mir Jafar", "Mir Qasim", "Mir Sadiq", "Ranjit Singh"],
+          "correct": 2
+        },
+        {
+          "topic": "The East India Company",
+          "question_type": "short_answer",
+          "question": "Give three reasons why the East India Company became involved in the Indian subcontinent.",
+          "model_answer": [
+            "India's valuable raw materials — spices, cotton and indigo — were highly demanded in Europe and could be sold at great profit",
+            "To oust European rivals (the Dutch and Portuguese) who were already earning large profits, and gain a monopoly over the European markets",
+            "The Dutch controlled the spice trade of the East Indies (Indonesia), so India became the EIC's alternate solution"
+          ],
+          "marking_note": "Any three points earn full marks."
+        },
+        {
+          "topic": "British expansion",
+          "question_type": "short_answer",
+          "question": "Give four reasons why the British were able to increase their influence in India between 1750 and 1850.",
+          "model_answer": [
+            "The Industrial Revolution gave them technological superiority and modern weaponry",
+            "They appointed experienced governors in Madras, Bombay and Calcutta",
+            "Military victories at the Battles of Plassey (1757) and Buxar (1764) gave them rich provinces",
+            "Indians were not united, so the British easily conquered areas like Sindh and Punjab",
+            "Treachery of some Indians — Mir Jafar (Bengal) and Mir Sadiq (Mysore)",
+            "A network of roads and railways let them move soldiers quickly and suppress revolts",
+            "English replaced Persian as the official language (1834), tightening their political grip"
+          ],
+          "marking_note": "Any four points earn full marks."
+        },
+        {
+          "topic": "British expansion",
+          "question_type": "short_answer",
+          "question": "Give three reasons why the British built railways in India during the 19th century.",
+          "model_answer": [
+            "To transport raw materials and to sell their manufactured goods throughout India (more profit)",
+            "To suppress revolts — soldiers could travel quickly from one trouble spot to another",
+            "To allow people to travel and to bring food to areas affected by famine"
+          ],
+          "marking_note": "Any three points earn full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-history-reformers",
+      "subject": "history",
+      "title": "The Reformers — Revival of Islam",
+      "questions": [
+        {
+          "topic": "Shah Waliullah",
+          "question_type": "mcq",
+          "question": "Which reformer translated the Holy Quran from Arabic into Persian?",
+          "options": ["Haji Shariatullah", "Shah Waliullah", "Syed Ahmad Shaheed Barelvi", "Shah Abdul Aziz"],
+          "correct": 1
+        },
+        {
+          "topic": "Haji Shariatullah",
+          "question_type": "mcq",
+          "question": "Who launched the Faraizi movement?",
+          "options": ["Shah Waliullah", "Syed Ahmad Shaheed Barelvi", "Haji Shariatullah", "Ranjit Singh"],
+          "correct": 2
+        },
+        {
+          "topic": "Syed Ahmad Shaheed Barelvi",
+          "question_type": "mcq",
+          "question": "Which reformer launched the Jihad movement against the Sikhs of Punjab?",
+          "options": ["Shah Waliullah", "Syed Ahmad Shaheed Barelvi", "Haji Shariatullah", "Shah Abdul Aziz"],
+          "correct": 1
+        },
+        {
+          "topic": "Jihad Movement",
+          "question_type": "mcq",
+          "question": "In which battle (1831) was Syed Ahmad Shaheed Barelvi martyred, ending the Jihad movement?",
+          "options": ["Battle of Panipat", "Battle of Balakot", "Battle of Plassey", "Battle of Buxar"],
+          "correct": 1
+        },
+        {
+          "topic": "Haji Shariatullah",
+          "question_type": "mcq",
+          "question": "Haji Shariatullah declared India as what, to instil a sense of Jihad among the Muslims of Bengal?",
+          "options": ["Dar-ul-Islam", "Dar-ul-Harb (enemy territory)", "Dar-ul-Aman", "Dar-ul-Uloom"],
+          "correct": 1
+        },
+        {
+          "topic": "Shah Waliullah",
+          "question_type": "short_answer",
+          "question": "Give three reasons why Shah Waliullah wished to revive Islam in the subcontinent.",
+          "model_answer": [
+            "Muslims had an incomplete knowledge of the Holy Quran — it was in Arabic while common Muslims knew Persian",
+            "Sectarianism — the community was divided into groups such as Shias and Sunnis, weakening it",
+            "Muslims had adopted corrupt, un-Islamic practices through interaction with non-Muslim communities"
+          ],
+          "marking_note": "Any three points earn full marks."
+        },
+        {
+          "topic": "Jihad Movement",
+          "question_type": "short_answer",
+          "question": "Give four reasons why the Jihad movement of Syed Ahmad Shaheed Barelvi failed.",
+          "model_answer": [
+            "His army was untrained (mostly teachers and spiritual leaders) against the well-trained Sikhs under Ranjit Singh",
+            "There was a lack of unity among the Muslim forces, who came from different backgrounds",
+            "The Pathan tribes refused to accept Muslim leadership they did not control",
+            "Taxes imposed on the local population to fund the army angered the locals and lost their support",
+            "Limited funds meant a lack of proper weapons and equipment",
+            "Internal betrayal by Yar Muhammad Khan (assassination attempts; left the battlefield at Okara)",
+            "Traders betrayed the army's route to the Sikhs, enabling the surprise attack",
+            "Defeat at the Battle of Balakot (1831), where Syed Ahmad Shaheed Barelvi was martyred"
+          ],
+          "marking_note": "Any four points earn full marks — there are eight distinct reasons in the notes."
+        },
+        {
+          "topic": "Shah Waliullah",
+          "question_type": "short_answer",
+          "question": "Describe two important contributions of Shah Waliullah to the revival of Islam.",
+          "model_answer": [
+            "He translated the Holy Quran from Arabic into Persian, making its teachings accessible to common people",
+            "He inspired his sons (Shah Abdul Qadir and Shah Abdul Aziz) to translate the Quran into Urdu",
+            "He wrote an objective account of the four Caliphs, acceptable to both Shias and Sunnis, to unite the Muslims",
+            "He wrote 51 books on the Quran, Hadith and Fiqh (e.g. Hujatullah-e-Balighah and Izlat-ul-Akhfah)",
+            "He invited Ahmed Shah Abdali, who defeated the Marathas at the Battle of Panipat (1761)",
+            "He emphasised social justice — fair pay for labourers and an Islamic mode of trade"
+          ],
+          "marking_note": "Any two well-developed contributions earn full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-geography-power",
+      "subject": "geography",
+      "title": "Power Resources",
+      "questions": [
+        {
+          "topic": "Renewable & non-renewable energy",
+          "question_type": "mcq",
+          "question": "Which of the following is a RENEWABLE energy source?",
+          "options": ["Coal", "Oil", "Hydroelectric power (HEP)", "Natural gas"],
+          "correct": 2
+        },
+        {
+          "topic": "Electricity",
+          "question_type": "mcq",
+          "question": "Which major dam is built on the River Jhelum?",
+          "options": ["Tarbela", "Warsak", "Mangla", "Sui"],
+          "correct": 2
+        },
+        {
+          "topic": "Oil & gas",
+          "question_type": "mcq",
+          "question": "In which geological structure is oil trapped, with natural gas above it and water below?",
+          "options": ["A syncline", "An anticline (oil trap)", "A coal seam", "A river delta"],
+          "correct": 1
+        },
+        {
+          "topic": "Coal",
+          "question_type": "mcq",
+          "question": "Which is the best quality coal, with the highest carbon content — but not available in Pakistan?",
+          "options": ["Bituminous", "Lignite", "Anthracite", "Peat"],
+          "correct": 2
+        },
+        {
+          "topic": "Oil & gas",
+          "question_type": "mcq",
+          "question": "Pakistan's natural gas is produced mainly at which location in Balochistan?",
+          "options": ["Tarbela", "Makerwal", "Sui", "Meyal"],
+          "correct": 2
+        },
+        {
+          "topic": "Coal",
+          "question_type": "short_answer",
+          "question": "Name the three methods used to mine coal, and state when each is used.",
+          "model_answer": [
+            "Shaft mining — used when coal is deep underground (a vertical shaft is dug)",
+            "Adit mining — used when coal is seen on a hillside (a horizontal shaft is dug into the hillside)",
+            "Open cast mining — used when coal outcrops on the surface"
+          ],
+          "marking_note": "All three methods, each with when it is used."
+        },
+        {
+          "topic": "Electricity",
+          "question_type": "short_answer",
+          "question": "Give four reasons why there is a shortage of electricity in Pakistan.",
+          "model_answer": [
+            "Many power stations are not working to full capacity due to old machinery and poor maintenance",
+            "Silt in reservoirs reduces their capacity (less water for HEP) and damages dam machinery",
+            "Less rainfall in winter means less water in reservoirs for HEP production",
+            "High demand from a growing population",
+            "High demand from industrialisation",
+            "High demand from an improved standard of living and rural electrification",
+            "Theft of electricity and losses on old, poorly maintained transmission lines"
+          ],
+          "marking_note": "Any four points earn full marks."
+        },
+        {
+          "topic": "Oil & gas",
+          "question_type": "short_answer",
+          "question": "Give three reasons why natural gas is widely used for domestic purposes in Pakistan.",
+          "model_answer": [
+            "It is easily available in the main cities through pipelines",
+            "It can be transported to remote areas in cylinders",
+            "It is cheaper than coal",
+            "It is convenient, as firewood is difficult to collect",
+            "It is cleaner than coal"
+          ],
+          "marking_note": "Any three points earn full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-islamiyat-prayer",
+      "subject": "islamiyat",
+      "title": "Prayer (Salah)",
+      "questions": [
+        {
+          "topic": "Five Daily Prayers",
+          "question_type": "mcq",
+          "question": "How many Fard Rakats are there in the Zuhr prayer?",
+          "options": ["2", "3", "4", "6"],
+          "correct": 2
+        },
+        {
+          "topic": "Friday Prayer (Jumu'ah)",
+          "question_type": "mcq",
+          "question": "Who introduced the first (additional) Azan for Friday prayer, to give people further away enough time to travel to the mosque?",
+          "options": ["Caliph Abu Bakr (RA)", "Caliph Umar (RA)", "Caliph Uthman ibn Affan (RA)", "Caliph Ali (RA)"],
+          "correct": 2
+        },
+        {
+          "topic": "Eid Prayer",
+          "question_type": "mcq",
+          "question": "How many additional Takbirs are recited during Eid prayer, beyond the standard Takbirs of Ruku and Sajdah?",
+          "options": ["3", "4", "6", "8"],
+          "correct": 2
+        },
+        {
+          "topic": "Individual Prayer / Wudu",
+          "question_type": "mcq",
+          "question": "Which of the following invalidates a Muslim's Wudu?",
+          "options": ["Reciting the Qur'an", "Passing wind", "Speaking to another person", "Turning the head"],
+          "correct": 1
+        },
+        {
+          "topic": "Eid Prayer",
+          "question_type": "mcq",
+          "question": "When is the Khutbah (sermon) delivered during Eid prayer, in contrast to Friday prayer?",
+          "options": ["Before the prayer, same as Friday", "After the prayer", "During the prayer", "There is no Khutbah on Eid"],
+          "correct": 1
+        },
+        {
+          "topic": "Friday Prayer (Jumu'ah)",
+          "question_type": "short_answer",
+          "question": "Describe how a Muslim should prepare for Friday prayer, and explain what happens once the Khutbah begins.",
+          "model_answer": [
+            "Ghusl (full ritual bath) is Sunnah — Wudu is acceptable if Ghusl is not possible",
+            "Using Miswak / brushing teeth and cutting nails before prayer",
+            "Wearing one's best, cleanest clothes and applying non-alcoholic perfume",
+            "Going early to the mosque, as arriving early earns greater reward",
+            "After the Azan, all business and trade must stop (Surah Al-Jumu'ah 62:9)",
+            "Once the Khutbah begins, complete silence is obligatory — even reciting Darud aloud is not permitted",
+            "Latecomers must sit quietly and listen, not start Nafl prayers"
+          ],
+          "marking_note": "Any 4-5 well-explained points earn full marks."
+        },
+        {
+          "topic": "Individual Prayer / Wudu",
+          "question_type": "short_answer",
+          "question": "List the preconditions (Shurut) that must be met before a Muslim can validly perform Salah.",
+          "model_answer": [
+            "Taharah (ritual purity) — Wudu or Ghusl as required",
+            "Clean clothing, free of impurity (Najasah)",
+            "A clean place of prayer",
+            "Facing the Qibla (the direction of the Ka'bah in Makkah)",
+            "Praying within the correct time (Waqt) for that prayer",
+            "Making a sincere Niyyah (intention) in the heart",
+            "Covering the Awrah — men: navel to knee; women: whole body except face and hands",
+            "Having reached puberty and being of sound mind"
+          ],
+          "marking_note": "Any 4-5 points earn full marks."
+        },
+        {
+          "topic": "Eid Prayer",
+          "question_type": "short_answer",
+          "question": "Compare Eid ul-Fitr and Eid ul-Adha in terms of date, food eaten before prayer, and the focus of the Khutbah.",
+          "model_answer": [
+            "Eid ul-Fitr is on 1st Shawwal, marking the end of Ramadan; Eid ul-Adha is on 10th Dhul Hijjah, marking the completion of Hajj and Ibrahim's (AS) sacrifice",
+            "Before Eid ul-Fitr prayer, Muslims eat an odd number of dates (Sunnah); before Eid ul-Adha prayer, Muslims eat nothing — the first food should come from the Qurbani sacrifice",
+            "The Eid ul-Fitr Khutbah focuses on Sadaqah-tul-Fitr (charity for the poor); the Eid ul-Adha Khutbah focuses on Qurbani (sacrifice)",
+            "Both are identical in method — 2 Rakats plus 6 additional Takbirs (3 in the first Rakat, 3 in the second)",
+            "Eid ul-Adha is usually held slightly earlier than Eid ul-Fitr to allow time for Qurbani"
+          ],
+          "marking_note": "Any well-organised comparison covering date, food, and Khutbah focus earns full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-islamiyat-hajj",
+      "subject": "islamiyat",
+      "title": "Hajj (Pilgrimage)",
+      "questions": [
+        {
+          "topic": "The Three Obligations of Hajj",
+          "question_type": "mcq",
+          "question": "Which of the following is the SECOND obligation of Hajj?",
+          "options": ["Ihram", "Wuquf-e-Arafat (standing at Arafat)", "Tawaf-e-Ziyarat", "Rami (stoning the Jamarat)"],
+          "correct": 1
+        },
+        {
+          "topic": "Types of Hajj",
+          "question_type": "mcq",
+          "question": "A pilgrim who performs Hajj al-Qiran (combining Umrah and Hajj in one Ihram) is called a...?",
+          "options": ["Mufrid", "Qarin", "Afaqi", "Muhrim"],
+          "correct": 1
+        },
+        {
+          "topic": "Types of Hajj",
+          "question_type": "mcq",
+          "question": "Which type of Hajj is easiest and most commonly performed by pilgrims travelling from overseas (Afaqi)?",
+          "options": ["Hajj al-Ifrad", "Hajj al-Qiran", "Hajj al-Tamattu", "Umrah al-Mufradah"],
+          "correct": 2
+        },
+        {
+          "topic": "Tawaf",
+          "question_type": "mcq",
+          "question": "Which Tawaf is performed by the pilgrim on arrival at the Holy Ka'bah, on the 8th of Zilhaj?",
+          "options": ["Tawaf-e-Wida", "Tawaf-e-Ziyarat", "Tawaf-e-Qudum", "Tawaf-e-Ifadah"],
+          "correct": 2
+        },
+        {
+          "topic": "Belief & Practice — Ihram",
+          "question_type": "mcq",
+          "question": "Which of the following is NOT restricted during the state of Ihram?",
+          "options": ["Trimming hair or nails", "Reciting the Talbiyah", "Using perfumes or oils", "Hunting or killing an animal"],
+          "correct": 1
+        },
+        {
+          "topic": "Hazrat Ibrahim (AS) and his family",
+          "question_type": "short_answer",
+          "question": "Explain how the rituals of Sayee and Rami connect Hajj to the sacrifices of Hazrat Ibrahim's (AS) family.",
+          "model_answer": [
+            "Sayee: Hazrat Hajra (AS) ran seven times between Safa and Marwa searching for water for her infant son Hazrat Ismail (AS) — pilgrims re-enact this with a brisk walk between the two mounts",
+            "The fountain of Zamzam appeared when Hazrat Ismail (AS) scraped his heels on the ground — pilgrims drink Zamzam water, without which Tawaf is not considered complete",
+            "Rami: Hazrat Ibrahim (AS) was misled by Satan three times on his way to sacrifice his son and stoned the devil three times in response — pilgrims re-enact this by stoning the Jamarat",
+            "Both rituals are direct re-enactments of the obedience and sacrifice of Hazrat Ibrahim's (AS) family"
+          ],
+          "marking_note": "Explaining both Sayee and Rami with their belief basis earns full marks."
+        },
+        {
+          "topic": "Types of Hajj",
+          "question_type": "short_answer",
+          "question": "Describe the three types of Hajj a pilgrim may perform.",
+          "model_answer": [
+            "Hajj al-Tamattu (Interrupted): Ihram for Umrah is entered first, removed after Umrah is completed, then put on again on the 8th of Zilhaj for Hajj — the easiest and most common type, usually chosen by Afaqi (overseas) pilgrims, involving two separate intentions",
+            "Hajj al-Qiran (Combined): Ihram for Umrah and Hajj is entered at the same time and not removed until the 10th of Zilhaj — the pilgrim is called a Qarin; those who live in Makkah cannot perform this type",
+            "Hajj al-Ifrad (Single): Ihram is entered for Hajj only, with no Umrah performed beforehand — the pilgrim is called a Mufrid"
+          ],
+          "marking_note": "All three types, each with their key distinguishing feature, earn full marks."
+        },
+        {
+          "topic": "Importance of Hajj",
+          "question_type": "short_answer",
+          "question": "Explain two ways in which Hajj promotes unity and equality within the Muslim community.",
+          "model_answer": [
+            "All pilgrims wear the same simple Ihram regardless of colour, caste or creed — this removes signs of distinction and promotes equality",
+            "Pilgrims from all over the world meet, share news, and discuss issues facing the Ummah — this promotes universal brotherhood",
+            "All pilgrims perform the same rituals at the same time and place (e.g. staying in Mina, Rami, sacrifice), reminding them that the Ummah must remain united under one God",
+            "Around 2 million Muslims perform Hajj every year, showing the Ummah is strong and secure in its large numbers"
+          ],
+          "marking_note": "Any two well-developed points with a 'Thus' style conclusion earn full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-islamiyat-zakat",
+      "subject": "islamiyat",
+      "title": "Zakat (Almsgiving)",
+      "questions": [
+        {
+          "topic": "Nisab and Rates",
+          "question_type": "mcq",
+          "question": "What is the standard Zakat rate charged on annual savings/cash above the Nisab?",
+          "options": ["1%", "2.5%", "5%", "10%"],
+          "correct": 1
+        },
+        {
+          "topic": "The Eight Recipients",
+          "question_type": "mcq",
+          "question": "According to Surah At-Taubah 9:60, which of the following is NOT one of the eight recipients of Zakat?",
+          "options": ["The poor (Fuqara)", "The needy (Masakeen)", "A wealthy relative", "The wayfarer (Ibn-As-Sabeel)"],
+          "correct": 2
+        },
+        {
+          "topic": "Non-Recipients",
+          "question_type": "mcq",
+          "question": "Why can a Muslim not give Zakat to his own wife?",
+          "options": [
+            "Because she is not Muslim",
+            "Because her maintenance (Nafaqah) is already his financial responsibility",
+            "Because women cannot receive Zakat",
+            "Because she is considered wealthy"
+          ],
+          "correct": 1
+        },
+        {
+          "topic": "Introduction to Zakat",
+          "question_type": "mcq",
+          "question": "In which year after the Hijrah did Zakat become obligatory on all adult wealthy Muslims?",
+          "options": ["1st year", "2nd year", "5th year", "10th year"],
+          "correct": 1
+        },
+        {
+          "topic": "Punishment for Withholding Zakat",
+          "question_type": "mcq",
+          "question": "According to Surah At-Taubah 9:34-35, how will those who hoard wealth and withhold Zakat be punished?",
+          "options": [
+            "They will be exiled",
+            "Their wealth will be confiscated by the state",
+            "They will be branded with their own hoarded wealth in the Fire of Hell",
+            "They will be forgotten by history"
+          ],
+          "correct": 2
+        },
+        {
+          "topic": "The Eight Recipients",
+          "question_type": "short_answer",
+          "question": "Name and briefly explain four of the eight categories of people who may receive Zakat.",
+          "model_answer": [
+            "Poor (Fuqara) — those whose funds are below the Nisab and cannot meet their basic needs",
+            "Needy (Masakeen) — those who are helpless and in miserable circumstances, may have some income but it is insufficient",
+            "Collectors (Amileen-e-Zakat) — officials appointed by the Islamic government to collect and administer Zakat, paid from Zakat funds even if wealthy",
+            "Reconciliation of Hearts (Mu'allafatul-Quloob) — newly converted Muslims whose support benefits the Islamic cause",
+            "Freeing of Slaves (Fi-Riqab) — historically freeing slaves; today extended to those unjustly imprisoned or in bonded labour",
+            "Debtors (Gharimeen) — those indebted and unable to repay on their own",
+            "In the Way of Allah (Fee Sabeelillah) — efforts for justice and the propagation of Islam, including schools, hospitals and mosques",
+            "Wayfarers (Ibn-As-Sabeel) — travellers stranded in a foreign land needing assistance, even if wealthy at home"
+          ],
+          "marking_note": "Any 4 categories, each correctly named and explained, earn full marks."
+        },
+        {
+          "topic": "Non-Recipients",
+          "question_type": "short_answer",
+          "question": "Give three examples of people who cannot receive Zakat, and explain why in each case.",
+          "model_answer": [
+            "Non-Muslims — Zakat is a specifically Islamic obligation and must stay within the Muslim community (Sadaqah, not Zakat, may be given to them)",
+            "The wealthy — anyone above the Nisab threshold is not entitled to receive Zakat, since its purpose is to help those in genuine need",
+            "A wife — a husband's Nafaqah (maintenance) obligation to her already covers this, so Zakat cannot substitute it",
+            "Children and grandchildren — a Muslim is already financially responsible for his dependants",
+            "Parents and grandparents — Islam already requires a Muslim to support needy parents",
+            "Descendants of the Holy Prophet (pbuh) — the Banu Hashim are prohibited from receiving Zakat as a matter of honour"
+          ],
+          "marking_note": "Any three examples with a reason each earn full marks."
+        },
+        {
+          "topic": "Importance of Zakat",
+          "question_type": "short_answer",
+          "question": "Explain the individual and social importance of Zakat for Muslims today.",
+          "model_answer": [
+            "Individual: Zakat purifies the remainder of one's wealth — the word 'Zakat' itself means purification (Surah At-Tawbah 9:103)",
+            "Individual: it is an act of obedience to Allah that strengthens faith (Iman) and God-consciousness (Taqwa), and protects from the punishment described in Surah At-Taubah 9:34-35",
+            "Social: Zakat directly transfers wealth from rich to poor, reducing poverty and creating a more equitable society",
+            "Social: it keeps wealth in circulation rather than hoarded, stimulating the economy",
+            "Social: it strengthens the unity of the Ummah, as the rich fulfil their duty of care toward the poor",
+            "Social: Fee Sabeelillah funds schools, hospitals and mosques, strengthening Islamic institutions"
+          ],
+          "marking_note": "Covering both individual AND social importance, with at least one point each, earns full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-islamiyat-fasting",
+      "subject": "islamiyat",
+      "title": "Sawm (Fasting)",
+      "questions": [
+        {
+          "topic": "How Fasting is Observed",
+          "question_type": "mcq",
+          "question": "What is the pre-dawn meal eaten by Muslims before beginning the fast called?",
+          "options": ["Iftar", "Sehri", "Niyyah", "Tarawih"],
+          "correct": 1
+        },
+        {
+          "topic": "Special Acts of Worship",
+          "question_type": "mcq",
+          "question": "Laylat-ul-Qadr (the Night of Power) falls within which part of Ramadan?",
+          "options": ["The first ten days", "The middle ten days", "The last ten odd nights", "The very last night only"],
+          "correct": 2
+        },
+        {
+          "topic": "Kaffarah",
+          "question_type": "mcq",
+          "question": "What is the Kaffarah (expiation) for deliberately breaking a fast without a valid excuse (aside from freeing a slave)?",
+          "options": [
+            "Fasting 60 consecutive days OR feeding 60 poor people",
+            "Paying a fine equal to one month's income",
+            "Fasting for the rest of Ramadan only",
+            "There is no Kaffarah, only Qaza"
+          ],
+          "correct": 0
+        },
+        {
+          "topic": "Exemptions from Fasting",
+          "question_type": "mcq",
+          "question": "Which of these people is permanently exempted from fasting and pays Fidyah instead, with no Qaza required?",
+          "options": ["A traveller", "A pregnant woman", "The chronically ill", "A woman who has just given birth"],
+          "correct": 2
+        },
+        {
+          "topic": "Special Acts of Worship",
+          "question_type": "mcq",
+          "question": "How many Rakats of Tarawih prayer are offered, at minimum, each night of Ramadan?",
+          "options": ["2", "4", "8", "20"],
+          "correct": 2
+        },
+        {
+          "topic": "How Fasting is Observed",
+          "question_type": "short_answer",
+          "question": "Describe what a fasting Muslim must abstain from during Ramadan, from dawn until sunset.",
+          "model_answer": [
+            "Physical abstentions: eating and drinking (including water), smoking, marital relations, and any deliberate act that breaks the fast",
+            "Moral/spiritual abstentions: lying, cheating, backbiting and abusing others",
+            "Arguing, fighting and quarrelling; indecent speech and actions; wasting time in idle activities",
+            "Hadith: 'If a person does not avoid false talk and false conduct during the fast, then Allah does not need him to abstain from food and drink' (Sahih al-Bukhari)",
+            "Normal life must continue — no special workplace concessions, and daily responsibilities and the five daily prayers continue as normal"
+          ],
+          "marking_note": "Must include BOTH physical and moral abstentions for full marks."
+        },
+        {
+          "topic": "Exemptions from Fasting",
+          "question_type": "short_answer",
+          "question": "Describe the difference between temporary and permanent exemptions from fasting, giving an example of each.",
+          "model_answer": [
+            "Temporary exemptions must make up the missed fasts later (Qaza) once able — examples: the sick, travellers, pregnant and breastfeeding mothers, and women during menstruation or Nifas",
+            "Permanent exemptions are never required to make up the fasts — instead, some must pay Fidyah (feeding a poor person for each missed day) — examples: the elderly and the chronically ill",
+            "Children and the insane are permanently excused with no Qaza or Fidyah required, since they are not held accountable for acts of worship",
+            "Note: women during menstruation ARE required to make up fasts later, unlike other permanent exemptions"
+          ],
+          "marking_note": "Clear distinction between temporary (Qaza) and permanent (Fidyah/none), with named examples, earns full marks."
+        },
+        {
+          "topic": "Significance of Fasting",
+          "question_type": "short_answer",
+          "question": "Explain the individual and communal importance of fasting for Muslims.",
+          "model_answer": [
+            "Individual: fasting builds Taqwa (God-consciousness) and self-control — the Qur'an says it is prescribed 'so that you may learn self-restraint' (2:183)",
+            "Individual: the Prophet (pbuh) said fasting is 'a shield by which a servant protects himself from the Fire', and there is a gate of Paradise, Rayyan, only for those who fast",
+            "Communal: experiencing hunger builds empathy for the poor and breaks down class barriers, since rich and poor share the same experience",
+            "Communal: Muslims worldwide fast simultaneously, creating a profound sense of global unity within the Ummah",
+            "Communal: Sadaqah-tul-Fitr at the end of Ramadan ensures even the poorest Muslims can celebrate Eid with dignity"
+          ],
+          "marking_note": "Covering both individual AND communal importance earns full marks."
+        }
+      ]
+    },
+    {
+      "id": "quiz-islamiyat-angels",
+      "subject": "islamiyat",
+      "title": "Angels (Mala'ikah)",
+      "questions": [
+        {
+          "topic": "Nature of Angels",
+          "question_type": "mcq",
+          "question": "What are angels created from, according to Islamic belief?",
+          "options": ["Clay", "Fire", "Light", "Water"],
+          "correct": 2
+        },
+        {
+          "topic": "Duties of Named Angels",
+          "question_type": "mcq",
+          "question": "Which angel will blow the trumpet (Sur) to signal the end of time and, later, the resurrection of the dead?",
+          "options": ["Jibrael (AS)", "Israfil (AS)", "Izrael (AS)", "Mikael (AS)"],
+          "correct": 1
+        },
+        {
+          "topic": "Duties of Named Angels",
+          "question_type": "mcq",
+          "question": "Which two angels question the deceased in their grave about their faith, Lord, and Prophet?",
+          "options": ["Malik and Rizwan", "Kiram-un-Katibeen", "Munkir and Nakir", "Harut and Marut"],
+          "correct": 2
+        },
+        {
+          "topic": "Angels vs Humans",
+          "question_type": "mcq",
+          "question": "What is the key difference between angels and humans regarding free will?",
+          "options": [
+            "Angels have free will but humans do not",
+            "Neither angels nor humans have free will",
+            "Angels have no free will and can only obey Allah, while humans can choose good or evil",
+            "Both have equal free will"
+          ],
+          "correct": 2
+        },
+        {
+          "topic": "Nature of Angels",
+          "question_type": "mcq",
+          "question": "Which pre-Islamic belief about angels does Islam explicitly reject?",
+          "options": ["That angels have wings", "That angels were the daughters of Allah", "That angels are invisible", "That angels worship Allah"],
+          "correct": 1
+        },
+        {
+          "topic": "Duties of Named Angels",
+          "question_type": "short_answer",
+          "question": "Name and describe the duties of four named angels in Islam.",
+          "model_answer": [
+            "Jibrael (AS) — chief of all angels; brought revelation to the Prophets and conducted the Holy Prophet (pbuh) on the Night of Mi'raj",
+            "Israfil (AS) — will blow the trumpet (Sur) to end the world, then blow it again to resurrect the dead for Judgement",
+            "Izrael (AS) (Malak-ul-Maut) — the Angel of Death, responsible for collecting the souls of all living beings",
+            "Mikael (AS) — responsible for celestial bodies, food, rain and natural provisions",
+            "Kiram-un-Katibeen — two angels assigned to every human, recording good deeds (right) and bad deeds (left)",
+            "Munkir and Nakir — question the deceased in the grave about their faith, Lord and Prophet",
+            "Malik — keeper of Hellfire (Jahannam); Rizwan — keeper of Paradise (Jannah)",
+            "Hamalat-ul-Arsh — the angels who bear the Throne of Allah"
+          ],
+          "marking_note": "Any four named angels with a correct duty each earn full marks."
+        },
+        {
+          "topic": "Angels vs Humans",
+          "question_type": "short_answer",
+          "question": "Compare angels and humans in terms of free will, accountability and rank before Allah.",
+          "model_answer": [
+            "Free will: angels have none and can only obey Allah; humans were given free will and can choose between good and evil",
+            "Accountability: angels are not held accountable on the Day of Judgement, since they have no choice; humans are fully accountable for their choices",
+            "Rank before Allah: despite their power, angels are inferior in rank to humans — they prostrated before Hazrat Adam (AS) on Allah's orders, showing that Allah made man His Khalifah (vicegerent) on earth",
+            "Only Iblis (from the Jinn, not an angel) refused to prostrate, since Jinn — unlike angels — have free will"
+          ],
+          "marking_note": "Covering all three points of comparison (free will, accountability, rank) earns full marks."
+        },
+        {
+          "topic": "Significance of Belief in Angels",
+          "question_type": "short_answer",
+          "question": "Explain why belief in Angels is significant for a Muslim's daily life.",
+          "model_answer": [
+            "Belief in angels completes Iman (faith) — it is explicitly listed in Iman-e-Mufassal as the second Article of Faith, without which faith is incomplete",
+            "Knowing that Kiram-un-Katibeen record every deed motivates a Muslim to avoid sin even in private, creating constant moral accountability",
+            "Belief in Izrael (AS), the Angel of Death, reminds the Muslim that death can come at any moment, encouraging sincere and timely repentance",
+            "Believing that Jibrael (AS) brought the Qur'an to the Prophet (pbuh) validates the entire chain of revelation and prophecy",
+            "Belief in Malik and Rizwan creates a healthy balance of fear of punishment and hope for reward"
+          ],
+          "marking_note": "Any two well-developed points earn AO2-level marks; more points needed for a fuller AO1 answer."
+        }
+      ]
+    }
+  ]
+}

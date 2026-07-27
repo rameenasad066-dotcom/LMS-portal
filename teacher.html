@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Portal · Study With Rameen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-overlay" id="authOverlay" hidden>Checking your session…</div>
+
+  <!-- ============ TOP NAV ============ -->
+  <header class="topnav">
+    <a class="brand" href="index.html">
+      <img src="logo.png" class="logo" alt="Study With Rameen">
+      <span class="brand-text">
+        <strong>Study With Rameen</strong>
+        <small>Teacher Portal</small>
+      </span>
+    </a>
+
+    <div class="topnav-right">
+      <button class="icon-btn" aria-label="Notifications, 3 unread">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="badge">3</span>
+      </button>
+      <div class="divider-v"></div>
+      <button class="user-chip">
+        <span class="avatar-initials">RA</span>
+        <span class="user-chip-name">Rameen Asad</span>
+        <svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ COHORT QUICK-SELECT ============ -->
+  <div class="cohort-bar">
+    <span class="cohort-label">Cohort</span>
+    <div class="cohort-pills" role="tablist" aria-label="Student cohorts">
+      <button class="pill active" data-cohort="on26">October/November 2026</button>
+      <button class="pill" data-cohort="mj27">May/June 2027</button>
+    </div>
+    <span class="cohort-meta" id="cohortMeta"></span>
+  </div>
+
+  <div class="layout">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" aria-label="Portal navigation">
+      <nav class="snav">
+        <a href="#dashboard" class="snav-item" data-view="dashboard">
+          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="#uploads" class="snav-item" data-view="uploads">
+          <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+          <span>Upload Notes</span>
+        </a>
+        <a href="#assignments" class="snav-item" data-view="assignments">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          <span>Assignments</span>
+        </a>
+        <a href="#students" class="snav-item" data-view="students">
+          <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          <span>Students</span>
+        </a>
+        <a href="#attendance" class="snav-item" data-view="attendance">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-9-6h2v2h-2zm-4 0h2v2H6zm8 0h2v2h-2z"/></svg>
+          <span>Attendance</span>
+        </a>
+        <a href="#scoreboard" class="snav-item" data-view="scoreboard">
+          <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+          <span>Scoreboard</span>
+        </a>
+        <a href="#settings" class="snav-item" data-view="settings">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Settings</span>
+        </a>
+        <div class="snav-sep"></div>
+        <a href="index.html" class="snav-item logout">
+          <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <span>Log out</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="content">
+
+      <div class="page-head">
+        <div>
+          <h1 id="viewTitle">Dashboard</h1>
+          <p id="todaySub"></p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-primary" id="quickUploadBtn">
+            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+            Upload Content
+          </button>
+          <button class="btn btn-outline btn-sm" id="copyMeetingBtn">Copy Meeting Link</button>
+        </div>
+      </div>
+
+      <!-- ================= VIEW: DASHBOARD ================= -->
+      <section class="view" data-view="dashboard">
+
+        <!-- Attendance nudge — only shows when today's class isn't marked yet -->
+        <a class="attn-card attn-nudge" id="attnAttendance" href="#attendance" hidden>
+          <div class="attn-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+          </div>
+          <div class="attn-body">
+            <span class="attn-label" id="attnAttendanceLabel">You haven't marked attendance for today's class yet.</span>
+            <span class="attn-link">Take attendance →</span>
+          </div>
+        </a>
+
+        <div class="stats stats-two" aria-label="Cohort statistics">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="statStudents"></span>
+              <span class="stat-label">Students Enrolled</span>
+              <span class="stat-sub" id="statStudentsSub"></span>
+            </div>
+          </div>
+          <a class="stat-card stat-card-link" href="#assignments">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+            </div>
+            <div class="stat-body">
+              <span class="stat-value" id="dashToMark">—</span>
+              <span class="stat-label">Submissions to Mark</span>
+              <span class="stat-sub" id="dashToMarkSub"></span>
+            </div>
+          </a>
+        </div>
+
+        <!-- ===== At-risk students & noticeboard ===== -->
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Needs attention</h2>
+              <span class="panel-hint">Low marks or attendance</span>
+            </div>
+            <div id="needsAttentionList"></div>
+            <p class="empty-note" id="needsAttentionEmpty" hidden>No students flagged right now — everyone's marks and attendance look healthy.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Broadcast Noticeboard</h2>
+              <span class="panel-hint" id="broadcastHint">Posts instantly to your students</span>
+            </div>
+            <form class="notice-form" id="noticeForm">
+              <input type="text" id="noticeInput" placeholder="Type an announcement for your students…" maxlength="140" required>
+              <button type="submit" class="btn btn-primary btn-sm">Broadcast</button>
+            </form>
+            <ul class="ann-list" data-list="notices"></ul>
+          </div>
+        </div>
+
+        <!-- ===== Recent activity & deadlines ===== -->
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Recent submissions</h2>
+              <a class="jump" href="#assignments">Go to marking →</a>
+            </div>
+            <ul id="dashRecentList"></ul>
+            <p class="empty-note" id="dashRecentEmpty" hidden>No submissions yet for this cohort.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Deadlines</h2>
+              <span class="panel-hint">Overdue &amp; upcoming</span>
+            </div>
+            <ul id="dashDeadlineList"></ul>
+            <p class="empty-note" id="dashDeadlineEmpty" hidden>No assignments posted yet for this cohort.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent Notes</h2>
+            <a class="jump" href="#uploads">Open Upload Notes →</a>
+          </div>
+          <ul id="dashNotesList"></ul>
+          <p class="empty-note" id="dashNotesEmpty" hidden>No notes uploaded yet for this cohort.</p>
+        </div>
+
+      </section>
+
+      <!-- ================= VIEW: UPLOAD MANAGER ================= -->
+      <section class="view" data-view="uploads" hidden>
+        <div class="panel" id="uploadManager">
+          <div class="panel-head">
+            <h2>Upload Notes</h2>
+            <span class="panel-hint">PDF notes for students to download</span>
+          </div>
+
+          <div class="upload-grid">
+            <form class="settings-form" id="uploadNoteForm">
+              <label for="unSubject">Subject</label>
+              <select id="unSubject" class="tool-select"></select>
+
+              <div class="chapter-select-row">
+                <label for="unChapter">Chapter</label>
+                <button type="button" class="jump chapter-add-link" id="unAddChapterBtn">+ Add chapter</button>
+              </div>
+              <select id="unChapter" class="tool-select"></select>
+
+              <div class="chapter-select-row">
+                <label for="unSubChapter">Sub-chapter (optional)</label>
+                <button type="button" class="jump chapter-add-link" id="unAddSubChapterBtn">+ Add sub-chapter</button>
+              </div>
+              <select id="unSubChapter" class="tool-select" hidden></select>
+              <p class="empty-note" id="unNoSubChapters">No sub-chapters yet — click "+ Add sub-chapter" to create one.</p>
+
+              <label for="unTitle">Title</label>
+              <input type="text" id="unTitle" required placeholder="e.g. Decline of the Mughal Empire">
+              <label for="unCategory">Category</label>
+              <select id="unCategory" class="tool-select">
+                <option value="Notes">Notes</option>
+                <option value="Cheat Sheet">Cheat Sheet</option>
+                <option value="Tips">Tips</option>
+              </select>
+              <label for="unFile">PDF file</label>
+              <input type="file" id="unFile" accept="application/pdf" required>
+              <span class="date-hint">Uploads to <span class="tag-red" id="unCohortTag"></span></span>
+              <p class="auth-error" id="unError" hidden></p>
+              <button type="submit" class="btn btn-primary" id="unSubmitBtn">Upload</button>
+            </form>
+
+            <div class="recent-uploads">
+              <h3 class="list-title">Upload history</h3>
+              <ul data-list="notes-uploads"></ul>
+              <p class="empty-note" id="notesUploadsEmpty" hidden>No notes uploaded yet for this cohort.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="lectureManager">
+          <div class="panel-head">
+            <h2>Add Video Lecture</h2>
+            <span class="panel-hint">Paste a Google Drive link — students play it in a new tab</span>
+          </div>
+
+          <div class="upload-grid">
+            <form class="settings-form" id="uploadLectureForm">
+              <label for="lecSubject">Subject</label>
+              <select id="lecSubject" class="tool-select"></select>
+
+              <div class="chapter-select-row">
+                <label for="lecChapter">Chapter</label>
+                <button type="button" class="jump chapter-add-link" id="lecAddChapterBtn">+ Add chapter</button>
+              </div>
+              <select id="lecChapter" class="tool-select"></select>
+
+              <div class="chapter-select-row">
+                <label for="lecSubChapter">Sub-chapter (optional)</label>
+                <button type="button" class="jump chapter-add-link" id="lecAddSubChapterBtn">+ Add sub-chapter</button>
+              </div>
+              <select id="lecSubChapter" class="tool-select" hidden></select>
+              <p class="empty-note" id="lecNoSubChapters">No sub-chapters yet — click "+ Add sub-chapter" to create one.</p>
+
+              <label for="lecTitle">Title</label>
+              <input type="text" id="lecTitle" required placeholder="e.g. Aurangzeb & the Decline of the Mughals">
+              <label for="lecUrl">Google Drive link</label>
+              <input type="url" id="lecUrl" required placeholder="https://drive.google.com/file/d/…">
+              <span class="date-hint">Make sure the file is shared as "Anyone with the link can view"</span>
+              <label for="lecDuration">Duration (optional)</label>
+              <input type="text" id="lecDuration" placeholder="e.g. 45 min">
+              <span class="date-hint">Uploads to <span class="tag-red" id="lecCohortTag"></span></span>
+              <p class="auth-error" id="lecError" hidden></p>
+              <button type="submit" class="btn btn-primary" id="lecSubmitBtn">Add Lecture</button>
+            </form>
+
+            <div class="recent-uploads">
+              <h3 class="list-title">Lecture history</h3>
+              <ul data-list="lecture-uploads"></ul>
+              <p class="empty-note" id="lectureUploadsEmpty" hidden>No lectures added yet for this cohort.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: ASSIGNMENTS & MARKING ================= -->
+      <section class="view" data-view="assignments" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Assignments &amp; Homework</h2>
+            <span class="panel-hint" id="asgHint"></span>
+          </div>
+          <div id="assignmentsArea"></div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: STUDENTS ================= -->
+      <section class="view" data-view="students" hidden>
+        <div class="panel" id="addStudentPanel">
+          <div class="panel-head">
+            <h2>Add Student</h2>
+            <span class="panel-hint">Creates their login — copy the password and send it to them yourself</span>
+          </div>
+          <form class="settings-form" id="addStudentForm">
+            <label for="asName">Full name</label>
+            <input type="text" id="asName" required autocomplete="off">
+            <label for="asEmail">Email</label>
+            <input type="email" id="asEmail" required autocomplete="off">
+            <label for="asCohort">Cohort</label>
+            <select id="asCohort" class="tool-select"></select>
+            <label for="asPassword">Password</label>
+            <div class="as-password-row">
+              <input type="text" id="asPassword" required minlength="8" placeholder="At least 8 characters">
+              <button type="button" class="btn btn-outline btn-sm" id="asRegenBtn">Generate one</button>
+            </div>
+            <span class="date-hint">Type your own, or click "Generate one" for a random one.</span>
+            <p class="auth-error" id="asError" hidden></p>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </form>
+          <div class="as-result" id="asResult" hidden>
+            <p class="as-result-title">Account created — send these to the student:</p>
+            <p><strong>Email:</strong> <span id="asResultEmail"></span></p>
+            <p><strong>Password:</strong> <span id="asResultPassword"></span></p>
+            <button type="button" class="btn btn-outline btn-sm" id="asCopyBtn">Copy to clipboard</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Students</h2>
+            <span class="panel-hint" id="rosterHint"></span>
+          </div>
+          <div class="table-wrap">
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th scope="col">Student</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Joined</th>
+                  <th scope="col">Submissions</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody id="rosterBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-note" id="rosterEmpty" hidden>No students enrolled yet — use Add Student above.</p>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: STUDENT REPORT ================= -->
+      <section class="view" data-view="student-report" hidden>
+        <a href="#students" class="report-back">← Back to Students</a>
+
+        <div class="panel report-identity">
+          <span class="avatar-initials lg" id="srAvatar"></span>
+          <div>
+            <h2 id="srName"></h2>
+            <span class="panel-hint" id="srEmail"></span>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-body">
+              <span class="stat-label">Latest score</span>
+              <span class="stat-value" id="srLatestPct">—</span>
+              <span class="stat-sub" id="srLatestTrend"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-body">
+              <span class="stat-label">Estimated band</span>
+              <span class="stat-value" id="srBand">—</span>
+              <span class="stat-sub">Based on latest graded work</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-body">
+              <span class="stat-label">Average</span>
+              <span class="stat-value" id="srAvgPct">—</span>
+              <span class="stat-sub" id="srAvgSub"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-body">
+              <span class="stat-label">Attendance</span>
+              <span class="stat-value" id="srAttendancePct">—</span>
+              <span class="stat-sub" id="srAttendanceSub"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Marks over time</h2>
+            <span class="panel-hint">Every graded item, in order</span>
+          </div>
+          <div id="srChart"></div>
+          <p class="empty-note" id="srChartEmpty" hidden>No graded work yet — the chart appears once you mark something for this student.</p>
+          <div class="report-bands-legend">
+            <div class="band-chip"><span class="grade-chip">A*</span><span class="band-range">90–100</span></div>
+            <div class="band-chip"><span class="grade-chip">A</span><span class="band-range">80–89</span></div>
+            <div class="band-chip"><span class="grade-chip mid">B</span><span class="band-range">70–79</span></div>
+            <div class="band-chip"><span class="grade-chip mid">C</span><span class="band-range">60–69</span></div>
+            <div class="band-chip"><span class="grade-chip mid">D</span><span class="band-range">50–59</span></div>
+            <div class="band-chip"><span class="grade-chip risk">U</span><span class="band-range">0–49</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent graded work</h2>
+            <span class="panel-hint">Most recent first</span>
+          </div>
+          <div id="srWorkList"></div>
+          <p class="empty-note" id="srWorkEmpty" hidden>Nothing marked yet for this student.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Practice Quizzes</h2>
+            <span class="panel-hint">Informal self-testing — not included in grade, band, or average</span>
+          </div>
+          <div id="srQuizList"></div>
+          <p class="empty-note" id="srQuizEmpty" hidden>No practice quizzes attempted yet.</p>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: ATTENDANCE ================= -->
+      <section class="view" data-view="attendance" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attendance</h2>
+            <span class="panel-hint" id="attHint"></span>
+            <div class="panel-tools">
+              <input type="date" id="attDate" class="tool-select" aria-label="Class date">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th scope="col">Student</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="attBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-note" id="attEmpty" hidden>No students enrolled yet in this cohort.</p>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: SCOREBOARD ================= -->
+      <section class="view" data-view="scoreboard" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Monthly Scoreboard</h2>
+            <span class="panel-hint" id="scoreboardHint"></span>
+          </div>
+          <div class="podium" id="podium"></div>
+          <p class="score-note" id="scoreNote">Students see ranks only — raw marks always stay private.</p>
+          <p class="empty-note" id="podiumEmpty" hidden>No scoreboard yet — the first monthly ranking is published after the first marked test.</p>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: SETTINGS ================= -->
+      <section class="view" data-view="settings" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Settings</h2>
+            <span class="panel-hint">Changing your email sends a confirmation link to the new address first</span>
+          </div>
+          <form class="settings-form" id="settingsForm">
+            <label for="setName">Display name</label>
+            <input type="text" id="setName" required>
+            <label for="setEmail">Email</label>
+            <input type="email" id="setEmail" required>
+            <label for="setCohort">Default cohort on login</label>
+            <select id="setCohort" class="tool-select">
+              <option value="on26">October/November 2026</option>
+              <option value="mj27">May/June 2027</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+        </div>
+      </section>
+
+      <footer class="foot">© 2026 Study With Rameen · Teacher Portal</footer>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+    <div>
+      <strong id="toastTitle">Upload complete</strong>
+      <small id="toastMsg"></small>
+    </div>
+  </div>
+
+<script src="data.js"></script>
+<script src="teacher.js"></script>
+<script src="owl.js"></script>
+<script type="module" src="teacher-auth-guard.js"></script>
+<script type="module" src="add-student.js"></script>
+<script type="module" src="teacher-roster.js"></script>
+<script type="module" src="teacher-student-report.js"></script>
+<script type="module" src="teacher-announcements.js"></script>
+<script type="module" src="teacher-notes-upload.js"></script>
+<script type="module" src="teacher-lectures-upload.js"></script>
+<script type="module" src="teacher-assignments.js"></script>
+<script type="module" src="teacher-scoreboard.js"></script>
+<script type="module" src="teacher-settings.js"></script>
+<script type="module" src="teacher-attendance.js"></script>
+<script type="module" src="teacher-dashboard.js"></script>
+</body>
+</html>

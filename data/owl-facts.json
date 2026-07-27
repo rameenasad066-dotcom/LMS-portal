@@ -1,0 +1,21 @@
+{
+  "_comment": "Study facts the owl says when a student clicks it. Each item has a 'tag' (fact, tip, or date) and the 'text' shown. ALL of these are placeholders for Miss Rameen to review and edit. How to edit: see data/README.md.",
+
+  "facts": [
+    { "tag": "tip",  "text": "Read the command word first: 'Describe' wants points listed, while 'Explain' and 'Why' want reasons." },
+    { "tag": "fact", "text": "The 1857 War of Independence was fought between the British East India Company and Indian soldiers and civilians — both Muslims and Hindus. It ended Mughal rule." },
+    { "tag": "fact", "text": "Sir Syed Ahmad Khan founded the MAO College at Aligarh in 1875 to give Muslims a modern education; it later became Aligarh Muslim University." },
+    { "tag": "date", "text": "The All-India Muslim League was founded in Dhaka in 1906." },
+    { "tag": "date", "text": "The Lahore Resolution was passed on 23 March 1940 — that is why Pakistan Day is marked on 23 March." },
+    { "tag": "fact", "text": "The Lucknow Pact of 1916 was the one time the Muslim League and Congress worked together, and Congress accepted separate electorates for Muslims." },
+    { "tag": "date", "text": "Pakistan gained independence on 14 August 1947, with Quaid-e-Azam Muhammad Ali Jinnah as its first Governor-General." },
+    { "tag": "fact", "text": "The Indus is Pakistan's longest river and the backbone of the Indus Basin Irrigation System — the largest continuous irrigation network in the world." },
+    { "tag": "fact", "text": "Tarbela Dam sits on the Indus and Mangla Dam on the Jhelum — both store water and generate hydro-electric power." },
+    { "tag": "fact", "text": "Wheat is Pakistan's main food (subsistence) crop, while cotton is its most important cash crop." },
+    { "tag": "tip",  "text": "In a 14-mark 'Was ___ the most important reason?' question, always weigh other factors too and finish with a clear judgement." },
+    { "tag": "tip",  "text": "In source questions, use BOTH the source and your own knowledge — answers from the source alone rarely reach the top marks." },
+    { "tag": "fact", "text": "The first revelation of the Quran, 'Iqra' (Surah Al-Alaq), came to the Prophet صلى الله عليه وسلم in the Cave of Hira." },
+    { "tag": "date", "text": "The Hijrah — the Prophet's migration from Makkah to Madinah in 622 CE — marks the start of the Islamic (Hijri) calendar." },
+    { "tag": "fact", "text": "The Quran was revealed gradually over about 23 years: roughly 13 years in Makkah and 10 years in Madinah." }
+  ]
+}

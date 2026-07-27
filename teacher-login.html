@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Log In · Study With Rameen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="gateway-body">
+
+  <main class="gateway-card auth-card">
+    <img src="logo.png" class="logo" alt="Study With Rameen">
+    <h1>Teacher Portal</h1>
+    <p class="gw-sub">Log in with your teacher account.</p>
+
+    <form class="settings-form auth-form" id="signInForm">
+      <label for="siEmail">Email</label>
+      <input type="email" id="siEmail" required autocomplete="email">
+      <label for="siPassword">Password</label>
+      <input type="password" id="siPassword" required autocomplete="current-password">
+      <a href="#" class="auth-forgot" id="forgotPassword">Forgot password?</a>
+      <p class="auth-error" id="siError" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+
+    <p class="gw-foot"><a href="index.html">← Back to gateway</a></p>
+  </main>
+
+<script type="module" src="teacher-login.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study With Rameen · LMS Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="gateway-body">
+
+  <main class="gateway-card">
+    <img src="logo.png" class="logo" alt="Study With Rameen">
+
+    <h1>Study With Rameen</h1>
+    <p class="gw-sub" aria-label="O Level · IGCSE — Pakistan Studies & Islamiyat. Learning Management Portal.">
+      <span aria-hidden="true">O Level · IGCSE — <span class="gw-type" id="gwType"></span><span class="gw-caret" id="gwCaret"></span></span>
+      <span class="gw-line2" id="gwLine2" aria-hidden="true">Learning Management Portal</span>
+    </p>
+
+    <div class="gw-actions">
+      <a class="btn btn-primary btn-block" href="teacher-login.html">Teacher Portal</a>
+      <a class="btn btn-outline btn-block" href="login.html">Student Portal</a>
+    </div>
+
+    <p class="gw-foot">© 2026 Study With Rameen</p>
+  </main>
+
+<script src="owl.js"></script>
+<script>
+(function () {
+  const TEXT = 'Pakistan Studies & Islamiyat';
+  const typeEl = document.getElementById('gwType');
+  const caret = document.getElementById('gwCaret');
+  const line2 = document.getElementById('gwLine2');
+  const done = () => {
+    line2.classList.add('show');
+    setTimeout(() => caret.classList.add('done'), 1300);
+  };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    typeEl.textContent = TEXT;
+    done();
+    return;
+  }
+  let i = 0;
+  setTimeout(function tick() {
+    typeEl.textContent = TEXT.slice(0, ++i);
+    if (i < TEXT.length) setTimeout(tick, 42);
+    else done();
+  }, 650);
+})();
+</script>
+</body>
+</html>
