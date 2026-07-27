@@ -7,6 +7,7 @@
    renderStudentWeeklyTest() once the profile has resolved. */
 
 import { supabase } from "./supabase-config.js";
+import { uploadToSubmissions } from "./storage-upload.js";
 
 const ICON_PDF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
 const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
@@ -120,13 +121,7 @@ document.addEventListener("submit", async (e) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     const weeklyTestId = form.dataset.wtId;
-    const paths = [];
-    for (const file of files) {
-      const path = `${user.id}/wt-${weeklyTestId}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("submissions").upload(path, file);
-      if (error) throw error;
-      paths.push(path);
-    }
+    const paths = await uploadToSubmissions(files, `${user.id}/wt-${weeklyTestId}`);
 
     const { error: insertError } = await supabase.from("weekly_test_submissions").insert({
       weekly_test_id: weeklyTestId,
@@ -140,7 +135,6 @@ document.addEventListener("submit", async (e) => {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = "Upload my answers";
-    const closedNow = err.message && err.message.toLowerCase().includes("row-level security");
-    showToast("Upload failed", closedNow ? "Uploads have closed for this test." : (err.message || "Please try again."));
+    showToast("Upload failed", err.message || "Please try again.");
   }
 });

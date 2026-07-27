@@ -8,6 +8,7 @@
    module — see teacher-auth-guard.js for the script-order reasoning. */
 
 import { supabase } from "./supabase-config.js";
+import { safeFileName } from "./storage-upload.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -168,7 +169,7 @@ $("weeklyTestArea").addEventListener("submit", async (e) => {
   const btn = $("wtSubmitBtn");
   btn.disabled = true;
   try {
-    const path = `${activeCohort}/${Date.now()}-${file.name}`;
+    const path = `${activeCohort}/${Date.now()}-${safeFileName(file.name)}`;
     const { error: uploadError } = await supabase.storage.from("weekly-tests").upload(path, file);
     if (uploadError) throw uploadError;
 
@@ -207,11 +208,22 @@ $("weeklyTestArea").addEventListener("click", async (e) => {
   const delBtn = e.target.closest("[data-delete-wt]");
   if (delBtn) {
     if (!confirm("Delete this weekly test? All student uploads go with it. This can't be undone.")) return;
+
+    // Gather the storage objects BEFORE deleting the row — the DB cascade drops
+    // the submission rows but never touches the files in storage, so collect
+    // their paths first, then remove them after the row is gone.
+    const { data: subs } = await supabase
+      .from("weekly_test_submissions").select("file_paths").eq("weekly_test_id", openTestId);
+    const photoPaths = (subs || []).flatMap((s) => s.file_paths || []);
+
     const { error } = await supabase.from("weekly_tests").delete().eq("id", openTestId);
     if (error) {
       showToast("Couldn't delete", error.message);
       return;
     }
+    if (photoPaths.length) await supabase.storage.from("submissions").remove(photoPaths);
+    if (currentPdfPath) await supabase.storage.from("weekly-tests").remove([currentPdfPath]);
+
     openTestId = null;
     showToast("Weekly test deleted", "Its uploads were removed too.");
     await renderListView();

@@ -6,6 +6,7 @@
    once the profile has resolved. */
 
 import { supabase } from "./supabase-config.js";
+import { uploadToSubmissions } from "./storage-upload.js";
 
 const TYPE_LABEL = { homework: "Homework", assignment: "Assignment", test: "Test" };
 
@@ -103,13 +104,7 @@ document.addEventListener("submit", async (e) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     const assignmentId = form.dataset.asgId;
-    const paths = [];
-    for (const file of files) {
-      const path = `${user.id}/${assignmentId}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("submissions").upload(path, file);
-      if (error) throw error;
-      paths.push(path);
-    }
+    const paths = await uploadToSubmissions(files, `${user.id}/${assignmentId}`);
 
     const { error: insertError } = await supabase.from("submissions").insert({
       assignment_id: assignmentId,
