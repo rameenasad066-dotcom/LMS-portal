@@ -88,7 +88,9 @@ export async function renderStudentAssignments() {
 
 document.addEventListener("submit", async (e) => {
   const form = e.target.closest(".asg-upload-form");
-  if (!form) return;
+  // The Weekly Test upload form reuses .asg-upload-form but carries data-wt-id
+  // and is handled in student-weekly-test.js — only claim real assignment forms.
+  if (!form || !form.dataset.asgId) return;
   e.preventDefault();
 
   const input = form.querySelector(".asg-file-input");

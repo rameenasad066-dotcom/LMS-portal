@@ -61,7 +61,7 @@ export async function renderStudentWeeklyTest() {
       statusHTML = '<p class="asg-meta">Uploads are closed for this test.</p>';
     } else {
       statusHTML = `
-        <form class="asg-upload-form" data-wt-id="${t.id}">
+        <form class="asg-upload-form" data-wt-id="${t.id}" data-wt-closes="${t.closes_at}">
           <input type="file" class="asg-file-input" multiple accept="image/*,application/pdf" required>
           <button type="submit" class="btn btn-primary btn-sm">Upload my answers</button>
         </form>`;
@@ -103,6 +103,16 @@ document.addEventListener("submit", async (e) => {
   const input = form.querySelector(".asg-file-input");
   const files = Array.from(input.files);
   if (!files.length) return;
+
+  // Don't even upload if the cutoff has passed — the server RLS is still the
+  // real boundary, but this stops orphaned files landing in storage and gives
+  // a clean message instead of leaning on the RLS error text.
+  const closesAt = form.dataset.wtCloses;
+  if (closesAt && Date.now() >= new Date(closesAt).getTime()) {
+    showToast("Uploads closed", "The deadline for this test has passed.");
+    await renderStudentWeeklyTest();
+    return;
+  }
 
   const btn = form.querySelector("button[type=submit]");
   btn.disabled = true;
