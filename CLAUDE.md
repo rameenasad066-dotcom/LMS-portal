@@ -79,7 +79,7 @@ All colors are defined as CSS custom properties in `style.css` `:root`.
 | `--bg` | `#FAF8F8` | Page background |
 | `--surface` | `#FFFFFF` | Card/panel surfaces |
 
-**Critical color rule:** Red dominates all structural elements (top nav, sidebar, headers, primary buttons, active indicators). Green appears ONLY on success/live/highlight states — on-time submission pills, graded checkmarks, the live-dot pulse, the download-ON toggle, scoreboard podium bars. Green is never decorative. This rule must never be violated.
+**Critical color rule (amended 2026-07-27 at Rameen's request):** Red still dominates all structural elements (top nav, sidebar, headers, primary/submit buttons, active indicators). Green is the **second brand colour** and she explicitly asked for it to "stand out a bit" more — so green is now used for: (1) success/live/highlight states as before (on-time pills, graded checkmarks, scoreboard podium bars, watched markers, download-ON toggle, complete rings); (2) **download / "get your content" actions** — `.btn-download` (green fill), the Notes download buttons, and the big `.wt-paper` weekly-test download card — giving green a real, recurring semantic job; (3) **deliberate brand accents** — the green→red gradient bar on the page title (`.page-head h1::before`), present on every page. Green is still never used as meaningless filler on structural chrome (don't turn the nav/sidebar/primary buttons green). The prior "green ONLY on success/live" wording is superseded by this.
 
 **Typography:**
 - Headings: `Poppins` (weights 500–800)
@@ -203,7 +203,7 @@ Helpers remaining in `data.js`: `isDownloaded/setDownloaded` and `isWatched/setW
 Sections are delimited by `/* === SECTION NAME === */` comments. Current sections in order:
 1. Reset & root variables
 2. Typography base
-3. Buttons (`.btn`, `.btn-primary`, `.btn-outline`, `.btn-sm`, `.btn-block`)
+3. Buttons (`.btn`, `.btn-primary`, `.btn-outline`, `.btn-download` (green, for downloads), `.btn-sm`, `.btn-block`)
 4. Top nav (`.topnav`, `.brand`, `.brand-text`, `.topnav-right`, `.icon-btn`, `.badge`, `.user-chip`, `.avatar-initials`)
 5. Cohort bar (`.cohort-bar` — sticky, `top: 64px` directly under the topnav, `z-index: 60` so it renders over the sidebar — `.cohort-pills`, `.pill`, `.pill.active`, `.cohort-meta`)
 6. Layout (`.layout` — 230px sidebar + flex content area)
@@ -221,7 +221,7 @@ Sections are delimited by `/* === SECTION NAME === */` comments. Current section
 18. Student portal components (`.cohort-label`, `.welcome-banner`, `.stats.three`, `.lecture-grid`, `.lecture-card`, `.switch` + `.switch.on`, `.cat-tag`, `.grade-chip`, `.feedback-row`, `.rank-callout`, `.you-tag`)
 19. Student drill-down nav (`.subject-grid`, `.subject-card`, `.chapter-list`, `.ch-item`, `.ch-body` expand, `.note-grid`, `.note-card`, `.chapter-hint`)
 20. Student dashboard widgets (`.ring-grid`, `.ring-fill` + `ring-in` keyframe, `.podium.mini`, `.ann-list`, `.ann-item`)
-21. Quiz engine & weekly test (`.quiz-card`, `.quiz-progress`, `.q-card`, `.q-opt.right/.wrong`, `.model-answer`, `.self-mark`, `.btn-success`, `.quiz-result`, `.screenshot-note`, `.deadline-card`, `.days-left`; `.instr-block`/`.instr-list`/`.instr-note` were deleted 2026-07-27 — dead once the old WhatsApp-instructions weekly-test card was retired, replaced by the reused `.asg-card`/`.asg-upload-form` classes)
+21. Quiz engine & weekly test (`.quiz-card`, `.quiz-progress`, `.q-card`, `.q-opt.right/.wrong`, `.model-answer`, `.self-mark`, `.btn-success`, `.quiz-result`, `.screenshot-note`, `.deadline-card`, `.days-left`; `.instr-block`/`.instr-list`/`.instr-note` were deleted 2026-07-27 — dead once the old WhatsApp-instructions weekly-test card was retired, replaced by the reused `.asg-card`/`.asg-upload-form` classes; the big green weekly-test download card `.wt-paper`/`.wt-paper-icon`/`.wt-paper-info`/`.wt-paper-cta` lives in the Assignments-card CSS block near `.asg-card`)
 22. Gateway entrance & typing (`gw-card-in`/`gw-logo-in`/`gw-rise` keyframes, `.gw-caret`, `.gw-line2`)
 23. Study-buddy owl easter egg (`.swr-owl`, `.owl-fly`, `.owl-twig`, `.owl-bubble`, flap/blink/hop/land keyframes)
 24. Motion & interaction polish (`view-in` / `pop-in` / `indicator-in` keyframes, `prefers-reduced-motion` guard)
@@ -238,7 +238,7 @@ Sections are delimited by `/* === SECTION NAME === */` comments. Current section
 - **Toast pattern:** Use a `showToast(msg)` helper (already in teacher.js) that appends a `.toast` div, animates in, and removes itself after ~2.5 s.
 - **No future-date uploads.** The content-date picker must always have `max` set to today's ISO date string.
 - **Scoreboard shows rank only** — never raw marks or percentage scores. The podium shows 1st/2nd/3rd by name; the student view shows "Your rank: #N" visible only to that student.
-- **Green is never decorative.** If it's not a success, live, highlight, or on state, use red or neutral.
+- **Green is the second brand colour, not filler.** Use it for success/live/highlight states, download/"get your content" actions (`.btn-download`, `.wt-paper`), and the sanctioned page-title brand accent — see the amended Critical color rule above. Don't paint structural chrome (nav, sidebar, primary/submit buttons) green.
 - **Data is in-memory** except the student's download/watched state (localStorage `swr_student` — approved exception). Do not add other storage unless explicitly requested.
 - **No backwards-compat hacks.** If something is unused, delete it. Don't leave `// removed` comments.
 

@@ -8,6 +8,9 @@
 
 import { supabase } from "./supabase-config.js";
 
+const ICON_PDF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
+
 function fmtDateTime(iso) {
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
@@ -74,7 +77,15 @@ export async function renderStudentWeeklyTest() {
         <span class="days-left ${closed ? "urgent" : ""}">${closed ? "Closed" : "Open"}</span>
       </div>
       <h3 class="weekly-title"></h3>
-      ${pdfUrls[t.id] ? `<a class="btn btn-outline btn-sm" href="${pdfUrls[t.id]}" target="_blank" rel="noopener">Download test paper (PDF)</a>` : ""}
+      ${pdfUrls[t.id] ? `
+      <a class="wt-paper" href="${pdfUrls[t.id]}" target="_blank" rel="noopener">
+        <span class="wt-paper-icon">${ICON_PDF}</span>
+        <span class="wt-paper-info">
+          <strong>Download test paper</strong>
+          <small>PDF · opens in a new tab</small>
+        </span>
+        <span class="wt-paper-cta">${ICON_DOWNLOAD}</span>
+      </a>` : ""}
       <div class="asg-status">${statusHTML}</div>
     </article>`;
   }).join("");

@@ -156,7 +156,7 @@ function noteCardHTML(n) {
       <small>PDF · ${esc(n.size)} · ${fmtDate(n.date)}</small>
     </span>
     <span class="cat-tag">${esc(n.cat)}</span>
-    <button class="btn btn-outline btn-sm dl-btn" data-id="${n.id}">Download</button>
+    <button class="btn btn-download btn-sm dl-btn" data-id="${n.id}">Download</button>
   </article>`;
 }
 
