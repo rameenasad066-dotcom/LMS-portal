@@ -255,4 +255,8 @@ document.querySelectorAll(".pill").forEach((pill) =>
   })
 );
 
+document.addEventListener("swr-view", (e) => {
+  if (e.detail === "assignments") renderArea();
+});
+
 window.dataReadyPromise.then(renderArea);

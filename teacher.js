@@ -75,6 +75,12 @@ function showView() {
     a.classList.toggle("active", a.dataset.view === view);
   });
   $("viewTitle").textContent = VIEW_TITLES[view];
+
+  // Real-data modules (dashboard, scoreboard, assignments, roster, attendance)
+  // only refetch on cohort-pill click or first load otherwise — without this,
+  // marking work in Assignments then navigating straight to Scoreboard via
+  // the sidebar shows stale data from before the marks existed.
+  document.dispatchEvent(new CustomEvent("swr-view", { detail: view }));
 }
 
 window.addEventListener("hashchange", showView);

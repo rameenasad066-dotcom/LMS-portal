@@ -87,6 +87,10 @@ $("attBody").addEventListener("click", async (e) => {
 $("attDate").addEventListener("change", renderAttendance);
 document.querySelectorAll(".pill").forEach((pill) => pill.addEventListener("click", renderAttendance));
 
+document.addEventListener("swr-view", (e) => {
+  if (e.detail === "attendance") renderAttendance();
+});
+
 window.dataReadyPromise.then(() => {
   $("attDate").max = todayISO();
   renderAttendance();

@@ -175,4 +175,8 @@ document.querySelectorAll(".pill").forEach((pill) =>
   pill.addEventListener("click", renderDashboard)
 );
 
+document.addEventListener("swr-view", (e) => {
+  if (e.detail === "dashboard") renderDashboard();
+});
+
 window.dataReadyPromise.then(renderDashboard);

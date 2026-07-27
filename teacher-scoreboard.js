@@ -49,4 +49,8 @@ document.querySelectorAll(".pill").forEach((pill) =>
   pill.addEventListener("click", renderScoreboardReal)
 );
 
+document.addEventListener("swr-view", (e) => {
+  if (e.detail === "scoreboard") renderScoreboardReal();
+});
+
 window.dataReadyPromise.then(renderScoreboardReal);

@@ -120,4 +120,8 @@ document.querySelectorAll(".pill").forEach((pill) =>
   pill.addEventListener("click", renderRosterReal)
 );
 
+document.addEventListener("swr-view", (e) => {
+  if (e.detail === "students") renderRosterReal();
+});
+
 window.dataReadyPromise.then(renderRosterReal);
