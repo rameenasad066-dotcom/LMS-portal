@@ -13,6 +13,7 @@ import { loadRealNotes } from "./student-notes.js";
 import { loadRealLectures } from "./student-lectures.js";
 import { loadChapters } from "./chapters-data.js";
 import { renderStudentAssignments } from "./student-assignments.js";
+import { renderStudentWeeklyTest } from "./student-weekly-test.js";
 import { renderStudentScoreboard } from "./student-scoreboard.js";
 import { renderStudentGrades } from "./student-grades.js";
 import { initStudentSettings } from "./student-settings.js";
@@ -87,6 +88,7 @@ async function init() {
   // pre-auth state from student.js's initial renderAll().
   renderDashboard();
   await renderStudentAssignments();
+  await renderStudentWeeklyTest();
   await renderStudentScoreboard();
   await renderStudentGrades();
   initStudentSettings();

@@ -63,6 +63,10 @@
           <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
           <span>Assignments</span>
         </a>
+        <a href="#weekly-test" class="snav-item" data-view="weekly-test">
+          <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm.01 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          <span>Weekly Test</span>
+        </a>
         <a href="#students" class="snav-item" data-view="students">
           <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
           <span>Students</span>
@@ -302,6 +306,17 @@
         </div>
       </section>
 
+      <!-- ================= VIEW: WEEKLY TEST ================= -->
+      <section class="view" data-view="weekly-test" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Weekly Test</h2>
+            <span class="panel-hint" id="wtHint"></span>
+          </div>
+          <div id="weeklyTestArea"></div>
+        </div>
+      </section>
+
       <!-- ================= VIEW: STUDENTS ================= -->
       <section class="view" data-view="students" hidden>
         <div class="panel" id="addStudentPanel">
@@ -520,6 +535,7 @@
 <script type="module" src="teacher-notes-upload.js"></script>
 <script type="module" src="teacher-lectures-upload.js"></script>
 <script type="module" src="teacher-assignments.js"></script>
+<script type="module" src="teacher-weekly-test.js"></script>
 <script type="module" src="teacher-scoreboard.js"></script>
 <script type="module" src="teacher-settings.js"></script>
 <script type="module" src="teacher-attendance.js"></script>

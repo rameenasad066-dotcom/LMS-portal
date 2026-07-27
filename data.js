@@ -19,20 +19,27 @@ const STUDENT = {
    loadData() must resolve before the first renderAll(). CHAPTERS is no
    longer part of this — it's real and teacher-managed now, populated by
    chapters-data.js (see auth-guard.js / teacher-notes-upload.js). */
-let SUBJECTS = [];
-let CHAPTERS = [];
-let QUIZZES  = [];
-let CURRENT  = null;
+let SUBJECTS  = [];
+let CHAPTERS  = [];
+let QUIZZES   = [];
+let HP_QUOTES = [];
 
 async function loadData() {
-  const [content, quizzes, current] = await Promise.all([
+  const [content, quizzes, hpQuotes] = await Promise.all([
     fetch('data/content.json').then(r => r.json()),
     fetch('data/quizzes.json').then(r => r.json()),
-    fetch('data/current.json').then(r => r.json()),
+    fetch('data/hp-quotes.json').then(r => r.json()),
   ]);
-  SUBJECTS = content.subjects;
-  QUIZZES  = quizzes.quizzes;
-  CURRENT  = current.weekly_test;
+  SUBJECTS  = content.subjects;
+  QUIZZES   = quizzes.quizzes;
+  HP_QUOTES = hpQuotes.quotes;
+}
+
+/* Same quote for every student on a given calendar day, a new one the next. */
+function quoteOfTheDay() {
+  if (!HP_QUOTES.length) return null;
+  const dayNumber = Math.floor(Date.now() / 86400000);
+  return HP_QUOTES[dayNumber % HP_QUOTES.length];
 }
 
 /* Video lectures — real, cohort-scoped, loaded from Supabase (see

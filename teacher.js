@@ -5,7 +5,7 @@
 const COHORT_DATA = {
   on26: {
     name: "October/November 2026",
-    meta: "Next deadline: <strong>Diagnostic Quiz 2 · 15 Jul</strong>",
+    meta: "",
   },
   mj27: {
     name: "May/June 2027",
@@ -27,6 +27,7 @@ const VIEW_TITLES = {
   dashboard: "Dashboard",
   uploads: "Upload Notes",
   assignments: "Assignments",
+  "weekly-test": "Weekly Test",
   students: "Students",
   "student-report": "Student Report",
   attendance: "Attendance",

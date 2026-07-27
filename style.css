@@ -2856,56 +2856,6 @@ body.auth-checking .layout {
   margin-bottom: 14px;
 }
 
-.instr-block {
-  margin-top: 18px;
-  border-top: 1px solid var(--gray-light);
-  padding-top: 16px;
-}
-
-.instr-block > strong {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.instr-list {
-  list-style: none;
-  counter-reset: step;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.instr-list li {
-  counter-increment: step;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.instr-list li::before {
-  content: counter(step);
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--red-blush);
-  color: var(--red-deep);
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.instr-note {
-  font-size: 12px;
-  color: var(--gray);
-}
-
 /* ==========================================================================
    Gateway entrance & typing
    ========================================================================== */

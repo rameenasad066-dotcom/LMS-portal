@@ -1,0 +1,125 @@
+/* Weekly Test (student.html) — replaces the old current.json + WhatsApp
+   flow. Download the test paper, upload photos of the finished paper before
+   the teacher's cutoff, see the exact time you uploaded. The cutoff is
+   enforced server-side (supabase/migrations/weekly-tests.sql) — hiding the
+   form here is just the UI half, not the real boundary. Exported rather
+   than self-running because it needs STUDENT.cohortId — auth-guard.js calls
+   renderStudentWeeklyTest() once the profile has resolved. */
+
+import { supabase } from "./supabase-config.js";
+
+function fmtDateTime(iso) {
+  return new Date(iso).toLocaleString("en-GB", {
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+export async function renderStudentWeeklyTest() {
+  const area = document.getElementById("weeklyArea");
+  if (!area) return;
+
+  const { data: tests, error } = await supabase
+    .from("weekly_tests")
+    .select("*")
+    .eq("cohort_id", STUDENT.cohortId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    area.innerHTML = '<p class="empty-note">Couldn\'t load the weekly test right now — try refreshing.</p>';
+    return;
+  }
+  if (!tests.length) {
+    area.innerHTML = '<p class="empty-note">Nothing posted yet — this week\'s test from Miss Rameen will appear here.</p>';
+    return;
+  }
+
+  const ids = tests.map((t) => t.id);
+  const { data: subs } = await supabase
+    .from("weekly_test_submissions")
+    .select("*")
+    .in("weekly_test_id", ids);
+  const subBy = {};
+  (subs || []).forEach((s) => { subBy[s.weekly_test_id] = s; });
+
+  const pdfUrls = {};
+  await Promise.all(tests.map(async (t) => {
+    const { data } = await supabase.storage.from("weekly-tests").createSignedUrl(t.pdf_path, 300);
+    if (data) pdfUrls[t.id] = data.signedUrl;
+  }));
+
+  area.innerHTML = tests.map((t) => {
+    const sub = subBy[t.id];
+    const closed = new Date() > new Date(t.closes_at);
+
+    let statusHTML;
+    if (sub) {
+      statusHTML = `<p class="asg-meta">Uploaded ${fmtDateTime(sub.submitted_at)}</p>`;
+    } else if (closed) {
+      statusHTML = '<p class="asg-meta">Uploads are closed for this test.</p>';
+    } else {
+      statusHTML = `
+        <form class="asg-upload-form" data-wt-id="${t.id}">
+          <input type="file" class="asg-file-input" multiple accept="image/*,application/pdf" required>
+          <button type="submit" class="btn btn-primary btn-sm">Upload my answers</button>
+        </form>`;
+    }
+
+    return `
+    <article class="asg-card">
+      <div class="deadline-card">
+        <div>
+          <span class="deadline-label">Uploads ${closed ? "closed" : "close"}</span>
+          <strong>${fmtDateTime(t.closes_at)}</strong>
+        </div>
+        <span class="days-left ${closed ? "urgent" : ""}">${closed ? "Closed" : "Open"}</span>
+      </div>
+      <h3 class="weekly-title"></h3>
+      ${pdfUrls[t.id] ? `<a class="btn btn-outline btn-sm" href="${pdfUrls[t.id]}" target="_blank" rel="noopener">Download test paper (PDF)</a>` : ""}
+      <div class="asg-status">${statusHTML}</div>
+    </article>`;
+  }).join("");
+
+  area.querySelectorAll(".weekly-title").forEach((el, i) => {
+    el.textContent = tests[i].title;
+  });
+}
+
+document.addEventListener("submit", async (e) => {
+  const form = e.target.closest(".asg-upload-form");
+  if (!form || !form.dataset.wtId) return;
+  e.preventDefault();
+
+  const input = form.querySelector(".asg-file-input");
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const btn = form.querySelector("button[type=submit]");
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const weeklyTestId = form.dataset.wtId;
+    const paths = [];
+    for (const file of files) {
+      const path = `${user.id}/wt-${weeklyTestId}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage.from("submissions").upload(path, file);
+      if (error) throw error;
+      paths.push(path);
+    }
+
+    const { error: insertError } = await supabase.from("weekly_test_submissions").insert({
+      weekly_test_id: weeklyTestId,
+      student_id: user.id,
+      file_paths: paths,
+    });
+    if (insertError) throw insertError;
+
+    showToast("Uploaded", "Miss Rameen can see your submission time now.");
+    await renderStudentWeeklyTest();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Upload my answers";
+    const closedNow = err.message && err.message.toLowerCase().includes("row-level security");
+    showToast("Upload failed", closedNow ? "Uploads have closed for this test." : (err.message || "Please try again."));
+  }
+});

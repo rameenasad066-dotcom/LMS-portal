@@ -1,0 +1,22 @@
+{
+  "_comment": "Quote of the day shown on the student dashboard's banner — a new one each calendar day, same for every student that day. Owner-editable: add/remove/edit entries freely. How to edit: see data/README.md.",
+
+  "quotes": [
+    { "text": "It does not do to dwell on dreams and forget to live.", "speaker": "Albus Dumbledore" },
+    { "text": "It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.", "speaker": "Albus Dumbledore" },
+    { "text": "Happiness can be found even in the darkest of times, if one only remembers to turn on the light.", "speaker": "Albus Dumbledore" },
+    { "text": "We've all got both light and dark inside us. What matters is the part we choose to act on.", "speaker": "Sirius Black" },
+    { "text": "It is our choices, Harry, that show what we truly are, far more than our abilities.", "speaker": "Albus Dumbledore" },
+    { "text": "I solemnly swear that I am up to no good.", "speaker": "Harry Potter" },
+    { "text": "Fear of a name increases fear of the thing itself.", "speaker": "Hermione Granger" },
+    { "text": "Working hard is important, but there is something that matters even more: believing in yourself.", "speaker": "Harry Potter" },
+    { "text": "You sort of start thinking anything's possible if you've got enough nerve.", "speaker": "Ginny Weasley" },
+    { "text": "Books! And cleverness! There are more important things — friendship and bravery.", "speaker": "Hermione Granger" },
+    { "text": "It matters not what someone is born, but what they grow to be.", "speaker": "Albus Dumbledore" },
+    { "text": "Age is foolish and forgetful when it underestimates youth.", "speaker": "Albus Dumbledore" },
+    { "text": "The best of us must sometimes eat our words.", "speaker": "Albus Dumbledore" },
+    { "text": "Being different isn't a bad thing.", "speaker": "Luna Lovegood" },
+    { "text": "You're a wizard, Harry.", "speaker": "Rubeus Hagrid" },
+    { "text": "Understanding is the first step to acceptance, and only with acceptance can there be recovery.", "speaker": "Albus Dumbledore" }
+  ]
+}

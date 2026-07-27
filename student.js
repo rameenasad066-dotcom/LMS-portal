@@ -66,14 +66,11 @@ function renderDate() {
 
 /* Called by auth-guard.js once the signed-in student's real profile has
    loaded from Firestore, to replace the demo STUDENT values shown in the
-   chrome (topnav, welcome banner, cohort bar, settings form). */
+   chrome (topnav, cohort bar, settings form). */
 function applyIdentity() {
-  const firstName = STUDENT.name.trim().split(/\s+/)[0];
   document.querySelectorAll('.topnav .avatar-initials').forEach((el) => { el.textContent = STUDENT.initials; });
   const chipName = document.querySelector('.topnav .user-chip-name');
   if (chipName) chipName.textContent = STUDENT.name;
-  const welcome = $('welcomeHeading');
-  if (welcome) welcome.textContent = `Welcome back, ${firstName} \u{1F44B}`;
   const cohortPill = $('cohortPillLabel');
   if (cohortPill) cohortPill.textContent = STUDENT.cohortName;
   const setName = $('setName');
@@ -87,6 +84,7 @@ function applyIdentity() {
 
 function renderDashboard() {
   renderRings();
+  renderQuoteBanner();
 }
 
 function renderRings() {
@@ -350,40 +348,15 @@ function renderQuizResult() {
   quizState = null;
 }
 
-/* ---------- Render: weekly test ---------- */
+/* ---------- Render: quote-of-the-day banner ---------- */
 
-function renderWeekly() {
-  const area = $('weeklyArea');
-  if (!area || !CURRENT) return;
-
-  const due = new Date(CURRENT.deadline + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.round((due - today) / 86400000);
-  const daysStr = days > 1 ? `${days} days left` : days === 1 ? '1 day left' : days === 0 ? 'Due today' : 'Deadline passed';
-  const dueStr = due.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  area.innerHTML = `
-    <div class="deadline-card">
-      <div>
-        <span class="deadline-label">Deadline</span>
-        <strong>${esc(dueStr)} · ${esc(CURRENT.deadline_time)}</strong>
-      </div>
-      <span class="days-left ${days <= 1 ? 'urgent' : ''}">${daysStr}</span>
-    </div>
-    <h3 class="weekly-title">${esc(CURRENT.title)}</h3>
-    <a class="btn btn-primary" href="${esc(CURRENT.pdf)}" download>Download test paper (PDF)</a>
-    <div class="instr-block">
-      <strong>How to submit</strong>
-      <ol class="instr-list">${(CURRENT.instructions || []).map(x => `<li>${esc(x)}</li>`).join('')}</ol>
-      <p class="instr-note">No uploads here — submissions are collected on WhatsApp only.</p>
-    </div>`;
-
-  const cd = $('cohortDeadline');
-  if (cd) {
-    const short = due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    cd.textContent = `${CURRENT.title.split('—')[0].trim()} · ${short}`;
-  }
+function renderQuoteBanner() {
+  const q = quoteOfTheDay();
+  const textEl = $('hpQuoteText');
+  const speakerEl = $('hpQuoteSpeaker');
+  if (!q || !textEl || !speakerEl) return;
+  textEl.textContent = `"${q.text}"`;
+  speakerEl.textContent = `— ${q.speaker}`;
 }
 
 /* ---------- Render all ---------- */
@@ -394,7 +367,6 @@ function renderAll() {
   renderVault();
   renderNotes();
   renderQuizList();
-  renderWeekly();
 }
 
 /* ==========================================================================

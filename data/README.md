@@ -3,13 +3,17 @@
 Everything in this folder is plain text you can edit with Notepad or VS Code.
 After saving a file, just **refresh the portal in the browser** — changes appear immediately.
 
-There are three files you'll edit:
+There are two files you'll edit:
 
 | File | What it controls |
 |---|---|
 | `quizzes.json` | The practice quizzes |
-| `current.json` | This week's test (PDF link, deadline, submission instructions) |
 | `owl-facts.json` | The study facts the owl says when a student clicks it |
+| `hp-quotes.json` | The Harry Potter quote of the day on the student dashboard |
+
+> The weekly test is no longer a file you edit — post it from the Teacher Portal's
+> **Weekly Test** page instead (title, PDF upload, and the time uploads close). See CLAUDE.md
+> for how the cutoff enforcement works.
 
 > Subjects live in `content.json`, but you won't normally need to touch it. **Chapters and
 > sub-chapters are no longer edited as a file at all** — create them directly in the Teacher
@@ -107,25 +111,16 @@ it won't break the page.
 
 ---
 
-## 3. current.json — updating the weekly test
+## 3. hp-quotes.json — the dashboard's quote of the day
 
-1. Create a folder called `tests` in the project root (next to `index.html`) if it doesn't exist.
-2. Put this week's test PDF inside it, e.g. `tests/mock-test-5.pdf`.
-3. Update `current.json`:
+Every student sees the same quote on a given day; it changes automatically the next day.
+Each entry is one line:
 
 ```json
-"weekly_test": {
-  "title": "Mock Test 5 — Paper 2 (Geography)",
-  "pdf": "tests/mock-test-5.pdf",
-  "deadline": "2026-07-19",
-  "deadline_time": "11:59 PM",
-  "instructions": [ ...one line per step... ]
-}
+{ "text": "It does not do to dwell on dreams and forget to live.", "speaker": "Albus Dumbledore" }
 ```
 
-- `deadline` must be in `YYYY-MM-DD` format — the portal computes "X days left" from it,
-  and the deadline in the top cohort bar updates automatically too.
-- There is deliberately **no upload button** — students submit on WhatsApp only.
+Add, remove, or edit entries freely — same comma rules as the other files below.
 
 ---
 
