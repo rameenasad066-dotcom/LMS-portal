@@ -1,16 +1,13 @@
-/* Study-buddy owl easter egg — a soft snowy owl flies in on page load, perches,
-   and shares a study fact on click (syllabus facts, examiner tips, key dates from
-   data/owl-facts.json; falls back to a few built-ins if that file can't load, so
-   the owl is never silent). Self-contained: builds its own DOM, no portal-script
-   dependencies. Two wing sets: spread wings (flight, flap-flap-glide cycle + air
-   bob) and folded wings (perched). Perch spots: portals = in-flow at the sidebar's
-   bottom (can never cover UI); gateway = the card's red top border.
-   Palette: white/gray/ink feathers, big dark eyes, neutral beak & talons — the
-   only red is the wax seal on the letter, never green. */
+/* Study-buddy owl easter egg — a soft snowy owl sits pre-perched on load (no
+   flight-in) and shares a study fact on click (syllabus facts, examiner tips,
+   key dates from data/owl-facts.json; falls back to a few built-ins if that
+   file can't load, so the owl is never silent). Self-contained: builds its
+   own DOM, no portal-script dependencies. Perch spots: portals = in-flow at
+   the sidebar's bottom (can never cover UI); gateway = the card's red top
+   border. Palette: white/gray/ink feathers, big dark eyes, neutral beak &
+   talons — never green. */
 
 (function () {
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   const FALLBACK_FACTS = [
     { tag: 'tip',  text: "Read the command word first: 'Describe' wants points, 'Explain' wants reasons." },
     { tag: 'date', text: 'Pakistan gained independence on 14 August 1947.' },
@@ -54,12 +51,6 @@
     return f;
   }
 
-  const WING_SPREAD = `
-      <path d="M22 37 Q8 30 -8 33 Q-2 38 4 38 Q-6 43 -9 50 Q1 49 7 44 Q3 51 3 57 Q11 51 17 44 Q21 40 22 37 Z"
-            fill="#F3F0EA" stroke="#CFC9BE" stroke-width="1.4"/>
-      <path d="M-4 35 Q1 37 5 37 M-6 42 Q0 43 5 41 M0 49 Q6 47 10 44"
-            fill="none" stroke="#CFC9BE" stroke-width="1.2"/>`;
-
   const WING_FOLD = `
       <path d="M21 40 Q15 47 18 58 Q22 63 25 56 Q22 47 26 41 Q24 38 21 40 Z"
             fill="#EDEAE3" stroke="#CFC9BE" stroke-width="1.3"/>
@@ -74,8 +65,6 @@
   <span class="owl-fly">
     <span class="owl-bob">
       <svg class="owl-svg" viewBox="0 0 72 72" aria-hidden="true">
-        <g class="ws-wrap"><g class="ws">${WING_SPREAD}</g></g>
-        <g class="ws-wrap" transform="translate(72 0) scale(-1 1)"><g class="ws">${WING_SPREAD}</g></g>
         <path d="M30 57 Q36 70 42 57 Z" fill="#E3DFD7" stroke="#CFC9BE" stroke-width="1.2"/>
         <g class="wf">${WING_FOLD}</g>
         <g class="wf" transform="translate(72 0) scale(-1 1)">${WING_FOLD}</g>
@@ -107,51 +96,9 @@
           <ellipse cx="42" cy="63.5" rx="1.8" ry="2.9"/>
         </g>
       </svg>
-      <svg class="owl-mail" viewBox="0 0 26 18" aria-hidden="true">
-        <rect x="1" y="1" width="24" height="16" rx="2.5" fill="#FFFDF7" stroke="#D9D4CC" stroke-width="1.4"/>
-        <path d="M2.5 3.5 L13 11 L23.5 3.5" fill="none" stroke="#D9D4CC" stroke-width="1.4"/>
-        <circle cx="13" cy="11.5" r="2.8" fill="#C8202C"/>
-      </svg>
     </span>
     <span class="owl-bubble" hidden></span>
   </span>`;
-
-  function fly(btn, flyEl, portal) {
-    const r = btn.getBoundingClientRect();
-    const w = innerWidth, h = innerHeight;
-    const at = (x, y, deg, offset, easing) => {
-      const f = { transform: `translate(${Math.round(x - r.left)}px, ${Math.round(y - r.top)}px) rotate(${deg}deg)` };
-      if (offset != null) f.offset = offset;
-      if (easing) f.easing = easing;
-      return f;
-    };
-    const frames = portal
-      ? [
-          at(w + 150, h * 0.16, -10, 0, 'ease-in'),
-          at(w * 0.7, h * 0.42, -14, 0.2, 'ease-in-out'),
-          at(w * 0.44, h * 0.14, -4, 0.4, 'ease-in-out'),
-          at(w * 0.2, h * 0.48, -12, 0.6, 'ease-in-out'),
-          at(r.left + 130, Math.max(r.top - 130, 40), -4, 0.78, 'ease-in-out'),
-          at(r.left + 26, r.top - 44, 10, 0.92, 'ease-out'),
-          at(r.left, r.top, 0),
-        ]
-      : [
-          at(-150, h * 0.2, 8, 0, 'ease-in'),
-          at(w * 0.32, h * 0.52, 14, 0.22, 'ease-in-out'),
-          at(w * 0.68, h * 0.16, -6, 0.44, 'ease-in-out'),
-          at(w * 0.48, h * 0.36, 6, 0.62, 'ease-in-out'),
-          at(Math.max(r.left - 160, 10), r.top + 70, 8, 0.8, 'ease-in-out'),
-          at(Math.max(r.left - 30, 10), r.top - 42, -10, 0.92, 'ease-out'),
-          at(r.left, r.top, 0),
-        ];
-    btn.classList.add('flying');
-    const anim = flyEl.animate(frames, { duration: 3400, easing: 'linear' });
-    anim.finished.then(() => {
-      anim.cancel();
-      btn.classList.remove('flying');
-      btn.classList.add('perched');
-    }).catch(() => {});
-  }
 
   function init() {
     loadFacts();
@@ -167,15 +114,9 @@
     const host = portal ? sidebar : (document.querySelector('.gateway-card') || document.body);
     host.appendChild(btn);
 
-    const flyEl = btn.querySelector('.owl-fly');
     const bubble = btn.querySelector('.owl-bubble');
 
-    if (reduce || !flyEl.animate) {
-      btn.querySelector('.owl-mail').remove();
-      btn.classList.add('still', 'perched');
-    } else {
-      setTimeout(() => fly(btn, flyEl, portal), portal ? 700 : 1400);
-    }
+    btn.classList.add('still', 'perched');
 
     let timer;
     btn.addEventListener('click', () => {

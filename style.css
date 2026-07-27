@@ -2982,7 +2982,6 @@ body.auth-checking .layout {
   visibility: hidden;
 }
 
-.swr-owl.flying,
 .swr-owl.perched {
   visibility: visible;
 }
@@ -3049,58 +3048,8 @@ body.auth-checking .layout {
   display: block;
 }
 
-.swr-owl.flying .owl-bob {
-  animation: owl-bob 1.7s linear infinite;
-}
-
-.swr-owl.gateway.flying .owl-svg,
 .swr-owl.portal.perched .owl-svg {
   transform: scaleX(-1);
-}
-
-.ws-wrap {
-  visibility: hidden;
-}
-
-.swr-owl.flying .ws-wrap {
-  visibility: visible;
-}
-
-.swr-owl.flying .wf {
-  visibility: hidden;
-}
-
-.ws {
-  transform-box: fill-box;
-  transform-origin: 94% 32%;
-}
-
-.swr-owl.flying .ws {
-  animation: owl-flap 1.7s linear infinite;
-}
-
-@keyframes owl-flap {
-  0% { transform: rotate(18deg); }
-  8% { transform: rotate(-34deg); }
-  16% { transform: rotate(18deg); }
-  24% { transform: rotate(-34deg); }
-  32% { transform: rotate(16deg); }
-  42% { transform: rotate(-28deg); }
-  54% { transform: rotate(4deg); }
-  78% { transform: rotate(9deg); }
-  100% { transform: rotate(18deg); }
-}
-
-@keyframes owl-bob {
-  0% { transform: translateY(0); }
-  8% { transform: translateY(-7px); }
-  16% { transform: translateY(-1px); }
-  24% { transform: translateY(-8px); }
-  32% { transform: translateY(-2px); }
-  42% { transform: translateY(-8px); }
-  60% { transform: translateY(2px); }
-  82% { transform: translateY(7px); }
-  100% { transform: translateY(0); }
 }
 
 .owl-eye {
@@ -3116,33 +3065,6 @@ body.auth-checking .layout {
 @keyframes owl-blink {
   0%, 90%, 100% { transform: scaleY(1); }
   93%, 95% { transform: scaleY(0.08); }
-}
-
-.owl-mail {
-  position: absolute;
-  left: 50%;
-  bottom: -11px;
-  width: 25px;
-  margin-left: -12.5px;
-  transform-origin: 50% -30%;
-}
-
-.swr-owl.flying .owl-mail {
-  animation: owl-mail-swing 0.9s ease-in-out infinite;
-}
-
-.swr-owl.perched .owl-mail {
-  animation: owl-mail-drop 0.7s ease-in 0.2s forwards;
-  pointer-events: none;
-}
-
-@keyframes owl-mail-swing {
-  0%, 100% { transform: rotate(8deg); }
-  50% { transform: rotate(-8deg); }
-}
-
-@keyframes owl-mail-drop {
-  to { transform: translateY(34px) rotate(-16deg); opacity: 0; }
 }
 
 @keyframes owl-land {
