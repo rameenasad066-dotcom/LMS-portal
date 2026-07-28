@@ -3568,6 +3568,32 @@ body.auth-checking .layout {
 }
 
 /* ==========================================================================
+   Mobile navigation (hamburger + off-canvas drawer)
+   Hidden on desktop; the ≤900 breakpoint below turns the sidebar into a
+   slide-in drawer and reveals the toggle.
+   ========================================================================== */
+
+.nav-toggle {
+  display: none;
+  margin-right: 4px;
+}
+
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.nav-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -3612,23 +3638,48 @@ body.auth-checking .layout {
   .publish-actions .btn {
     flex: 1;
   }
+
+  /* Content spans the full width; the sidebar becomes a slide-in drawer. */
+  .nav-toggle {
+    display: inline-flex;
+  }
   .layout {
-    grid-template-columns: 68px minmax(0, 1fr);
-    gap: 18px;
-    padding: 20px 18px 36px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 18px 16px 36px;
+  }
+  .content {
+    min-width: 0;
   }
   .sidebar {
-    padding: 8px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: min(80vw, 290px);
+    max-height: none;
+    border-radius: 0;
+    border-width: 0 1px 0 0;
+    padding: 14px 12px;
+    overflow-y: auto;
+    z-index: 210;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
   }
+  .sidebar.open {
+    transform: none;
+    box-shadow: var(--shadow-pop);
+  }
+  /* Full labels inside the drawer (undo any desktop icon-rail assumptions). */
   .snav-item {
-    justify-content: center;
-    padding: 12px 0;
+    justify-content: flex-start;
+    padding: 12px 14px;
   }
   .snav-item span {
-    display: none;
+    display: inline;
   }
   .snav-item.active::before {
-    display: none;
+    display: block;
   }
   .user-chip-name,
   .user-chip svg {
@@ -3656,7 +3707,9 @@ body.auth-checking .layout {
     flex-direction: column;
     align-items: flex-start;
   }
-  .brand-text small {
+  /* Logo alone stands in for the brand on mobile — the wordmark plus the
+     hamburger would overflow a narrow topnav. */
+  .brand-text {
     display: none;
   }
   .ring-grid {
@@ -3669,6 +3722,27 @@ body.auth-checking .layout {
   .notice-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* Podium columns are a fixed 130px each on desktop (~390px) — let them
+     share the row instead of forcing horizontal overflow. */
+  .podium {
+    gap: 8px;
+  }
+  .podium-col {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .podium-name {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Detail toolbars (weekly test / assignment marking) wrap instead of
+     spilling off-screen. */
+  .asg-detail-head {
+    flex-wrap: wrap;
   }
 }
 

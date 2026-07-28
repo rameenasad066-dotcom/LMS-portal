@@ -16,6 +16,7 @@ LMS portal/
 ├── data.js           — Student data layer (lectures/notes demo data, localStorage state, loadData() for JSON)
 ├── owl.js            — Study-buddy owl easter egg: sits pre-perched on load, says a study fact on click (shared by all three pages)
 ├── theme.js          — Light/dark theme toggle (shared by every page; persists choice in localStorage `swr_theme`)
+├── mobile-nav.js     — Mobile hamburger → off-canvas sidebar drawer (shared by both portals)
 ├── data/
 │   ├── content.json  — Subjects & chapters (owner-editable)
 │   ├── quizzes.json  — Practice quizzes (owner-editable; History/Geography/Islamiyat all real content now — Islamiyat pending her religious-accuracy review)
@@ -232,7 +233,7 @@ Sections are delimited by `/* === SECTION NAME === */` comments. Current section
 22. Gateway entrance & typing (`gw-card-in`/`gw-logo-in`/`gw-rise` keyframes, `.gw-caret`, `.gw-line2`)
 23. Study-buddy owl easter egg (`.swr-owl`, `.owl-fly`, `.owl-twig`, `.owl-bubble`, flap/blink/hop/land keyframes)
 24. Motion & interaction polish (`view-in` / `pop-in` / `indicator-in` keyframes, `prefers-reduced-motion` guard)
-25. Responsive breakpoints (1100px / 900px / 640px / 520px)
+25. Responsive breakpoints (1100px / 900px / 640px / 520px). **Mobile nav (added 2026-07-28):** at ≤900px the left sidebar becomes an off-canvas drawer — `.nav-toggle` hamburger in the topnav (shown ≤900) slides `.sidebar` in via `transform`, dimmed by `.nav-backdrop`; `mobile-nav.js` (shared) opens it and closes it on backdrop tap / Escape / nav-item click. The layout goes single-column (`minmax(0,1fr)`) so content spans full width. Also mobile: `.brand-text` hidden (logo only), podium columns switch from fixed 130px to `flex:1;min-width:0` (they were the main source of horizontal overflow), `.asg-detail-head` wraps. Wide `.sub-table`s scroll inside `.table-wrap` (`overflow-x:auto`) rather than blowing out the page. Verified no horizontal overflow at 375/320px.
 26. Theme toggle + dark-mode overrides (`.theme-toggle` sun/moon swap, `.theme-toggle.floating`, theme-switch transitions, `:root[data-theme="dark"]` form-control + decorative-tint overrides) — kept last so it wins by source order. The dark *palette* itself lives in a `:root[data-theme="dark"]` block near the top, right after `:root`.
 
 ---
