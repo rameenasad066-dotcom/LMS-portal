@@ -26,7 +26,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // boundary — this is defense-in-depth, restricting which origins the
 // browser will even let the request through to in the first place.
 const ALLOWED_ORIGINS = [
-  "https://studywithrameenlms.netlify.app",
+  "https://studywithrameen-lms.netlify.app",
   "http://localhost:5501",
   "http://localhost:5500",
 ];
