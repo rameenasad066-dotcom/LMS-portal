@@ -76,10 +76,34 @@ async function renderNotesUploadHistory() {
         <small>${esc(subjectName(n.subject))} · ${esc(chapterLabel(n.chapter_id))} · ${fmtDate(n.created_at)}</small>
       </span>
       <span class="u-kind">PDF</span>
+      <button class="kebab" data-delete-note="${n.id}" data-delete-path="${esc(n.storage_path)}" data-delete-title="${esc(n.title)}" aria-label="Delete ${esc(n.title)}">${ICONS.trash}</button>
     </li>`
     )
     .join("");
 }
+
+document.querySelector('[data-list="notes-uploads"]').addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-note]");
+  if (!btn) return;
+
+  const noteId = btn.dataset.deleteNote;
+  const path = btn.dataset.deletePath;
+  const title = btn.dataset.deleteTitle;
+  if (!confirm(`Delete "${title}"? Students will no longer see it. This can't be undone.`)) return;
+
+  btn.disabled = true;
+  try {
+    const { error: deleteError } = await supabase.from("notes").delete().eq("id", noteId);
+    if (deleteError) throw deleteError;
+    if (path) await supabase.storage.from("notes").remove([path]);
+
+    await renderNotesUploadHistory();
+    showToast("Note deleted", `${title} was removed.`);
+  } catch (err) {
+    btn.disabled = false;
+    showToast("Couldn't delete", err.message || "Please try again.");
+  }
+});
 
 window.dataReadyPromise.then(async () => {
   populateSubjects();

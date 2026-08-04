@@ -78,10 +78,32 @@ async function renderLectureHistory() {
         <small>${esc(subjectName(l.subject))} · ${esc(chapterLabel(l.chapter_id))} · ${fmtDate(l.created_at)}</small>
       </span>
       <span class="u-kind">MP4</span>
+      <button class="kebab" data-delete-lecture="${l.id}" data-delete-title="${esc(l.title)}" aria-label="Delete ${esc(l.title)}">${ICONS.trash}</button>
     </li>`
     )
     .join("");
 }
+
+document.querySelector('[data-list="lecture-uploads"]').addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-lecture]");
+  if (!btn) return;
+
+  const lectureId = btn.dataset.deleteLecture;
+  const title = btn.dataset.deleteTitle;
+  if (!confirm(`Delete "${title}"? Students will no longer see it. This can't be undone.`)) return;
+
+  btn.disabled = true;
+  try {
+    const { error } = await supabase.from("lectures").delete().eq("id", lectureId);
+    if (error) throw error;
+
+    await renderLectureHistory();
+    showToast("Lecture deleted", `${title} was removed.`);
+  } catch (err) {
+    btn.disabled = false;
+    showToast("Couldn't delete", err.message || "Please try again.");
+  }
+});
 
 window.dataReadyPromise.then(async () => {
   populateSubjects();
