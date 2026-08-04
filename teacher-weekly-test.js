@@ -26,6 +26,29 @@ async function renderArea() {
   else await renderListView();
 }
 
+// Shared by the list row's delete button and the detail view's delete
+// button — collects the storage files (PDF + every student's uploaded
+// photos) before the row delete cascades away the DB records that point to
+// them, then removes the files after.
+async function deleteWeeklyTest(id, pdfPath, title) {
+  if (!confirm(`Delete "${title}"? All student uploads go with it. This can't be undone.`)) return false;
+
+  const { data: subs } = await supabase
+    .from("weekly_test_submissions").select("file_paths").eq("weekly_test_id", id);
+  const photoPaths = (subs || []).flatMap((s) => s.file_paths || []);
+
+  const { error } = await supabase.from("weekly_tests").delete().eq("id", id);
+  if (error) {
+    showToast("Couldn't delete", error.message);
+    return false;
+  }
+  if (photoPaths.length) await supabase.storage.from("submissions").remove(photoPaths);
+  if (pdfPath) await supabase.storage.from("weekly-tests").remove([pdfPath]);
+
+  showToast("Weekly test deleted", "Its uploads were removed too.");
+  return true;
+}
+
 async function renderListView() {
   const area = $("weeklyTestArea");
   $("wtHint").textContent = `Posts to ${COHORT_DATA[activeCohort].name}`;
@@ -73,6 +96,7 @@ async function renderListView() {
           <small>Closes ${fmtDateTime(t.closes_at)} · ${subCounts[t.id] || 0} uploaded</small>
         </span>
         <button class="btn btn-outline btn-sm" data-open-wt="${t.id}">Open →</button>
+        <button class="kebab" data-delete-wt-list="${t.id}" data-delete-wt-pdf="${esc(t.pdf_path)}" data-delete-wt-title="${esc(t.title)}" aria-label="Delete ${esc(t.title)}">${ICONS.trash}</button>
       </li>`).join("")}
     </ul>
     ${tests.length ? "" : "<p class=\"empty-note\">Nothing posted yet — post this week's test above.</p>"}`;
@@ -205,28 +229,21 @@ $("weeklyTestArea").addEventListener("click", async (e) => {
     return;
   }
 
+  const delListBtn = e.target.closest("[data-delete-wt-list]");
+  if (delListBtn) {
+    const ok = await deleteWeeklyTest(delListBtn.dataset.deleteWtList, delListBtn.dataset.deleteWtPdf, delListBtn.dataset.deleteWtTitle);
+    if (ok) await renderListView();
+    return;
+  }
+
   const delBtn = e.target.closest("[data-delete-wt]");
   if (delBtn) {
-    if (!confirm("Delete this weekly test? All student uploads go with it. This can't be undone.")) return;
-
-    // Gather the storage objects BEFORE deleting the row — the DB cascade drops
-    // the submission rows but never touches the files in storage, so collect
-    // their paths first, then remove them after the row is gone.
-    const { data: subs } = await supabase
-      .from("weekly_test_submissions").select("file_paths").eq("weekly_test_id", openTestId);
-    const photoPaths = (subs || []).flatMap((s) => s.file_paths || []);
-
-    const { error } = await supabase.from("weekly_tests").delete().eq("id", openTestId);
-    if (error) {
-      showToast("Couldn't delete", error.message);
-      return;
+    const title = $("weeklyTestArea").querySelector(".asg-detail-title").textContent;
+    const ok = await deleteWeeklyTest(openTestId, currentPdfPath, title);
+    if (ok) {
+      openTestId = null;
+      await renderListView();
     }
-    if (photoPaths.length) await supabase.storage.from("submissions").remove(photoPaths);
-    if (currentPdfPath) await supabase.storage.from("weekly-tests").remove([currentPdfPath]);
-
-    openTestId = null;
-    showToast("Weekly test deleted", "Its uploads were removed too.");
-    await renderListView();
     return;
   }
 
