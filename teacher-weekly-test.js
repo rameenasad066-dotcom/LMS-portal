@@ -135,9 +135,9 @@ async function renderDetailView() {
       : "—";
     return `
     <tr>
-      <td><span class="student-cell"><span class="avatar-initials sm">${esc(st.initials)}</span>${esc(st.name)}</span></td>
-      <td>${status}</td>
-      <td><span class="asg-files">${files}</span></td>
+      <td data-label="Student"><span class="student-cell"><span class="avatar-initials sm">${esc(st.initials)}</span>${esc(st.name)}</span></td>
+      <td data-label="Status">${status}</td>
+      <td data-label="Files"><span class="asg-files">${files}</span></td>
     </tr>`;
   }).join("");
 

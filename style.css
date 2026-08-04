@@ -3735,6 +3735,94 @@ body.auth-checking .layout {
   .note-card .cat-tag {
     display: none;
   }
+
+  /* Upload rows (Notes/Lectures history, Weekly Test posted list): the PDF/
+     MP4 badge and the trash button were crowding titles down to ~15
+     visible characters before an ellipsis. Drop the redundant badge, let
+     the title wrap onto two lines instead of truncating, and give the
+     delete button room to breathe and an actual touch-friendly target. */
+  .upload-item {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 8px;
+  }
+  .u-kind {
+    display: none;
+  }
+  .u-info strong {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.35;
+  }
+  .kebab {
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Data tables (roster, assignments marking, weekly-test detail, grading
+     tracker, attendance): min-width:640px forced ~2.3x horizontal scrolling
+     just to reach the action buttons. Below the point where columns can
+     read comfortably side by side, drop the grid and render each row as a
+     labeled card instead — a standard responsive-table pattern. Cells opt
+     in via a data-label attribute (added in the render functions); cells
+     without one (colspan empty-state rows, the lone Save-button cell) just
+     render unlabeled. */
+  .sub-table {
+    min-width: 0;
+  }
+  .sub-table thead {
+    display: none;
+  }
+  .sub-table,
+  .sub-table tbody,
+  .sub-table tr {
+    display: block;
+    width: 100%;
+  }
+  .sub-table tr {
+    border: 1px solid var(--gray-light);
+    border-radius: 12px;
+    padding: 4px 12px;
+    margin-bottom: 10px;
+    background: var(--surface);
+  }
+  .sub-table tr:last-child {
+    margin-bottom: 0;
+  }
+  .sub-table tbody tr:hover td {
+    background: none;
+  }
+  .sub-table td {
+    display: block;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-soft);
+  }
+  .sub-table td:last-child {
+    border-bottom: none;
+  }
+  .sub-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray-soft);
+    margin-bottom: 4px;
+  }
+  .sub-table td[colspan] {
+    text-align: center;
+    color: var(--gray);
+  }
+  .mark-input,
+  .mark-feedback {
+    width: 100%;
+  }
+
   .notice-form {
     flex-direction: column;
     align-items: stretch;
@@ -3755,10 +3843,18 @@ body.auth-checking .layout {
     overflow-wrap: anywhere;
   }
 
-  /* Detail toolbars (weekly test / assignment marking) wrap instead of
-     spilling off-screen. */
+  /* Detail toolbars (weekly test / assignment marking): flex-wrap alone
+     squeezed the flex:1 title into an unreadable few-px-wide, many-line-tall
+     column once the buttons ran out of room. Stack instead — title gets its
+     own full-width line, the buttons wrap into a row underneath. */
   .asg-detail-head {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .asg-detail-title {
+    flex: none;
+    font-size: 16px;
   }
 }
 

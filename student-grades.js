@@ -168,14 +168,14 @@ export async function renderStudentGrades() {
         const g = r.status === "graded" ? letterGrade(r.pct) : null;
         return `
       <tr>
-        <td><strong>${esc(r.title)}</strong></td>
-        <td>${esc(r.date)}</td>
-        <td><span class="status-pill ${r.status === "graded" ? "ontime" : "muted"}">${r.status === "graded" ? "Graded" : "Pending review"}</span></td>
-        <td>${g ? `
+        <td data-label="Item"><strong>${esc(r.title)}</strong></td>
+        <td data-label="Submitted">${esc(r.date)}</td>
+        <td data-label="Status"><span class="status-pill ${r.status === "graded" ? "ontime" : "muted"}">${r.status === "graded" ? "Graded" : "Pending review"}</span></td>
+        <td data-label="Grade">${g ? `
           <span class="grade-chip ${g.cls}">${g.label}</span> <small>${r.marksVal}/${r.maxMarks} · ${r.pct}%</small>
           <div class="progress-bar"><div class="progress-fill" style="width:${r.pct}%; background:${zoneColorFor(r.pct)}"></div></div>
         ` : "—"}</td>
-        <td>${r.feedback ? '<button class="btn btn-outline btn-sm fb-toggle">View feedback</button>' : "—"}</td>
+        <td data-label="Feedback">${r.feedback ? '<button class="btn btn-outline btn-sm fb-toggle">View feedback</button>' : "—"}</td>
       </tr>
       ${r.feedback ? `<tr class="feedback-row" hidden><td colspan="5"><div>"${esc(r.feedback)}"</div></td></tr>` : ""}`;
       }).join("")

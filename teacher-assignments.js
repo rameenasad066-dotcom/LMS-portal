@@ -121,11 +121,11 @@ async function renderMarkingView() {
       : "—";
     return `
     <tr data-student-id="${st.id}">
-      <td><span class="student-cell"><span class="avatar-initials sm">${esc(st.initials)}</span>${esc(st.name)}</span></td>
-      <td>${status}</td>
-      <td><span class="asg-files">${files}</span></td>
-      <td><input type="number" class="mark-input" min="0" max="${a.max_marks}" value="${mark ? mark.marks : ""}" placeholder="/${a.max_marks}"></td>
-      <td><input type="text" class="mark-feedback" value="${mark && mark.feedback ? esc(mark.feedback) : ""}" placeholder="Feedback (optional)"></td>
+      <td data-label="Student"><span class="student-cell"><span class="avatar-initials sm">${esc(st.initials)}</span>${esc(st.name)}</span></td>
+      <td data-label="Status">${status}</td>
+      <td data-label="Files"><span class="asg-files">${files}</span></td>
+      <td data-label="Marks"><input type="number" class="mark-input" min="0" max="${a.max_marks}" value="${mark ? mark.marks : ""}" placeholder="/${a.max_marks}"></td>
+      <td data-label="Feedback"><input type="text" class="mark-feedback" value="${mark && mark.feedback ? esc(mark.feedback) : ""}" placeholder="Feedback (optional)"></td>
       <td><button class="btn btn-primary btn-sm" data-save-mark="${st.id}">${mark ? "Update" : "Save"}</button></td>
     </tr>`;
   }).join("");

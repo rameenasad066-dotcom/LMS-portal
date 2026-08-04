@@ -59,10 +59,10 @@ async function renderRosterReal() {
 
   body.innerHTML = students.map((s) => `
     <tr data-student-id="${s.id}">
-      <td><button class="student-cell student-cell-link" data-open-report="${s.id}"><span class="avatar-initials sm">${esc(s.initials)}</span>${esc(s.name)}</button></td>
-      <td>${esc(s.email)}</td>
-      <td>${fmtDate(s.created_at)}</td>
-      <td>${subCounts[s.id] || 0}</td>
+      <td data-label="Student"><button class="student-cell student-cell-link" data-open-report="${s.id}"><span class="avatar-initials sm">${esc(s.initials)}</span>${esc(s.name)}</button></td>
+      <td data-label="Email">${esc(s.email)}</td>
+      <td data-label="Joined">${fmtDate(s.created_at)}</td>
+      <td data-label="Submissions">${subCounts[s.id] || 0}</td>
       <td>
         <span class="roster-actions">
           <select class="tool-select roster-cohort-select" data-shift-cohort="${s.id}" data-shift-name="${esc(s.name)}" data-current-cohort="${s.cohort_id}" aria-label="Cohort for ${esc(s.name)}">

@@ -48,8 +48,8 @@ async function renderAttendance() {
 
   body.innerHTML = students.map((s) => `
     <tr data-student-id="${s.id}">
-      <td><span class="student-cell"><span class="avatar-initials sm">${esc(s.initials)}</span>${esc(s.name)}</span></td>
-      <td>
+      <td data-label="Student"><span class="student-cell"><span class="avatar-initials sm">${esc(s.initials)}</span>${esc(s.name)}</span></td>
+      <td data-label="Status">
         <div class="att-toggle">
           ${STATUSES.map((st) => `<button type="button" class="att-btn ${st} ${statusBy[s.id] === st ? "active" : ""}" data-status="${st}" data-student="${s.id}">${STATUS_LABEL[st]}</button>`).join("")}
         </div>
