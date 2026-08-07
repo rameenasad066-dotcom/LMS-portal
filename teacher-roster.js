@@ -6,7 +6,7 @@
    recovered (see reset-student-password Edge Function). Runs as a
    module — see teacher-auth-guard.js for the script-order reasoning. */
 
-import { supabase, SUPABASE_URL, COHORTS } from "./supabase-config.js";
+import { supabase, SUPABASE_URL, COHORTS, courseLabel } from "./supabase-config.js";
 import { openStudentReport } from "./teacher-student-report.js";
 
 const $ = (id) => document.getElementById(id);
@@ -61,6 +61,7 @@ async function renderRosterReal() {
     <tr data-student-id="${s.id}">
       <td data-label="Student"><button class="student-cell student-cell-link" data-open-report="${s.id}"><span class="avatar-initials sm">${esc(s.initials)}</span>${esc(s.name)}</button></td>
       <td data-label="Email">${esc(s.email)}</td>
+      <td data-label="Subjects">${esc(courseLabel(s.subjects))}</td>
       <td data-label="Joined">${fmtDate(s.created_at)}</td>
       <td data-label="Submissions">${subCounts[s.id] || 0}</td>
       <td>

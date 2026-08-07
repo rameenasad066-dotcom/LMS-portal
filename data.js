@@ -13,6 +13,10 @@ const STUDENT = {
   cohortId:   'on26',
   email:      '',
   rank:       2,
+  /* Portal subject ids this student is enrolled in — overwritten by
+     auth-guard.js from their real profile. Pakistan Studies is two of these
+     (history + geography), Islamiyat is the third. */
+  subjects:   ['history', 'geography', 'islamiyat'],
 };
 
 /* Owner-editable content loads from data/*.json (see data/README.md);
@@ -33,6 +37,18 @@ async function loadData() {
   SUBJECTS  = content.subjects;
   QUIZZES   = quizzes.quizzes;
   HP_QUOTES = hpQuotes.quotes;
+}
+
+/* The subjects this student can actually see, in the portal's display order.
+   Every subject-scoped screen (Syllabus Tracker, Lecture Vault, Notes,
+   Practice Quizzes) renders from this rather than the full SUBJECTS list. */
+function enrolledSubjects() {
+  const mine = STUDENT.subjects || [];
+  return SUBJECTS.filter(s => mine.includes(s.id));
+}
+
+function isEnrolledIn(subjectId) {
+  return (STUDENT.subjects || []).includes(subjectId);
 }
 
 /* Same quote for every student on a given calendar day, a new one the next. */

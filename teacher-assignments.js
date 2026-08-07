@@ -5,10 +5,24 @@
    WhatsApp. Runs as a module — see teacher-auth-guard.js for the
    script-order reasoning. */
 
-import { supabase } from "./supabase-config.js";
+import { supabase, COURSES, ALL_SUBJECT_IDS, subjectsForCourses, courseLabel } from "./supabase-config.js";
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABEL = { homework: "Homework", assignment: "Assignment", test: "Test" };
+
+/* An assignment carries the subjects it's aimed at; a student sees it when
+   their own subjects overlap. All three = everyone, which is also what every
+   assignment posted before subject enrolment existed was backfilled to. */
+function audienceLabel(subjects) {
+  const list = subjects || [];
+  return ALL_SUBJECT_IDS.every((s) => list.includes(s)) ? "All students" : courseLabel(list);
+}
+
+function isFor(student, assignment) {
+  const theirs = student.subjects || [];
+  const aimed = assignment.subjects || [];
+  return theirs.some((s) => aimed.includes(s));
+}
 
 let openAssignmentId = null;
 
@@ -60,6 +74,11 @@ async function renderListView() {
         <option value="assignment">Assignment</option>
         <option value="test">Test</option>
       </select>
+      <label for="caAudience">For</label>
+      <select id="caAudience" class="tool-select">
+        <option value="all">All students</option>
+        ${COURSES.map((c) => `<option value="${c.id}">${c.name} only</option>`).join("")}
+      </select>
       <label for="caTitle">Title</label>
       <input type="text" id="caTitle" required placeholder="e.g. Homework 2 — Causes of the War of Independence">
       <label for="caDue">Due date</label>
@@ -76,7 +95,7 @@ async function renderListView() {
       <li class="upload-item">
         <span class="u-info">
           <strong></strong>
-          <small>${TYPE_LABEL[a.type] || a.type} · due ${fmtDue(a.due_date)} · out of ${a.max_marks} · ${subCounts[a.id] || 0} submitted · ${markCounts[a.id] || 0} marked</small>
+          <small>${TYPE_LABEL[a.type] || a.type} · ${esc(audienceLabel(a.subjects))} · due ${fmtDue(a.due_date)} · out of ${a.max_marks} · ${subCounts[a.id] || 0} submitted · ${markCounts[a.id] || 0} marked</small>
         </span>
         <button class="btn btn-outline btn-sm" data-open-asg="${a.id}">Open →</button>
       </li>`).join("")}
@@ -95,10 +114,10 @@ async function renderMarkingView() {
     openAssignmentId = null;
     return renderListView();
   }
-  $("asgHint").textContent = `${TYPE_LABEL[a.type] || a.type} · due ${fmtDue(a.due_date)} · out of ${a.max_marks}`;
+  $("asgHint").textContent = `${TYPE_LABEL[a.type] || a.type} · ${audienceLabel(a.subjects)} · due ${fmtDue(a.due_date)} · out of ${a.max_marks}`;
 
-  const [{ data: students }, { data: subs }, { data: mks }] = await Promise.all([
-    supabase.from("students").select("id, name, initials").eq("cohort_id", a.cohort_id).order("name"),
+  const [{ data: allStudents }, { data: subs }, { data: mks }] = await Promise.all([
+    supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", a.cohort_id).order("name"),
     supabase.from("submissions").select("*").eq("assignment_id", a.id),
     supabase.from("marks").select("*").eq("assignment_id", a.id),
   ]);
@@ -108,7 +127,10 @@ async function renderMarkingView() {
   const markBy = {};
   (mks || []).forEach((m) => { markBy[m.student_id] = m; });
 
-  const rows = (students || []).map((st) => {
+  // Only students enrolled in a subject this assignment is aimed at.
+  const students = (allStudents || []).filter((st) => isFor(st, a));
+
+  const rows = students.map((st) => {
     const sub = subBy[st.id];
     const mark = markBy[st.id];
     const status = sub
@@ -151,7 +173,7 @@ async function renderMarkingView() {
         <tbody>${rows}</tbody>
       </table>
     </div>
-    ${(students || []).length ? "" : '<p class="empty-note">No students in this cohort yet.</p>'}`;
+    ${students.length ? "" : `<p class="empty-note">No students in this cohort are taking ${esc(audienceLabel(a.subjects))}.</p>`}`;
 
   area.querySelector(".asg-detail-title").textContent = a.title;
 }
@@ -164,12 +186,14 @@ $("assignmentsArea").addEventListener("submit", async (e) => {
   const btn = e.target.querySelector("button[type=submit]");
   btn.disabled = true;
   try {
+    const audience = $("caAudience").value;
     const { error } = await supabase.from("assignments").insert({
       cohort_id: activeCohort,
       type: $("caType").value,
       title: $("caTitle").value.trim(),
       due_date: $("caDue").value,
       max_marks: Number($("caMax").value),
+      subjects: audience === "all" ? ALL_SUBJECT_IDS : subjectsForCourses([audience]),
     });
     if (error) throw error;
     showToast("Posted", `Now visible to ${COHORT_DATA[activeCohort].name} students.`);

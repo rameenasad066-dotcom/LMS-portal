@@ -6,9 +6,52 @@
    the teacher's own RLS policies already grant her full read access to
    every student's marks, so no privacy boundary needs crossing here. */
 
-import { supabase } from "./supabase-config.js";
+import { supabase, COURSES, subjectsForCourses, coursesForSubjects } from "./supabase-config.js";
 
 const $ = (id) => document.getElementById(id);
+
+/* Enrolment editor — she picks courses (Pakistan Studies / Islamiyat) and
+   they expand to the subject ids stored on the student. Saves on tick with
+   no confirm: it's instantly reversible and deletes nothing, unlike the
+   cohort shift or Remove. */
+let reportStudentId = null;
+
+function renderCoursePicker(subjects) {
+  const enrolled = coursesForSubjects(subjects);
+  $("srCourses").innerHTML = COURSES.map((c) => `
+    <label class="course-option ${enrolled.includes(c.id) ? "on" : ""}">
+      <input type="checkbox" value="${c.id}" ${enrolled.includes(c.id) ? "checked" : ""}>
+      <span>${c.name}</span>
+    </label>`).join("");
+}
+
+$("srCourses").addEventListener("change", async (e) => {
+  const box = e.target.closest("input[type=checkbox]");
+  if (!box || !reportStudentId) return;
+
+  const picker = $("srCourses");
+  const chosen = [...picker.querySelectorAll("input:checked")].map((i) => i.value);
+  if (!chosen.length) {
+    box.checked = true;
+    showToast("Keep at least one", "A student needs at least one subject.");
+    return;
+  }
+
+  picker.querySelectorAll("input").forEach((i) => { i.disabled = true; });
+  const { error } = await supabase
+    .from("students")
+    .update({ subjects: subjectsForCourses(chosen) })
+    .eq("id", reportStudentId);
+  picker.querySelectorAll("input").forEach((i) => { i.disabled = false; });
+
+  if (error) {
+    box.checked = !box.checked;
+    showToast("Couldn't update subjects", error.message);
+    return;
+  }
+  box.closest(".course-option").classList.toggle("on", box.checked);
+  showToast("Subjects updated", "Their portal now matches this straight away.");
+});
 
 function letterGrade(pct) {
   if (pct >= 90) return { label: "A*", cls: "" };
@@ -169,6 +212,8 @@ function render(report) {
     $("srAvatar").textContent = "?";
     $("srName").textContent = "Couldn't load student";
     $("srEmail").textContent = "";
+    reportStudentId = null;
+    $("srCourses").innerHTML = "";
     $("srLatestPct").textContent = "—";
     $("srLatestTrend").textContent = "";
     $("srBand").textContent = "—";
@@ -193,6 +238,8 @@ function render(report) {
   $("srAvatar").textContent = student.initials;
   $("srName").textContent = student.name;
   $("srEmail").textContent = student.email;
+  reportStudentId = student.id;
+  renderCoursePicker(student.subjects);
 
   $("srAttendancePct").textContent = attendance ? `${attendance.pct}%` : "—";
   $("srAttendanceSub").textContent = attendance

@@ -44,6 +44,18 @@ function initialsOf(name: string) {
   return name.trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
+// Which subjects a student is enrolled in. The teacher UI sends the expanded
+// ids (Pakistan Studies -> history + geography); anything unrecognised is
+// dropped rather than trusted, and an empty result falls back to all three so
+// a student is never created able to see nothing.
+const VALID_SUBJECTS = ["history", "geography", "islamiyat"];
+
+function cleanSubjects(input: unknown) {
+  if (!Array.isArray(input)) return VALID_SUBJECTS;
+  const picked = VALID_SUBJECTS.filter((s) => input.includes(s));
+  return picked.length ? picked : VALID_SUBJECTS;
+}
+
 Deno.serve(async (req) => {
   const cors = corsHeaders(req);
   const json = (body: unknown, status = 200) =>
@@ -70,7 +82,7 @@ Deno.serve(async (req) => {
     return json({ error: "Not authorized" }, 403);
   }
 
-  let body: { name?: string; email?: string; password?: string; cohortId?: string; cohortName?: string };
+  let body: { name?: string; email?: string; password?: string; cohortId?: string; cohortName?: string; subjects?: string[] };
   try {
     body = await req.json();
   } catch {
@@ -103,6 +115,7 @@ Deno.serve(async (req) => {
     initials: initialsOf(name),
     cohort_id: cohortId,
     cohort_name: cohortName,
+    subjects: cleanSubjects(body.subjects),
   });
   if (insertError) {
     // Don't leave an orphaned auth user with no profile row.

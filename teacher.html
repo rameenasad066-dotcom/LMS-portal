@@ -339,6 +339,9 @@
             <input type="email" id="asEmail" required autocomplete="off">
             <label for="asCohort">Cohort</label>
             <select id="asCohort" class="tool-select"></select>
+            <span class="form-label">Subjects</span>
+            <div class="course-picker" id="asCourses"></div>
+            <span class="date-hint">Only the subjects you tick will show up in this student's portal. You can change this later from their report page.</span>
             <label for="asPassword">Password</label>
             <div class="as-password-row">
               <input type="text" id="asPassword" required minlength="8" placeholder="At least 8 characters">
@@ -367,6 +370,7 @@
                 <tr>
                   <th scope="col">Student</th>
                   <th scope="col">Email</th>
+                  <th scope="col">Subjects</th>
                   <th scope="col">Joined</th>
                   <th scope="col">Submissions</th>
                   <th scope="col"></th>
@@ -388,6 +392,10 @@
           <div>
             <h2 id="srName"></h2>
             <span class="panel-hint" id="srEmail"></span>
+          </div>
+          <div class="report-subjects">
+            <span class="form-label">Subjects</span>
+            <div class="course-picker" id="srCourses"></div>
           </div>
         </div>
 

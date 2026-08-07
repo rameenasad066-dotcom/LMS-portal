@@ -25,3 +25,34 @@ export const COHORTS = [
   { id: "on26", name: "October/November 2026" },
   { id: "mj27", name: "May/June 2027" },
 ];
+
+/* The two courses Rameen actually sells, mapped to the portal's subject ids.
+   Pakistan Studies is ONE course made of TWO papers/subjects, so the teacher
+   UI always offers courses (never bare subjects) — that way a student can't
+   accidentally end up enrolled in History but not Geography, which isn't a
+   real thing she teaches. Everything downstream (content tables, RLS,
+   filtering) works in expanded subject ids; the expansion happens once, at
+   the moment a student is created or edited. */
+export const COURSES = [
+  { id: "pakstudies", name: "Pakistan Studies", subjects: ["history", "geography"] },
+  { id: "islamiyat", name: "Islamiyat", subjects: ["islamiyat"] },
+];
+
+export const ALL_SUBJECT_IDS = COURSES.flatMap((c) => c.subjects);
+
+export function subjectsForCourses(courseIds) {
+  return COURSES.filter((c) => courseIds.includes(c.id)).flatMap((c) => c.subjects);
+}
+
+/* Which courses a stored subject list corresponds to — a course counts as
+   enrolled when every one of its subjects is present, so a Pak Studies
+   student reads back as Pak Studies rather than two loose papers. */
+export function coursesForSubjects(subjects) {
+  const list = subjects || [];
+  return COURSES.filter((c) => c.subjects.every((s) => list.includes(s))).map((c) => c.id);
+}
+
+export function courseLabel(subjects) {
+  const names = COURSES.filter((c) => c.subjects.every((s) => (subjects || []).includes(s))).map((c) => c.name);
+  return names.length ? names.join(" + ") : "No subjects";
+}

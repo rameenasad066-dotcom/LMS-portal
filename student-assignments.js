@@ -22,10 +22,13 @@ export async function renderStudentAssignments() {
   const area = document.getElementById("assignmentsArea");
   if (!area) return;
 
+  // RLS already hides assignments aimed at subjects this student isn't
+  // enrolled in; the overlaps() filter keeps the intent visible client-side too.
   const { data: assignments, error } = await supabase
     .from("assignments")
     .select("*")
     .eq("cohort_id", STUDENT.cohortId)
+    .overlaps("subjects", STUDENT.subjects || [])
     .order("due_date", { ascending: false });
 
   if (error) {

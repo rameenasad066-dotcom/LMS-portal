@@ -70,6 +70,7 @@ async function init() {
       STUDENT.cohortName = profile.cohort_name;
       STUDENT.cohortId = profile.cohort_id;
       STUDENT.email = profile.email;
+      if (Array.isArray(profile.subjects) && profile.subjects.length) STUDENT.subjects = profile.subjects;
     }
   } catch {
     /* Profile fetch failed or timed out — falls back to the demo STUDENT

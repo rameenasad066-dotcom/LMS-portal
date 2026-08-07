@@ -94,7 +94,7 @@ function renderRings() {
   const R = 40;
   const C = 2 * Math.PI * R;
 
-  grid.innerHTML = SUBJECTS.map(s => {
+  grid.innerHTML = enrolledSubjects().map(s => {
     const p = subjectProgress(s.id);
     const off = (C * (1 - p.pct / 100)).toFixed(1);
     const done = p.pct === 100;
@@ -178,7 +178,7 @@ function renderDrill(view) {
 
   const st = drill[view];
 
-  subEl.innerHTML = SUBJECTS.map(s => {
+  subEl.innerHTML = enrolledSubjects().map(s => {
     const n = arr.filter(x => x.subject === s.id).length;
     return `
     <button class="subject-card ${st.subject === s.id ? 'active' : ''}" data-subject-btn="${s.id}">
@@ -255,7 +255,7 @@ function renderQuizList() {
   const area = $('quizArea');
   if (!area) return;
   quizState = null;
-  area.innerHTML = QUIZZES.map(q => {
+  area.innerHTML = QUIZZES.filter(q => isEnrolledIn(q.subject)).map(q => {
     const s = SUBJECTS.find(x => x.id === q.subject);
     const mcq = q.questions.filter(x => x.question_type === 'mcq').length;
     const sa  = q.questions.length - mcq;

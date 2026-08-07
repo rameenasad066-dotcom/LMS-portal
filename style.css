@@ -1164,6 +1164,59 @@ button, input, select {
   align-self: flex-start;
 }
 
+/* Course/subject enrolment pickers (Add Student + Student Report). Green
+   marks an enrolled course — a positive "on" state, same role as the
+   download toggle and watched markers. */
+.form-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray);
+  margin-top: 10px;
+}
+
+.course-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.course-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.course-option:hover {
+  border-color: var(--red-blush-line);
+}
+
+.course-option.on {
+  border-color: var(--green);
+  background: var(--green-light);
+  color: var(--ink-green);
+}
+
+/* .settings-form styles every input as a text field — checkboxes need that
+   padding/border undone. */
+.course-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
 /* ==========================================================================
    Teacher portal — chapter management (Upload Notes)
    ========================================================================== */
@@ -3267,6 +3320,27 @@ body.auth-checking .layout {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Enrolment editor sits to the right of the name, dropping below it when
+   there isn't room. */
+.report-subjects {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-subjects .form-label {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .report-subjects {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .report-identity h2 {
