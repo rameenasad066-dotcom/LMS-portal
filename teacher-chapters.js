@@ -28,13 +28,21 @@ const expanded = new Set();
 
 async function loadItems() {
   const [{ data: notes }, { data: lectures }] = await Promise.all([
-    supabase.from("notes").select("id, title, chapter_id, subject, storage_path"),
-    supabase.from("lectures").select("id, title, chapter_id, subject"),
+    supabase.from("notes").select("id, title, chapter_id, subject, storage_path, cohort_id"),
+    supabase.from("lectures").select("id, title, chapter_id, subject, cohort_id"),
   ]);
   allItems = [
     ...(notes || []).map((n) => ({ ...n, type: "note" })),
     ...(lectures || []).map((l) => ({ ...l, type: "lecture" })),
   ];
+}
+
+// Chapters are shared across cohorts, but notes/lectures aren't — an item
+// that only exists in one cohort would otherwise look identical to one
+// visible everywhere, which is exactly what made a cross-cohort duplicate
+// (e.g. a lecture posted under May/June 2027) look like a bug here.
+function cohortLabel(cohortId) {
+  return (COHORT_DATA[cohortId] && COHORT_DATA[cohortId].name) || cohortId;
 }
 
 function itemsForChapter(chapterId) {
@@ -50,7 +58,10 @@ function itemRowHTML(item) {
   return `
     <div class="chapter-mgr-item" data-item-id="${item.id}" data-item-type="${item.type}">
       <span class="chapter-mgr-item-icon">${icon}</span>
-      <span class="chapter-mgr-item-title">${esc(item.title)}</span>
+      <span class="chapter-mgr-item-titlewrap">
+        <span class="chapter-mgr-item-title">${esc(item.title)}</span>
+        <span class="chapter-mgr-item-cohort">${esc(cohortLabel(item.cohort_id))}</span>
+      </span>
       <select class="tool-select chapter-mgr-select" data-move-item="${item.id}" data-move-item-type="${item.type}">
         <option value="">Move to…</option>
       </select>
