@@ -28,7 +28,7 @@ const expanded = new Set();
 
 async function loadItems() {
   const [{ data: notes }, { data: lectures }] = await Promise.all([
-    supabase.from("notes").select("id, title, chapter_id, subject"),
+    supabase.from("notes").select("id, title, chapter_id, subject, storage_path"),
     supabase.from("lectures").select("id, title, chapter_id, subject"),
   ]);
   allItems = [
@@ -54,6 +54,7 @@ function itemRowHTML(item) {
       <select class="tool-select chapter-mgr-select" data-move-item="${item.id}" data-move-item-type="${item.type}">
         <option value="">Move to…</option>
       </select>
+      <button type="button" class="btn-icon-danger" data-delete-item="${item.id}" data-delete-item-type="${item.type}" data-delete-item-path="${esc(item.storage_path || "")}" data-delete-item-title="${esc(item.title)}" aria-label="Delete ${esc(item.title)}">${ICONS.trash}</button>
     </div>`;
 }
 
@@ -216,6 +217,29 @@ $("chapterMgrList").addEventListener("click", async (e) => {
       showToast("Couldn't delete", err.message || "It may still have content referencing it.");
     }
     return;
+  }
+
+  const deleteItemBtn = e.target.closest("[data-delete-item]");
+  if (deleteItemBtn) {
+    const itemId = deleteItemBtn.dataset.deleteItem;
+    const itemType = deleteItemBtn.dataset.deleteItemType;
+    const path = deleteItemBtn.dataset.deleteItemPath;
+    const title = deleteItemBtn.dataset.deleteItemTitle;
+    if (!confirm(`Delete "${title}"? Students will no longer see it. This can't be undone.`)) return;
+
+    deleteItemBtn.disabled = true;
+    try {
+      const table = itemType === "note" ? "notes" : "lectures";
+      const { error } = await supabase.from(table).delete().eq("id", itemId);
+      if (error) throw error;
+      if (itemType === "note" && path) await supabase.storage.from("notes").remove([path]);
+
+      showToast(itemType === "note" ? "Note deleted" : "Lecture deleted", `"${title}" was removed.`);
+      await refresh();
+    } catch (err) {
+      deleteItemBtn.disabled = false;
+      showToast("Couldn't delete", err.message || "Please try again.");
+    }
   }
 });
 

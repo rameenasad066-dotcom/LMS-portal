@@ -1037,18 +1037,40 @@ button, input, select {
   height: 14px;
 }
 
-.res-actions .btn-icon-danger {
-  flex: 0 0 auto;
+/* Base look — usable standalone (e.g. the Chapter Manager's per-item
+   delete) as well as inside .res-actions (Resource CMS cards). */
+.btn-icon-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 30px;
-  color: var(--gray-soft);
-  background: none;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--gray-light);
+  background: none;
+  color: var(--gray-soft);
+  cursor: pointer;
 }
 
-.res-actions .btn-icon-danger:hover {
+.btn-icon-danger svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-icon-danger:hover {
   color: var(--ink-red);
   border-color: var(--red-blush-line);
   background: var(--red-blush-soft);
+}
+
+.btn-icon-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.res-actions .btn-icon-danger {
+  flex: 0 0 auto;
 }
 
 /* -------------------------------------------------------------- modal --- */
