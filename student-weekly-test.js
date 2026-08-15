@@ -41,7 +41,8 @@ export async function renderStudentWeeklyTest() {
   const { data: subs } = await supabase
     .from("weekly_test_submissions")
     .select("*")
-    .in("weekly_test_id", ids);
+    .in("weekly_test_id", ids)
+    .eq("student_id", STUDENT.id);
   const subBy = {};
   (subs || []).forEach((s) => { subBy[s.weekly_test_id] = s; });
 
@@ -115,17 +116,21 @@ document.addEventListener("submit", async (e) => {
     return;
   }
 
+  if (STUDENT.isPreview) {
+    showToast("Preview mode", "You're viewing as a student — uploads aren't saved.");
+    return;
+  }
+
   const btn = form.querySelector("button[type=submit]");
   btn.disabled = true;
   btn.textContent = "Uploading…";
   try {
-    const { data: { user } } = await supabase.auth.getUser();
     const weeklyTestId = form.dataset.wtId;
-    const paths = await uploadToSubmissions(files, `${user.id}/wt-${weeklyTestId}`);
+    const paths = await uploadToSubmissions(files, `${STUDENT.id}/wt-${weeklyTestId}`);
 
     const { error: insertError } = await supabase.from("weekly_test_submissions").insert({
       weekly_test_id: weeklyTestId,
-      student_id: user.id,
+      student_id: STUDENT.id,
       file_paths: paths,
     });
     if (insertError) throw insertError;

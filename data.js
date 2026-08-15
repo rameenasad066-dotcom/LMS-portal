@@ -7,6 +7,12 @@
    signed-in student's real profile from Supabase (see teacher-login.js /
    auth-guard.js). */
 const STUDENT = {
+  /* Real auth uid — used by every "my data" query (marks, submissions,
+     weekly-test uploads, quiz attempts, settings). Normally the signed-in
+     student's uid; when Rameen previews a student from her teacher portal
+     (auth-guard.js?preview=<id>), this is overridden with that student's
+     uid so the previewed page renders their real personal data. */
+  id:         '',
   name:       'Ayesha Khan',
   initials:   'AK',
   cohortName: 'October/November 2026',
@@ -17,6 +23,11 @@ const STUDENT = {
      auth-guard.js from their real profile. Pakistan Studies is two of these
      (history + geography), Islamiyat is the third. */
   subjects:   ['history', 'geography', 'islamiyat'],
+  /* True when the teacher is previewing a student's view — every mutating
+     student action (submit assignment, upload weekly test, save quiz
+     attempt, change settings) is disabled so the preview never touches
+     the real student's data. */
+  isPreview:  false,
 };
 
 /* Owner-editable content loads from data/*.json (see data/README.md);

@@ -29,12 +29,9 @@ function podiumRowHTML(top3, myId) {
 }
 
 export async function renderStudentScoreboard() {
-  const [{ data, error }, { data: { user } }] = await Promise.all([
-    supabase.rpc("get_scoreboard", { target_cohort: STUDENT.cohortId }),
-    supabase.auth.getUser(),
-  ]);
+  const { data, error } = await supabase.rpc("get_scoreboard", { target_cohort: STUDENT.cohortId });
   const has = !error && data && data.top3 && data.top3.length > 0;
-  const myId = user ? user.id : null;
+  const myId = STUDENT.id || null;
 
   const mini = document.querySelector('[data-list="mini-podium"]');
   if (mini) mini.innerHTML = has ? podiumRowHTML(data.top3, myId) : '<p class="empty-note">No scoreboard yet this month.</p>';

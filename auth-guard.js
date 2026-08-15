@@ -57,14 +57,26 @@ async function init() {
     return;
   }
 
-  if (!(await verifySession(session.user.id))) return;
+  // Teacher preview mode: if the teacher opens student.html?preview=<id>
+  // while signed in as herself, load THAT student's profile into STUDENT so
+  // every page renders as they see it. Session-guard is skipped (teacher
+  // shouldn't get device-kicked), mutating student actions are gated by
+  // STUDENT.isPreview across the student-*.js modules. Teacher RLS already
+  // grants read access to all the tables the student pages read.
+  const previewId = new URLSearchParams(location.search).get("preview");
+  const TEACHER_UID = "e6e72a6c-2242-42f4-8a09-116af571bb95";
+  const isPreview = previewId && session.user.id === TEACHER_UID;
+
+  if (!isPreview && !(await verifySession(session.user.id))) return;
 
   try {
+    const targetId = isPreview ? previewId : session.user.id;
     const { data: profile } = await withTimeout(
-      supabase.from("students").select("*").eq("id", session.user.id).single(),
+      supabase.from("students").select("*").eq("id", targetId).single(),
       10000
     );
     if (profile) {
+      STUDENT.id = profile.id;
       STUDENT.name = profile.name;
       STUDENT.initials = profile.initials;
       STUDENT.cohortName = profile.cohort_name;
@@ -72,12 +84,16 @@ async function init() {
       STUDENT.email = profile.email;
       if (Array.isArray(profile.subjects) && profile.subjects.length) STUDENT.subjects = profile.subjects;
     }
+    STUDENT.isPreview = !!isPreview;
   } catch {
     /* Profile fetch failed or timed out — falls back to the demo STUDENT
        values already in data.js rather than blocking the page. */
   }
 
+  if (isPreview) showPreviewBanner();
+
   applyIdentity();
+  if (STUDENT.isPreview) document.body.classList.add("preview-mode");
   await renderAnnouncements();
   await loadChapters();
   await loadRealNotes();
@@ -93,9 +109,23 @@ async function init() {
   await renderStudentScoreboard();
   await renderStudentGrades();
   initStudentSettings();
-  startSessionWatch(session.user.id);
+  if (!STUDENT.isPreview) startSessionWatch(session.user.id);
   document.body.classList.remove("auth-checking");
   overlay.hidden = true;
+}
+
+function showPreviewBanner() {
+  const banner = document.createElement("div");
+  banner.className = "preview-banner";
+  banner.innerHTML = `
+    <span>Previewing as <strong id="previewBannerName">this student</strong> — nothing you do here is saved.</span>
+    <a href="teacher.html" class="btn btn-outline btn-sm">Back to teacher portal</a>`;
+  document.body.prepend(banner);
+  // Fill the name once STUDENT is populated.
+  queueMicrotask(() => {
+    const el = document.getElementById("previewBannerName");
+    if (el && STUDENT.name) el.textContent = STUDENT.name;
+  });
 }
 
 init();

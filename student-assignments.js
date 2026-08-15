@@ -42,8 +42,8 @@ export async function renderStudentAssignments() {
 
   const ids = assignments.map((a) => a.id);
   const [{ data: subs }, { data: mks }] = await Promise.all([
-    supabase.from("submissions").select("*").in("assignment_id", ids),
-    supabase.from("marks").select("*").in("assignment_id", ids),
+    supabase.from("submissions").select("*").in("assignment_id", ids).eq("student_id", STUDENT.id),
+    supabase.from("marks").select("*").in("assignment_id", ids).eq("student_id", STUDENT.id),
   ]);
   const subBy = {};
   (subs || []).forEach((s) => { subBy[s.assignment_id] = s; });
@@ -97,6 +97,11 @@ document.addEventListener("submit", async (e) => {
   if (!form || !form.dataset.asgId) return;
   e.preventDefault();
 
+  if (STUDENT.isPreview) {
+    showToast("Preview mode", "You're viewing as a student — submissions aren't saved.");
+    return;
+  }
+
   const input = form.querySelector(".asg-file-input");
   const files = Array.from(input.files);
   if (!files.length) return;
@@ -105,13 +110,12 @@ document.addEventListener("submit", async (e) => {
   btn.disabled = true;
   btn.textContent = "Uploading…";
   try {
-    const { data: { user } } = await supabase.auth.getUser();
     const assignmentId = form.dataset.asgId;
-    const paths = await uploadToSubmissions(files, `${user.id}/${assignmentId}`);
+    const paths = await uploadToSubmissions(files, `${STUDENT.id}/${assignmentId}`);
 
     const { error: insertError } = await supabase.from("submissions").insert({
       assignment_id: assignmentId,
-      student_id: user.id,
+      student_id: STUDENT.id,
       file_paths: paths,
     });
     if (insertError) throw insertError;

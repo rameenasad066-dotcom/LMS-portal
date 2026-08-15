@@ -19,12 +19,15 @@ export function initStudentSettings() {
 
   document.getElementById("settingsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (STUDENT.isPreview) {
+      showToast("Preview mode", "You're viewing as a student — changes aren't saved.");
+      return;
+    }
     const btn = e.target.querySelector("button[type=submit]");
     btn.disabled = true;
     try {
       const newName = document.getElementById("setName").value.trim();
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase.from("students").update({ name: newName }).eq("id", user.id);
+      const { error } = await supabase.from("students").update({ name: newName }).eq("id", STUDENT.id);
       if (error) throw error;
 
       STUDENT.name = newName;

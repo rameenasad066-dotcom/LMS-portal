@@ -68,12 +68,13 @@ export async function renderStudentGrades() {
   if (!body) return;
 
   const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
-  const { data: { user } } = await supabase.auth.getUser();
+  const uid = STUDENT.id;
+  if (!uid) return;
 
   const [{ data: marks, error: markErr }, { data: subs }, { data: attendance }] = await Promise.all([
-    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", user.id),
-    supabase.from("submissions").select("*").eq("student_id", user.id),
-    supabase.from("attendance").select("status").eq("student_id", user.id),
+    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", uid),
+    supabase.from("submissions").select("*").eq("student_id", uid),
+    supabase.from("attendance").select("status").eq("student_id", uid),
   ]);
 
   // "Leave" is an excused absence — excluded from the % entirely, unlike

@@ -10,11 +10,10 @@
 import { supabase } from "./supabase-config.js";
 
 export async function saveQuizAttempt({ quiz, score, answers }) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (STUDENT.isPreview || !STUDENT.id) return;
 
   const { error } = await supabase.from("quiz_attempts").insert({
-    student_id: user.id,
+    student_id: STUDENT.id,
     quiz_id: quiz.id,
     quiz_title: quiz.title,
     subject: quiz.subject,
