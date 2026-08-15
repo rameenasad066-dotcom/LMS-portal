@@ -29,6 +29,7 @@ const KIND = {
 let kind = "lecture";
 let subject = null;
 let items = [];
+let occupancy = {};
 const open = new Set();
 
 /* ------------------------------------------------------------- loading */
@@ -38,13 +39,25 @@ async function loadItems() {
     ? "id, title, chapter_id, subject, storage_path"
     : "id, title, chapter_id, subject";
 
-  const { data, error } = await supabase
-    .from(KIND[kind].table)
-    .select(cols)
-    .eq("cohort_id", activeCohort)
-    .order("created_at", { ascending: false });
+  // The active tab's rows drive the expanded lists and per-item actions, but
+  // occupancy has to span BOTH tables: a topic with no lectures can still
+  // hold notes, and deleting it would be rejected by the notes foreign key.
+  const [active, lectureRows, noteRows] = await Promise.all([
+    supabase.from(KIND[kind].table).select(cols)
+      .eq("cohort_id", activeCohort).order("created_at", { ascending: false }),
+    supabase.from("lectures").select("chapter_id").eq("cohort_id", activeCohort),
+    supabase.from("notes").select("chapter_id").eq("cohort_id", activeCohort),
+  ]);
 
-  items = error ? [] : (data || []);
+  items = active.error ? [] : (active.data || []);
+
+  occupancy = {};
+  const tally = (rows, key) => (rows || []).forEach((r) => {
+    if (!occupancy[r.chapter_id]) occupancy[r.chapter_id] = { lecture: 0, note: 0 };
+    occupancy[r.chapter_id][key] += 1;
+  });
+  tally(lectureRows.data, "lecture");
+  tally(noteRows.data, "note");
 }
 
 async function refresh() {
@@ -58,15 +71,23 @@ function itemsIn(chapterId) {
   return items.filter((i) => i.chapter_id === chapterId);
 }
 
-// A topic's total includes everything in its sub-topics, since that's what
-// "how much is filed under this heading" means to her.
-function totalIn(chapter) {
-  return itemsIn(chapter.id).length
-    + subChaptersOf(chapter.id).reduce((sum, s) => sum + itemsIn(s.id).length, 0);
+function occ(chapterId) {
+  return occupancy[chapterId] || { lecture: 0, note: 0 };
 }
 
-function countLabel(n) {
-  return `${n} ${KIND[kind].label}${n === 1 ? "" : "s"}`;
+// Everything filed under a chapter — both kinds, and its sub-topics when it
+// has them. This is what decides whether Delete is allowed, rather than the
+// count the current tab happens to show.
+function occupiedCount(chapter, withSubs) {
+  const chapters = withSubs ? [chapter, ...subChaptersOf(chapter.id)] : [chapter];
+  return chapters.reduce((sum, c) => {
+    const o = occ(c.id);
+    return sum + o.lecture + o.note;
+  }, 0);
+}
+
+function plural(n, word) {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
 
 /* ------------------------------------------------------------ rendering */
@@ -83,14 +104,23 @@ function actionBtn(icon, action, id, label, disabledReason) {
 }
 
 function chapterRow(c, isSub, index) {
-  const own = itemsIn(c.id).length;
   const subs = isSub ? [] : subChaptersOf(c.id);
-  const total = isSub ? own : totalIn(c);
   const isOpen = open.has(c.id);
-  const emptyReason = total ? "Move or merge what's inside it first" : "";
+  const o = occ(c.id);
 
-  const meta = [countLabel(own)];
-  if (!isSub && subs.length) meta.push(`${subs.length} sub-topic${subs.length === 1 ? "" : "s"}`);
+  // Delete is blocked by anything filed under it in EITHER table, not just
+  // the tab being viewed — the database rejects it either way.
+  const blocking = occupiedCount(c, !isSub);
+  const blockedReason = blocking
+    ? `Still holds ${plural(blocking, "item")} — move or merge them first`
+    : "";
+
+  // The other kind is only mentioned when it's there, so a topic that's
+  // empty on this tab but full on the other never looks deletable.
+  const meta = [plural(kind === "note" ? o.note : o.lecture, KIND[kind].label)];
+  const other = kind === "note" ? o.lecture : o.note;
+  if (other) meta.push(plural(other, kind === "note" ? "lecture" : "note"));
+  if (!isSub && subs.length) meta.push(plural(subs.length, "sub-topic"));
 
   return `
     <div class="mc-row${isSub ? " sub" : ""}" data-chapter="${c.id}">
@@ -104,7 +134,7 @@ function chapterRow(c, isSub, index) {
         ${actionBtn(ICON_PENCIL, "rename", c.id, `Rename ${c.title}`)}
         ${actionBtn(ICON_MOVE, "move-chapter", c.id, `Move ${c.title}`)}
         ${actionBtn(ICON_MERGE, "merge-chapter", c.id, `Merge ${c.title}`)}
-        ${actionBtn(ICONS.trash, "delete-chapter", c.id, `Delete ${c.title}`, emptyReason)}
+        ${actionBtn(ICONS.trash, "delete-chapter", c.id, `Delete ${c.title}`, blockedReason)}
       </span>
     </div>`;
 }
@@ -289,7 +319,16 @@ async function onDeleteChapter(id) {
     showToast("Deleted", `"${c.title}" was removed.`);
     await refresh();
   } catch (err) {
-    showToast("Couldn't delete", err.message || "Something may still be filed under it.");
+    // The raw Postgres foreign-key message is unreadable, and this is the
+    // only way it can realistically fail, so say what it actually means.
+    const fk = /foreign key|violates/i.test(err.message || "");
+    showToast(
+      "Couldn't delete",
+      fk
+        ? "Something is still filed under it — check the Notes tab as well as Lectures."
+        : err.message || "Please try again."
+    );
+    await refresh();
   }
 }
 
