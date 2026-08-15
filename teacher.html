@@ -255,13 +255,11 @@
             <div class="recent-uploads">
               <h3 class="list-title">Uploaded notes</h3>
               <div class="res-toolbar">
-                <input type="search" class="res-search" id="notesSearch" placeholder="Search uploaded notes…">
-                <select class="tool-select" id="notesFilterSubject">
-                  <option value="">All subjects</option>
-                </select>
+                <input type="search" class="res-search" id="notesSearch" placeholder="Search all uploaded notes…">
               </div>
+              <nav class="res-crumbs" id="notesCrumbs"></nav>
               <p class="res-count" id="notesResCount"></p>
-              <div class="res-grid" data-list="notes-uploads"></div>
+              <div class="res-list" data-list="notes-uploads"></div>
               <p class="empty-note" id="notesUploadsEmpty" hidden>No notes uploaded yet for this cohort.</p>
             </div>
           </div>
@@ -308,13 +306,11 @@
             <div class="recent-uploads">
               <h3 class="list-title">Uploaded lectures</h3>
               <div class="res-toolbar">
-                <input type="search" class="res-search" id="lecturesSearch" placeholder="Search uploaded lectures…">
-                <select class="tool-select" id="lecturesFilterSubject">
-                  <option value="">All subjects</option>
-                </select>
+                <input type="search" class="res-search" id="lecturesSearch" placeholder="Search all uploaded lectures…">
               </div>
+              <nav class="res-crumbs" id="lecturesCrumbs"></nav>
               <p class="res-count" id="lecturesResCount"></p>
-              <div class="res-grid" data-list="lecture-uploads"></div>
+              <div class="res-list" data-list="lecture-uploads"></div>
               <p class="empty-note" id="lectureUploadsEmpty" hidden>No lectures added yet for this cohort.</p>
             </div>
           </div>

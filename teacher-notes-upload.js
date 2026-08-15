@@ -26,8 +26,6 @@ function fmtDate(iso) {
 function populateSubjects() {
   $("unSubject").innerHTML = SUBJECTS.map((s) => `<option value="${s.id}">${s.name}</option>`).join("");
   $("unEditSubject").innerHTML = $("unSubject").innerHTML;
-  $("notesFilterSubject").innerHTML =
-    `<option value="">All subjects</option>` + SUBJECTS.map((s) => `<option value="${s.id}">${s.name}</option>`).join("");
 }
 
 function populateChapterDropdown() {
@@ -89,44 +87,48 @@ function selectEditChapter(subjectId, chapterId) {
   }
 }
 
-function applyFilters() {
-  const q = $("notesSearch").value.trim().toLowerCase();
-  const subjectFilter = $("notesFilterSubject").value;
+/* Drill-down state: pick a subject, then a topic (top-level chapter),
+   then see the notes filed there — instead of one long flat grid. A
+   search query bypasses the drill entirely and shows flat matches across
+   every subject, since that's a faster path when she knows what she wants. */
+const notesDrill = { subject: null, topic: null };
 
+function notesMatching(q) {
   return allNotes.filter((n) => {
-    if (subjectFilter && n.subject !== subjectFilter) return false;
-    if (!q) return true;
     const haystack = `${n.title} ${n.description || ""} ${subjectName(n.subject)} ${chapterLabel(n.chapter_id)}`.toLowerCase();
     return haystack.includes(q);
   });
 }
 
-function renderGrid() {
-  const grid = document.querySelector('[data-list="notes-uploads"]');
-  const empty = $("notesUploadsEmpty");
-  const filtered = applyFilters();
+/* A note's chapter_id may be a top-level chapter or one of its
+   sub-chapters — "topic" always means the top-level one. */
+function topicIdOf(chapterId) {
+  const c = CHAPTERS.find((x) => x.id === chapterId);
+  return c && c.parentId ? c.parentId : chapterId;
+}
 
-  $("notesResCount").textContent = allNotes.length
-    ? `${filtered.length} of ${allNotes.length} note${allNotes.length === 1 ? "" : "s"}`
-    : "";
+function notesForTopic(subjectId, topicId) {
+  return allNotes.filter((n) => n.subject === subjectId && topicIdOf(n.chapter_id) === topicId);
+}
 
-  if (!allNotes.length) {
-    grid.innerHTML = "";
-    empty.textContent = "No notes uploaded yet for this cohort.";
-    empty.hidden = false;
-    return;
+function renderCrumbs() {
+  const nav = $("notesCrumbs");
+  const parts = [`<button type="button" class="res-crumb${notesDrill.subject ? "" : " current"}" data-crumb-root>All subjects</button>`];
+  if (notesDrill.subject) {
+    parts.push(`<span class="res-crumb-sep">/</span>`);
+    parts.push(
+      `<button type="button" class="res-crumb${notesDrill.topic ? "" : " current"}" data-crumb-subject>${esc(subjectName(notesDrill.subject))}</button>`
+    );
   }
-  if (!filtered.length) {
-    grid.innerHTML = "";
-    empty.textContent = "No notes match your search.";
-    empty.hidden = false;
-    return;
+  if (notesDrill.topic) {
+    parts.push(`<span class="res-crumb-sep">/</span>`);
+    parts.push(`<span class="res-crumb current">${esc(chapterLabel(notesDrill.topic))}</span>`);
   }
-  empty.hidden = true;
+  nav.innerHTML = parts.join("");
+}
 
-  grid.innerHTML = filtered
-    .map(
-      (n) => `
+function noteCardHTML(n) {
+  return `
     <div class="res-card">
       <div class="res-card-top">
         <span class="res-tag">${esc(subjectName(n.subject))}</span>
@@ -141,10 +143,88 @@ function renderGrid() {
         <button type="button" class="btn btn-outline btn-sm" data-edit-note="${n.id}">${ICONS.edit} Edit</button>
         <button type="button" class="btn-icon-danger" data-delete-note="${n.id}" data-delete-path="${esc(n.storage_path)}" data-delete-title="${esc(n.title)}" aria-label="Delete ${esc(n.title)}">${ICONS.trash}</button>
       </div>
-    </div>`
-    )
-    .join("");
+    </div>`;
 }
+
+function renderGrid() {
+  const list = document.querySelector('[data-list="notes-uploads"]');
+  const empty = $("notesUploadsEmpty");
+  const crumbs = $("notesCrumbs");
+  const q = $("notesSearch").value.trim().toLowerCase();
+
+  if (!allNotes.length) {
+    crumbs.innerHTML = "";
+    list.innerHTML = "";
+    $("notesResCount").textContent = "";
+    empty.textContent = "No notes uploaded yet for this cohort.";
+    empty.hidden = false;
+    return;
+  }
+
+  if (q) {
+    crumbs.innerHTML = "";
+    const matches = notesMatching(q);
+    $("notesResCount").textContent = `${matches.length} match${matches.length === 1 ? "" : "es"}`;
+    if (!matches.length) {
+      list.innerHTML = "";
+      empty.textContent = "No notes match your search.";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    list.innerHTML = `<div class="res-grid">${matches.map(noteCardHTML).join("")}</div>`;
+    return;
+  }
+
+  empty.hidden = true;
+  renderCrumbs();
+
+  if (!notesDrill.subject) {
+    $("notesResCount").textContent = "";
+    list.innerHTML = `<div class="res-tile-grid">${SUBJECTS.map((s) => {
+      const count = allNotes.filter((n) => n.subject === s.id).length;
+      return `<button type="button" class="res-tile" data-drill-subject="${s.id}"><strong>${esc(s.name)}</strong><span class="res-tile-count">${count} note${count === 1 ? "" : "s"}</span></button>`;
+    }).join("")}</div>`;
+    return;
+  }
+
+  if (!notesDrill.topic) {
+    $("notesResCount").textContent = "";
+    const topics = topLevelChapters(notesDrill.subject);
+    if (!topics.length) {
+      list.innerHTML = "";
+      empty.textContent = "No chapters yet for this subject — add one from the upload form.";
+      empty.hidden = false;
+      return;
+    }
+    list.innerHTML = `<div class="res-tile-grid">${topics.map((c) => {
+      const count = notesForTopic(notesDrill.subject, c.id).length;
+      return `<button type="button" class="res-tile" data-drill-topic="${c.id}"><strong>${esc(c.title)}</strong><span class="res-tile-count">${count} note${count === 1 ? "" : "s"}</span></button>`;
+    }).join("")}</div>`;
+    return;
+  }
+
+  const items = notesForTopic(notesDrill.subject, notesDrill.topic);
+  $("notesResCount").textContent = `${items.length} note${items.length === 1 ? "" : "s"}`;
+  if (!items.length) {
+    list.innerHTML = "";
+    empty.textContent = "No notes uploaded here yet.";
+    empty.hidden = false;
+    return;
+  }
+  list.innerHTML = `<div class="res-grid">${items.map(noteCardHTML).join("")}</div>`;
+}
+
+$("notesCrumbs").addEventListener("click", (e) => {
+  if (e.target.closest("[data-crumb-root]")) {
+    notesDrill.subject = null;
+    notesDrill.topic = null;
+    renderGrid();
+  } else if (e.target.closest("[data-crumb-subject]")) {
+    notesDrill.topic = null;
+    renderGrid();
+  }
+});
 
 async function renderNotesUploadHistory() {
   $("unCohortTag").textContent = COHORT_DATA[activeCohort].name;
@@ -170,6 +250,20 @@ async function renderNotesUploadHistory() {
 }
 
 document.querySelector('[data-list="notes-uploads"]').addEventListener("click", async (e) => {
+  const subjectTile = e.target.closest("[data-drill-subject]");
+  if (subjectTile) {
+    notesDrill.subject = subjectTile.dataset.drillSubject;
+    renderGrid();
+    return;
+  }
+
+  const topicTile = e.target.closest("[data-drill-topic]");
+  if (topicTile) {
+    notesDrill.topic = topicTile.dataset.drillTopic;
+    renderGrid();
+    return;
+  }
+
   const viewBtn = e.target.closest("[data-view-note]");
   if (viewBtn) {
     const note = allNotes.find((n) => n.id === viewBtn.dataset.viewNote);
@@ -214,7 +308,6 @@ document.querySelector('[data-list="notes-uploads"]').addEventListener("click", 
 });
 
 $("notesSearch").addEventListener("input", renderGrid);
-$("notesFilterSubject").addEventListener("change", renderGrid);
 
 /* ============================= Edit modal ============================= */
 

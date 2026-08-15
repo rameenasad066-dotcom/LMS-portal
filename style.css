@@ -866,6 +866,81 @@ button, input, select {
   margin-bottom: 10px;
 }
 
+/* Breadcrumb trail for the subject -> topic -> items drill-down (added
+   2026-08-15 — she wanted the same drill-nav feel as the student portal's
+   Vault/Notes, not one long flat grid to scroll). */
+.res-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.res-crumb {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--ink-red);
+  font-weight: 600;
+}
+
+.res-crumb:hover {
+  text-decoration: underline;
+}
+
+.res-crumb.current {
+  color: var(--ink);
+  font-weight: 700;
+  cursor: default;
+}
+
+.res-crumb.current:hover {
+  text-decoration: none;
+}
+
+.res-crumb-sep {
+  color: var(--gray-soft);
+}
+
+/* Subject / topic tiles — the two drill levels before the actual item grid. */
+.res-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.res-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.res-tile:hover {
+  border-color: var(--red-blush-line);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.res-tile strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.res-tile-count {
+  font-size: 11.5px;
+  color: var(--gray);
+}
+
 .res-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -4056,7 +4131,8 @@ body.auth-checking .layout {
   .res-toolbar .tool-select {
     width: 100%;
   }
-  .res-grid {
+  .res-grid,
+  .res-tile-grid {
     grid-template-columns: 1fr;
   }
   .modal-card {
