@@ -85,46 +85,6 @@ function selectEditChapter(subjectId, chapterId) {
   }
 }
 
-/* Drill-down state: pick a subject, then a topic (top-level chapter),
-   then see the lectures filed there — instead of one long flat grid. A
-   search query bypasses the drill entirely and shows flat matches across
-   every subject. */
-const lecturesDrill = { subject: null, topic: null };
-
-function lecturesMatching(q) {
-  return allLectures.filter((l) => {
-    const haystack = `${l.title} ${l.description || ""} ${subjectName(l.subject)} ${chapterLabel(l.chapter_id)}`.toLowerCase();
-    return haystack.includes(q);
-  });
-}
-
-/* A lecture's chapter_id may be a top-level chapter or one of its
-   sub-chapters — "topic" always means the top-level one. */
-function topicIdOf(chapterId) {
-  const c = CHAPTERS.find((x) => x.id === chapterId);
-  return c && c.parentId ? c.parentId : chapterId;
-}
-
-function lecturesForTopic(subjectId, topicId) {
-  return allLectures.filter((l) => l.subject === subjectId && topicIdOf(l.chapter_id) === topicId);
-}
-
-function renderCrumbs() {
-  const nav = $("lecturesCrumbs");
-  const parts = [`<button type="button" class="res-crumb${lecturesDrill.subject ? "" : " current"}" data-crumb-root>All subjects</button>`];
-  if (lecturesDrill.subject) {
-    parts.push(`<span class="res-crumb-sep">/</span>`);
-    parts.push(
-      `<button type="button" class="res-crumb${lecturesDrill.topic ? "" : " current"}" data-crumb-subject>${esc(subjectName(lecturesDrill.subject))}</button>`
-    );
-  }
-  if (lecturesDrill.topic) {
-    parts.push(`<span class="res-crumb-sep">/</span>`);
-    parts.push(`<span class="res-crumb current">${esc(chapterLabel(lecturesDrill.topic))}</span>`);
-  }
-  nav.innerHTML = parts.join("");
-}
-
 function lectureCardHTML(l) {
   return `
     <div class="res-card">
@@ -144,14 +104,16 @@ function lectureCardHTML(l) {
     </div>`;
 }
 
+/* Newest-first list of what's been added to this cohort, filtered by the
+   search box. Organising (moving between topics, renaming topics, merging
+   duplicates) lives on the Manage Content page — this panel is just
+   "add a lecture, confirm it landed". */
 function renderGrid() {
   const list = document.querySelector('[data-list="lecture-uploads"]');
   const empty = $("lectureUploadsEmpty");
-  const crumbs = $("lecturesCrumbs");
   const q = $("lecturesSearch").value.trim().toLowerCase();
 
   if (!allLectures.length) {
-    crumbs.innerHTML = "";
     list.innerHTML = "";
     $("lecturesResCount").textContent = "";
     empty.textContent = "No lectures added yet for this cohort.";
@@ -159,70 +121,28 @@ function renderGrid() {
     return;
   }
 
-  if (q) {
-    crumbs.innerHTML = "";
-    const matches = lecturesMatching(q);
-    $("lecturesResCount").textContent = `${matches.length} match${matches.length === 1 ? "" : "es"}`;
-    if (!matches.length) {
-      list.innerHTML = "";
-      empty.textContent = "No lectures match your search.";
-      empty.hidden = false;
-      return;
-    }
-    empty.hidden = true;
-    list.innerHTML = `<div class="res-grid">${matches.map(lectureCardHTML).join("")}</div>`;
+  const shown = q
+    ? allLectures.filter((l) =>
+        `${l.title} ${l.description || ""} ${subjectName(l.subject)} ${chapterLabel(l.chapter_id)}`
+          .toLowerCase()
+          .includes(q)
+      )
+    : allLectures;
+
+  $("lecturesResCount").textContent = q
+    ? `${shown.length} of ${allLectures.length} lectures`
+    : `${allLectures.length} lecture${allLectures.length === 1 ? "" : "s"}`;
+
+  if (!shown.length) {
+    list.innerHTML = "";
+    empty.textContent = "No lectures match your search.";
+    empty.hidden = false;
     return;
   }
 
   empty.hidden = true;
-  renderCrumbs();
-
-  if (!lecturesDrill.subject) {
-    $("lecturesResCount").textContent = "";
-    list.innerHTML = `<div class="res-tile-grid">${SUBJECTS.map((s) => {
-      const count = allLectures.filter((l) => l.subject === s.id).length;
-      return `<button type="button" class="res-tile" data-drill-subject="${s.id}"><strong>${esc(s.name)}</strong><span class="res-tile-count">${count} lecture${count === 1 ? "" : "s"}</span></button>`;
-    }).join("")}</div>`;
-    return;
-  }
-
-  if (!lecturesDrill.topic) {
-    $("lecturesResCount").textContent = "";
-    const topics = topLevelChapters(lecturesDrill.subject);
-    if (!topics.length) {
-      list.innerHTML = "";
-      empty.textContent = "No chapters yet for this subject — add one from the upload form.";
-      empty.hidden = false;
-      return;
-    }
-    list.innerHTML = `<div class="res-tile-grid">${topics.map((c) => {
-      const count = lecturesForTopic(lecturesDrill.subject, c.id).length;
-      return `<button type="button" class="res-tile" data-drill-topic="${c.id}"><strong>${esc(c.title)}</strong><span class="res-tile-count">${count} lecture${count === 1 ? "" : "s"}</span></button>`;
-    }).join("")}</div>`;
-    return;
-  }
-
-  const items = lecturesForTopic(lecturesDrill.subject, lecturesDrill.topic);
-  $("lecturesResCount").textContent = `${items.length} lecture${items.length === 1 ? "" : "s"}`;
-  if (!items.length) {
-    list.innerHTML = "";
-    empty.textContent = "No lectures added here yet.";
-    empty.hidden = false;
-    return;
-  }
-  list.innerHTML = `<div class="res-grid">${items.map(lectureCardHTML).join("")}</div>`;
+  list.innerHTML = `<div class="res-grid">${shown.map(lectureCardHTML).join("")}</div>`;
 }
-
-$("lecturesCrumbs").addEventListener("click", (e) => {
-  if (e.target.closest("[data-crumb-root]")) {
-    lecturesDrill.subject = null;
-    lecturesDrill.topic = null;
-    renderGrid();
-  } else if (e.target.closest("[data-crumb-subject]")) {
-    lecturesDrill.topic = null;
-    renderGrid();
-  }
-});
 
 async function renderLectureHistory() {
   $("lecCohortTag").textContent = COHORT_DATA[activeCohort].name;
@@ -248,20 +168,6 @@ async function renderLectureHistory() {
 }
 
 document.querySelector('[data-list="lecture-uploads"]').addEventListener("click", (e) => {
-  const subjectTile = e.target.closest("[data-drill-subject]");
-  if (subjectTile) {
-    lecturesDrill.subject = subjectTile.dataset.drillSubject;
-    renderGrid();
-    return;
-  }
-
-  const topicTile = e.target.closest("[data-drill-topic]");
-  if (topicTile) {
-    lecturesDrill.topic = topicTile.dataset.drillTopic;
-    renderGrid();
-    return;
-  }
-
   const viewBtn = e.target.closest("[data-view-lecture]");
   if (viewBtn) {
     const lecture = allLectures.find((l) => l.id === viewBtn.dataset.viewLecture);
@@ -369,7 +275,7 @@ $("lectureEditForm").addEventListener("submit", async (e) => {
 
 window.dataReadyPromise.then(async () => {
   populateSubjects();
-  await loadChapters();
+  await loadChapters(activeCohort);
   populateChapterDropdown();
   await renderLectureHistory();
 });
@@ -382,7 +288,7 @@ $("lecAddChapterBtn").addEventListener("click", async () => {
   const title = prompt(`New chapter name (${subjectName(subjectId)}):`);
   if (!title || !title.trim()) return;
   try {
-    const created = await createChapter(subjectId, title.trim());
+    const created = await createChapter(subjectId, title.trim(), null, activeCohort);
     populateChapterDropdown();
     $("lecChapter").value = created.id;
     populateSubChapterDropdown();
@@ -397,7 +303,7 @@ $("lecAddSubChapterBtn").addEventListener("click", async () => {
   const title = prompt(`New sub-chapter name (inside "${chapterLabel(chapterId)}"):`);
   if (!title || !title.trim()) return;
   try {
-    const created = await createChapter($("lecSubject").value, title.trim(), chapterId);
+    const created = await createChapter($("lecSubject").value, title.trim(), chapterId, activeCohort);
     populateSubChapterDropdown();
     $("lecSubChapter").value = created.id;
     showToast("Sub-chapter created", `"${title.trim()}" added inside ${chapterLabel(chapterId)}.`);
@@ -406,8 +312,14 @@ $("lecAddSubChapterBtn").addEventListener("click", async () => {
   }
 });
 
+// Chapters are cohort-scoped now, so a pill switch has to reload the tree
+// before the chapter dropdowns (and the history's chapter labels) can be right.
 document.querySelectorAll(".pill").forEach((pill) =>
-  pill.addEventListener("click", renderLectureHistory)
+  pill.addEventListener("click", async () => {
+    await loadChapters(activeCohort);
+    populateChapterDropdown();
+    await renderLectureHistory();
+  })
 );
 
 $("uploadLectureForm").addEventListener("submit", async (e) => {

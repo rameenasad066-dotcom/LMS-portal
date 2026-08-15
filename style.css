@@ -866,81 +866,6 @@ button, input, select {
   margin-bottom: 10px;
 }
 
-/* Breadcrumb trail for the subject -> topic -> items drill-down (added
-   2026-08-15 — she wanted the same drill-nav feel as the student portal's
-   Vault/Notes, not one long flat grid to scroll). */
-.res-crumbs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.res-crumb {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  color: var(--ink-red);
-  font-weight: 600;
-}
-
-.res-crumb:hover {
-  text-decoration: underline;
-}
-
-.res-crumb.current {
-  color: var(--ink);
-  font-weight: 700;
-  cursor: default;
-}
-
-.res-crumb.current:hover {
-  text-decoration: none;
-}
-
-.res-crumb-sep {
-  color: var(--gray-soft);
-}
-
-/* Subject / topic tiles — the two drill levels before the actual item grid. */
-.res-tile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.res-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.res-tile:hover {
-  border-color: var(--red-blush-line);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.res-tile strong {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.res-tile-count {
-  font-size: 11.5px;
-  color: var(--gray);
-}
-
 .res-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -1167,6 +1092,255 @@ button, input, select {
 }
 
 /* ==========================================================================
+   Manage Content — cohort-scoped topic / sub-topic / item tree
+   Replaced the old "Manage Chapters" modal 2026-08-16. Uploading lives on
+   Upload Notes; this page only reorganises what already exists.
+   ========================================================================== */
+
+.mc-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--gray-light);
+  margin-bottom: 16px;
+}
+
+.mc-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.mc-tab svg { width: 15px; height: 15px; }
+.mc-tab:hover { color: var(--ink); }
+.mc-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+.mc-subjects {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.mc-subj {
+  border: 1px solid var(--gray-light);
+  border-radius: 9px;
+  padding: 8px 14px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mc-subj:hover { border-color: var(--red-blush-line); }
+
+.mc-subj.active {
+  background: var(--red-blush);
+  border-color: var(--red-blush-line);
+  color: var(--ink-red);
+}
+
+.mc-subj em {
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: .75;
+}
+
+.mc-tree { display: flex; flex-direction: column; gap: 6px; }
+
+.mc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.mc-row:hover { border-color: var(--red-blush-line); }
+.mc-row.sub { margin-left: 26px; background: var(--surface-2); }
+
+.mc-chev {
+  border: none;
+  background: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--gray-soft);
+  display: flex;
+  flex-shrink: 0;
+}
+
+.mc-chev svg {
+  width: 16px;
+  height: 16px;
+  transform: rotate(-90deg);
+  transition: transform .15s ease;
+}
+
+.mc-chev.open svg { transform: none; }
+
+.mc-idx {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-red);
+  background: var(--red-blush);
+  border-radius: 5px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.mc-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mc-title { font-size: 13.5px; font-weight: 600; }
+.mc-meta { font-size: 11.5px; color: var(--gray); }
+
+.mc-acts { display: flex; gap: 4px; flex-shrink: 0; }
+
+.mc-ico {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--gray);
+  cursor: pointer;
+}
+
+.mc-ico svg { width: 14px; height: 14px; }
+
+.mc-ico:hover {
+  border-color: var(--red-blush-line);
+  background: var(--red-blush-soft);
+  color: var(--ink-red);
+}
+
+.mc-ico.danger:hover { color: var(--red); }
+
+.mc-ico:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  background: var(--surface);
+  border-color: var(--gray-light);
+  color: var(--gray-soft);
+}
+
+.mc-items {
+  margin: -3px 0 0 52px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-soft);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mc-item { display: flex; align-items: center; gap: 9px; }
+
+.mc-item-icon { width: 16px; height: 16px; color: var(--red); flex-shrink: 0; }
+.mc-item-icon svg { width: 100%; height: 100%; }
+
+.mc-item-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-none { margin: 0; font-size: 12px; color: var(--gray-soft); }
+
+.mc-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--gray-light);
+  border-radius: var(--radius-sm);
+  background: var(--green-light);
+  color: var(--ink-green);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mc-add svg { width: 15px; height: 15px; }
+.mc-add:hover { border-color: var(--green); }
+.mc-add.sub { margin-left: 26px; }
+
+/* Inline chooser used by Move and Merge — one list of destinations rather
+   than a <select> per row, which is what made the old manager cluttered. */
+.mc-choose { max-width: 380px; }
+
+.mc-choose-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.mc-choose-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mc-choose-row:hover {
+  background: var(--red-blush-soft);
+  border-color: var(--red-blush-line);
+}
+
+.mc-choose-row small { font-size: 11.5px; color: var(--gray); flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .mc-row.sub, .mc-add.sub { margin-left: 12px; }
+  .mc-items { margin-left: 24px; }
+  .mc-row { flex-wrap: wrap; }
+  .mc-label { min-width: 120px; }
+}
+
+/* ==========================================================================
    "View as a student" — topnav preview picker + preview-mode banner
    ========================================================================== */
 
@@ -1276,177 +1450,6 @@ button, input, select {
   }
 }
 
-/* ==========================================================================
-   Chapter Manager modal (rename/merge/move/delete chapters + sub-chapters)
-   ========================================================================== */
-
-.chapter-mgr-card {
-  max-width: 640px;
-}
-
-#chapterMgrSubject {
-  width: 100%;
-  margin: 10px 0 14px;
-}
-
-.chapter-mgr-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 55vh;
-  overflow-y: auto;
-}
-
-.chapter-mgr-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-}
-
-.chapter-mgr-row.sub {
-  margin-left: 24px;
-  background: var(--surface-2);
-}
-
-.chapter-mgr-row-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 140px;
-}
-
-.chapter-mgr-toggle {
-  background: none;
-  border: none;
-  padding: 2px;
-  cursor: pointer;
-  color: var(--gray-soft);
-  flex-shrink: 0;
-  display: flex;
-}
-
-.chapter-mgr-toggle:disabled {
-  visibility: hidden;
-}
-
-.chapter-mgr-chev {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.15s ease;
-}
-
-.chapter-mgr-chev.open {
-  transform: rotate(180deg);
-}
-
-.chapter-mgr-titlewrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.chapter-mgr-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: -2px 0 0 24px;
-  padding: 8px 12px;
-  border: 1px solid var(--border-soft);
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  background: var(--surface-2);
-}
-
-.chapter-mgr-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.chapter-mgr-item-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--red);
-  flex-shrink: 0;
-}
-
-.chapter-mgr-item-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.chapter-mgr-item-titlewrap {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.chapter-mgr-item-title {
-  font-size: 12.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chapter-mgr-item-cohort {
-  font-size: 10.5px;
-  color: var(--gray-soft);
-}
-
-.chapter-mgr-title {
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.chapter-mgr-count {
-  font-size: 11.5px;
-  color: var(--gray);
-}
-
-.chapter-mgr-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.chapter-mgr-select {
-  width: 130px;
-  padding: 6px 8px;
-  font-size: 12px;
-}
-
-@media (max-width: 640px) {
-  .chapter-mgr-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .chapter-mgr-row.sub {
-    margin-left: 12px;
-  }
-  .chapter-mgr-actions {
-    justify-content: flex-start;
-  }
-  .chapter-mgr-select {
-    width: auto;
-    flex: 1;
-  }
-  .chapter-mgr-items {
-    margin-left: 12px;
-  }
-  .chapter-mgr-item {
-    flex-wrap: wrap;
-  }
-}
 
 /* ==========================================================================
    Data tables — shared by Students roster, Assignments marking queue, My Grades
@@ -4471,8 +4474,7 @@ body.auth-checking .layout {
   .res-toolbar .tool-select {
     width: 100%;
   }
-  .res-grid,
-  .res-tile-grid {
+  .res-grid {
     grid-template-columns: 1fr;
   }
   .modal-card {

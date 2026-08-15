@@ -87,46 +87,6 @@ function selectEditChapter(subjectId, chapterId) {
   }
 }
 
-/* Drill-down state: pick a subject, then a topic (top-level chapter),
-   then see the notes filed there — instead of one long flat grid. A
-   search query bypasses the drill entirely and shows flat matches across
-   every subject, since that's a faster path when she knows what she wants. */
-const notesDrill = { subject: null, topic: null };
-
-function notesMatching(q) {
-  return allNotes.filter((n) => {
-    const haystack = `${n.title} ${n.description || ""} ${subjectName(n.subject)} ${chapterLabel(n.chapter_id)}`.toLowerCase();
-    return haystack.includes(q);
-  });
-}
-
-/* A note's chapter_id may be a top-level chapter or one of its
-   sub-chapters — "topic" always means the top-level one. */
-function topicIdOf(chapterId) {
-  const c = CHAPTERS.find((x) => x.id === chapterId);
-  return c && c.parentId ? c.parentId : chapterId;
-}
-
-function notesForTopic(subjectId, topicId) {
-  return allNotes.filter((n) => n.subject === subjectId && topicIdOf(n.chapter_id) === topicId);
-}
-
-function renderCrumbs() {
-  const nav = $("notesCrumbs");
-  const parts = [`<button type="button" class="res-crumb${notesDrill.subject ? "" : " current"}" data-crumb-root>All subjects</button>`];
-  if (notesDrill.subject) {
-    parts.push(`<span class="res-crumb-sep">/</span>`);
-    parts.push(
-      `<button type="button" class="res-crumb${notesDrill.topic ? "" : " current"}" data-crumb-subject>${esc(subjectName(notesDrill.subject))}</button>`
-    );
-  }
-  if (notesDrill.topic) {
-    parts.push(`<span class="res-crumb-sep">/</span>`);
-    parts.push(`<span class="res-crumb current">${esc(chapterLabel(notesDrill.topic))}</span>`);
-  }
-  nav.innerHTML = parts.join("");
-}
-
 function noteCardHTML(n) {
   return `
     <div class="res-card">
@@ -146,14 +106,16 @@ function noteCardHTML(n) {
     </div>`;
 }
 
+/* Newest-first list of what's been uploaded to this cohort, filtered by
+   the search box. Organising (moving between topics, renaming topics,
+   merging duplicates) lives on the Manage Content page — this panel is
+   just "upload something, confirm it landed". */
 function renderGrid() {
   const list = document.querySelector('[data-list="notes-uploads"]');
   const empty = $("notesUploadsEmpty");
-  const crumbs = $("notesCrumbs");
   const q = $("notesSearch").value.trim().toLowerCase();
 
   if (!allNotes.length) {
-    crumbs.innerHTML = "";
     list.innerHTML = "";
     $("notesResCount").textContent = "";
     empty.textContent = "No notes uploaded yet for this cohort.";
@@ -161,70 +123,28 @@ function renderGrid() {
     return;
   }
 
-  if (q) {
-    crumbs.innerHTML = "";
-    const matches = notesMatching(q);
-    $("notesResCount").textContent = `${matches.length} match${matches.length === 1 ? "" : "es"}`;
-    if (!matches.length) {
-      list.innerHTML = "";
-      empty.textContent = "No notes match your search.";
-      empty.hidden = false;
-      return;
-    }
-    empty.hidden = true;
-    list.innerHTML = `<div class="res-grid">${matches.map(noteCardHTML).join("")}</div>`;
+  const shown = q
+    ? allNotes.filter((n) =>
+        `${n.title} ${n.description || ""} ${subjectName(n.subject)} ${chapterLabel(n.chapter_id)}`
+          .toLowerCase()
+          .includes(q)
+      )
+    : allNotes;
+
+  $("notesResCount").textContent = q
+    ? `${shown.length} of ${allNotes.length} notes`
+    : `${allNotes.length} note${allNotes.length === 1 ? "" : "s"}`;
+
+  if (!shown.length) {
+    list.innerHTML = "";
+    empty.textContent = "No notes match your search.";
+    empty.hidden = false;
     return;
   }
 
   empty.hidden = true;
-  renderCrumbs();
-
-  if (!notesDrill.subject) {
-    $("notesResCount").textContent = "";
-    list.innerHTML = `<div class="res-tile-grid">${SUBJECTS.map((s) => {
-      const count = allNotes.filter((n) => n.subject === s.id).length;
-      return `<button type="button" class="res-tile" data-drill-subject="${s.id}"><strong>${esc(s.name)}</strong><span class="res-tile-count">${count} note${count === 1 ? "" : "s"}</span></button>`;
-    }).join("")}</div>`;
-    return;
-  }
-
-  if (!notesDrill.topic) {
-    $("notesResCount").textContent = "";
-    const topics = topLevelChapters(notesDrill.subject);
-    if (!topics.length) {
-      list.innerHTML = "";
-      empty.textContent = "No chapters yet for this subject — add one from the upload form.";
-      empty.hidden = false;
-      return;
-    }
-    list.innerHTML = `<div class="res-tile-grid">${topics.map((c) => {
-      const count = notesForTopic(notesDrill.subject, c.id).length;
-      return `<button type="button" class="res-tile" data-drill-topic="${c.id}"><strong>${esc(c.title)}</strong><span class="res-tile-count">${count} note${count === 1 ? "" : "s"}</span></button>`;
-    }).join("")}</div>`;
-    return;
-  }
-
-  const items = notesForTopic(notesDrill.subject, notesDrill.topic);
-  $("notesResCount").textContent = `${items.length} note${items.length === 1 ? "" : "s"}`;
-  if (!items.length) {
-    list.innerHTML = "";
-    empty.textContent = "No notes uploaded here yet.";
-    empty.hidden = false;
-    return;
-  }
-  list.innerHTML = `<div class="res-grid">${items.map(noteCardHTML).join("")}</div>`;
+  list.innerHTML = `<div class="res-grid">${shown.map(noteCardHTML).join("")}</div>`;
 }
-
-$("notesCrumbs").addEventListener("click", (e) => {
-  if (e.target.closest("[data-crumb-root]")) {
-    notesDrill.subject = null;
-    notesDrill.topic = null;
-    renderGrid();
-  } else if (e.target.closest("[data-crumb-subject]")) {
-    notesDrill.topic = null;
-    renderGrid();
-  }
-});
 
 async function renderNotesUploadHistory() {
   $("unCohortTag").textContent = COHORT_DATA[activeCohort].name;
@@ -250,20 +170,6 @@ async function renderNotesUploadHistory() {
 }
 
 document.querySelector('[data-list="notes-uploads"]').addEventListener("click", async (e) => {
-  const subjectTile = e.target.closest("[data-drill-subject]");
-  if (subjectTile) {
-    notesDrill.subject = subjectTile.dataset.drillSubject;
-    renderGrid();
-    return;
-  }
-
-  const topicTile = e.target.closest("[data-drill-topic]");
-  if (topicTile) {
-    notesDrill.topic = topicTile.dataset.drillTopic;
-    renderGrid();
-    return;
-  }
-
   const viewBtn = e.target.closest("[data-view-note]");
   if (viewBtn) {
     const note = allNotes.find((n) => n.id === viewBtn.dataset.viewNote);
@@ -387,7 +293,7 @@ $("noteEditForm").addEventListener("submit", async (e) => {
 
 window.dataReadyPromise.then(async () => {
   populateSubjects();
-  await loadChapters();
+  await loadChapters(activeCohort);
   populateChapterDropdown();
   await renderNotesUploadHistory();
 });
@@ -400,7 +306,7 @@ $("unAddChapterBtn").addEventListener("click", async () => {
   const title = prompt(`New chapter name (${subjectName(subjectId)}):`);
   if (!title || !title.trim()) return;
   try {
-    const created = await createChapter(subjectId, title.trim());
+    const created = await createChapter(subjectId, title.trim(), null, activeCohort);
     populateChapterDropdown();
     $("unChapter").value = created.id;
     populateSubChapterDropdown();
@@ -415,7 +321,7 @@ $("unAddSubChapterBtn").addEventListener("click", async () => {
   const title = prompt(`New sub-chapter name (inside "${chapterLabel(chapterId)}"):`);
   if (!title || !title.trim()) return;
   try {
-    const created = await createChapter($("unSubject").value, title.trim(), chapterId);
+    const created = await createChapter($("unSubject").value, title.trim(), chapterId, activeCohort);
     populateSubChapterDropdown();
     $("unSubChapter").value = created.id;
     showToast("Sub-chapter created", `"${title.trim()}" added inside ${chapterLabel(chapterId)}.`);
@@ -424,8 +330,14 @@ $("unAddSubChapterBtn").addEventListener("click", async () => {
   }
 });
 
+// Chapters are cohort-scoped now, so a pill switch has to reload the tree
+// before the chapter dropdowns (and the history's chapter labels) can be right.
 document.querySelectorAll(".pill").forEach((pill) =>
-  pill.addEventListener("click", renderNotesUploadHistory)
+  pill.addEventListener("click", async () => {
+    await loadChapters(activeCohort);
+    populateChapterDropdown();
+    await renderNotesUploadHistory();
+  })
 );
 
 $("uploadNoteForm").addEventListener("submit", async (e) => {

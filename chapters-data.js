@@ -1,18 +1,24 @@
-/* Study With Rameen · chapters — real, hierarchical, teacher-managed.
-   Replaces the old static CHAPTERS array from content.json. A chapter may
-   optionally have sub-chapters (parent_id set); most don't. Populates the
-   global CHAPTERS array (declared in data.js) so every existing consumer
-   (renderDrill in student.js, populateChapterSelect in teacher.js, etc.)
-   keeps working unchanged — they just see {id, subject, parent_id, title}
-   instead of the old JSON shape. */
+/* Study With Rameen · chapters — real, hierarchical, teacher-managed,
+   cohort-scoped. Replaces the old static CHAPTERS array from content.json.
+   A chapter may optionally have sub-chapters (parent_id set); most don't.
+   Populates the global CHAPTERS array (declared in data.js) so every
+   existing consumer (renderDrill in student.js, the upload forms' chapter
+   selects, etc.) keeps working unchanged — they just see
+   {id, subject, cohortId, parentId, title}.
+
+   Cohort scoping added 2026-08-16 (see cohort-scoped-chapters.sql): each
+   cohort owns its own tree, so renaming or deleting a topic in one never
+   touches the other. Every caller must pass the cohort it's rendering —
+   the student portal passes STUDENT.cohortId, the teacher portal passes
+   whichever cohort pill is active, and re-loads on pill switch. */
 
 import { supabase } from "./supabase-config.js";
 
-export async function loadChapters() {
-  const { data, error } = await supabase
-    .from("chapters")
-    .select("*")
-    .order("sort_order", { ascending: true });
+export async function loadChapters(cohortId) {
+  let query = supabase.from("chapters").select("*").order("sort_order", { ascending: true });
+  if (cohortId) query = query.eq("cohort_id", cohortId);
+
+  const { data, error } = await query;
 
   if (error) {
     CHAPTERS = [];
@@ -22,6 +28,7 @@ export async function loadChapters() {
   CHAPTERS = data.map((c) => ({
     id: c.id,
     subject: c.subject,
+    cohortId: c.cohort_id,
     parentId: c.parent_id,
     title: c.title,
   }));
@@ -35,7 +42,7 @@ export function subChaptersOf(chapterId) {
   return CHAPTERS.filter((c) => c.parentId === chapterId);
 }
 
-export async function createChapter(subjectId, title, parentId = null) {
+export async function createChapter(subjectId, title, parentId = null, cohortId) {
   const siblings = parentId
     ? subChaptersOf(parentId)
     : topLevelChapters(subjectId);
@@ -45,13 +52,19 @@ export async function createChapter(subjectId, title, parentId = null) {
 
   const { data, error } = await supabase
     .from("chapters")
-    .insert({ subject: subjectId, parent_id: parentId, title, sort_order: sortOrder })
+    .insert({ subject: subjectId, cohort_id: cohortId, parent_id: parentId, title, sort_order: sortOrder })
     .select()
     .single();
 
   if (error) throw error;
 
-  CHAPTERS.push({ id: data.id, subject: data.subject, parentId: data.parent_id, title: data.title });
+  CHAPTERS.push({
+    id: data.id,
+    subject: data.subject,
+    cohortId: data.cohort_id,
+    parentId: data.parent_id,
+    title: data.title,
+  });
   return data;
 }
 

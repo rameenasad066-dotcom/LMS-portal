@@ -95,7 +95,7 @@ async function init() {
   applyIdentity();
   if (STUDENT.isPreview) document.body.classList.add("preview-mode");
   await renderAnnouncements();
-  await loadChapters();
+  await loadChapters(STUDENT.cohortId);
   await loadRealNotes();
   renderNotes();
   await loadRealLectures();

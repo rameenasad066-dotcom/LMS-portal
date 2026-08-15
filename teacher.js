@@ -29,6 +29,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
 const VIEW_TITLES = {
   dashboard: "Dashboard",
   uploads: "Upload Notes",
+  content: "Manage Content",
   assignments: "Assignments",
   "weekly-test": "Weekly Test",
   students: "Students",
