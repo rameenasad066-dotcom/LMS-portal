@@ -1108,6 +1108,42 @@ button, input, select {
   gap: 10px;
 }
 
+/* Inline "set max marks" prompt shown at the top of the Weekly Test
+   detail view when max_marks wasn't set at post time (e.g. old tests
+   posted before grading existed). Disappears after first save. */
+.wt-max-setter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 260px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--red-blush-line);
+  background: var(--red-blush-soft);
+  border-radius: var(--radius-md);
+}
+
+.wt-max-setter label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.wt-max-setter input {
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+}
+
+.wt-max-setter input:focus {
+  border-color: var(--red);
+}
+
 /* ==========================================================================
    Data tables — shared by Students roster, Assignments marking queue, My Grades
    ========================================================================== */
