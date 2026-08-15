@@ -243,6 +243,8 @@
                 <option value="Cheat Sheet">Cheat Sheet</option>
                 <option value="Tips">Tips</option>
               </select>
+              <label for="unDescription">Description (optional)</label>
+              <textarea id="unDescription" rows="2" placeholder="A short note on what this covers"></textarea>
               <label for="unFile">PDF file</label>
               <input type="file" id="unFile" accept="application/pdf" required>
               <span class="date-hint">Uploads to <span class="tag-red" id="unCohortTag"></span></span>
@@ -251,8 +253,15 @@
             </form>
 
             <div class="recent-uploads">
-              <h3 class="list-title">Upload history</h3>
-              <ul data-list="notes-uploads"></ul>
+              <h3 class="list-title">Uploaded notes</h3>
+              <div class="res-toolbar">
+                <input type="search" class="res-search" id="notesSearch" placeholder="Search uploaded notes…">
+                <select class="tool-select" id="notesFilterSubject">
+                  <option value="">All subjects</option>
+                </select>
+              </div>
+              <p class="res-count" id="notesResCount"></p>
+              <div class="res-grid" data-list="notes-uploads"></div>
               <p class="empty-note" id="notesUploadsEmpty" hidden>No notes uploaded yet for this cohort.</p>
             </div>
           </div>
@@ -289,19 +298,79 @@
               <span class="date-hint">Make sure the file is shared as "Anyone with the link can view"</span>
               <label for="lecDuration">Duration (optional)</label>
               <input type="text" id="lecDuration" placeholder="e.g. 45 min">
+              <label for="lecDescription">Description (optional)</label>
+              <textarea id="lecDescription" rows="2" placeholder="A short note on what this covers"></textarea>
               <span class="date-hint">Uploads to <span class="tag-red" id="lecCohortTag"></span></span>
               <p class="auth-error" id="lecError" hidden></p>
               <button type="submit" class="btn btn-primary" id="lecSubmitBtn">Add Lecture</button>
             </form>
 
             <div class="recent-uploads">
-              <h3 class="list-title">Lecture history</h3>
-              <ul data-list="lecture-uploads"></ul>
+              <h3 class="list-title">Uploaded lectures</h3>
+              <div class="res-toolbar">
+                <input type="search" class="res-search" id="lecturesSearch" placeholder="Search uploaded lectures…">
+                <select class="tool-select" id="lecturesFilterSubject">
+                  <option value="">All subjects</option>
+                </select>
+              </div>
+              <p class="res-count" id="lecturesResCount"></p>
+              <div class="res-grid" data-list="lecture-uploads"></div>
               <p class="empty-note" id="lectureUploadsEmpty" hidden>No lectures added yet for this cohort.</p>
             </div>
           </div>
         </div>
       </section>
+
+      <!-- ================= EDIT MODALS: notes & lectures ================= -->
+      <div class="modal-overlay" id="noteEditModal" hidden>
+        <div class="modal-card">
+          <div class="modal-head">
+            <h3>Edit note</h3>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+          </div>
+          <form class="settings-form" id="noteEditForm">
+            <label for="unEditSubject">Subject</label>
+            <select id="unEditSubject" class="tool-select"></select>
+            <label for="unEditChapter">Chapter</label>
+            <select id="unEditChapter" class="tool-select"></select>
+            <select id="unEditSubChapter" class="tool-select" hidden></select>
+            <label for="unEditTitle">Title</label>
+            <input type="text" id="unEditTitle" required>
+            <label for="unEditDescription">Description (optional)</label>
+            <textarea id="unEditDescription" rows="2"></textarea>
+            <label for="unEditFile">Replace PDF (optional)</label>
+            <input type="file" id="unEditFile" accept="application/pdf">
+            <p class="auth-error" id="unEditError" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="unEditSubmitBtn">Save changes</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="lectureEditModal" hidden>
+        <div class="modal-card">
+          <div class="modal-head">
+            <h3>Edit lecture</h3>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+          </div>
+          <form class="settings-form" id="lectureEditForm">
+            <label for="lecEditSubject">Subject</label>
+            <select id="lecEditSubject" class="tool-select"></select>
+            <label for="lecEditChapter">Chapter</label>
+            <select id="lecEditChapter" class="tool-select"></select>
+            <select id="lecEditSubChapter" class="tool-select" hidden></select>
+            <label for="lecEditTitle">Title</label>
+            <input type="text" id="lecEditTitle" required>
+            <label for="lecEditUrl">Google Drive link</label>
+            <input type="url" id="lecEditUrl" required>
+            <label for="lecEditDuration">Duration (optional)</label>
+            <input type="text" id="lecEditDuration">
+            <label for="lecEditDescription">Description (optional)</label>
+            <textarea id="lecEditDescription" rows="2"></textarea>
+            <p class="auth-error" id="lecEditError" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="lecEditSubmitBtn">Save changes</button>
+          </form>
+        </div>
+      </div>
 
       <!-- ================= VIEW: ASSIGNMENTS & MARKING ================= -->
       <section class="view" data-view="assignments" hidden>
