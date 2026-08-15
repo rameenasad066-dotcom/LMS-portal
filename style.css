@@ -1255,6 +1255,91 @@ button, input, select {
 }
 
 /* ==========================================================================
+   Chapter Manager modal (rename/merge/move/delete chapters + sub-chapters)
+   ========================================================================== */
+
+.chapter-mgr-card {
+  max-width: 640px;
+}
+
+#chapterMgrSubject {
+  width: 100%;
+  margin: 10px 0 14px;
+}
+
+.chapter-mgr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.chapter-mgr-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.chapter-mgr-row.sub {
+  margin-left: 24px;
+  background: var(--surface-2);
+}
+
+.chapter-mgr-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.chapter-mgr-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.chapter-mgr-count {
+  font-size: 11.5px;
+  color: var(--gray);
+}
+
+.chapter-mgr-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chapter-mgr-select {
+  width: 130px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .chapter-mgr-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chapter-mgr-row.sub {
+    margin-left: 12px;
+  }
+  .chapter-mgr-actions {
+    justify-content: flex-start;
+  }
+  .chapter-mgr-select {
+    width: auto;
+    flex: 1;
+  }
+}
+
+/* ==========================================================================
    Data tables — shared by Students roster, Assignments marking queue, My Grades
    ========================================================================== */
 

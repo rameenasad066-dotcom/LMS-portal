@@ -227,6 +227,9 @@
           <div class="panel-head">
             <h2>Upload Notes</h2>
             <span class="panel-hint">PDF notes for students to download</span>
+            <div class="panel-tools">
+              <button type="button" class="btn btn-outline btn-sm" id="openChapterManagerBtn">Manage Chapters</button>
+            </div>
           </div>
 
           <div class="upload-grid">
@@ -377,6 +380,19 @@
             <p class="auth-error" id="lecEditError" hidden></p>
             <button type="submit" class="btn btn-primary btn-block" id="lecEditSubmitBtn">Save changes</button>
           </form>
+        </div>
+      </div>
+
+      <!-- ================= CHAPTER MANAGER ================= -->
+      <div class="modal-overlay" id="chapterManagerModal" hidden>
+        <div class="modal-card chapter-mgr-card">
+          <div class="modal-head">
+            <h3>Manage Chapters</h3>
+            <button type="button" class="modal-close" id="chapterMgrClose" aria-label="Close">&times;</button>
+          </div>
+          <p class="preview-picker-hint">Rename, merge, move, or delete chapters and sub-chapters. Changes apply to every cohort, since chapters are shared across all of them.</p>
+          <select id="chapterMgrSubject" class="tool-select"></select>
+          <div class="chapter-mgr-list" id="chapterMgrList"></div>
         </div>
       </div>
 
@@ -630,6 +646,7 @@
 <script type="module" src="teacher-notes-upload.js"></script>
 <script type="module" src="teacher-lectures-upload.js"></script>
 <script type="module" src="teacher-preview.js"></script>
+<script type="module" src="teacher-chapters.js"></script>
 <script type="module" src="teacher-assignments.js"></script>
 <script type="module" src="teacher-weekly-test.js"></script>
 <script type="module" src="teacher-scoreboard.js"></script>
