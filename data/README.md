@@ -8,8 +8,7 @@ There are two files you'll edit:
 | File | What it controls |
 |---|---|
 | `quizzes.json` | The practice quizzes |
-| `owl-facts.json` | The study facts the owl says when a student clicks it |
-| `hp-quotes.json` | The Harry Potter quote of the day on the student dashboard |
+| `owl-facts.json` | The study facts the owl says when clicked, **and** the dashboard's fact-of-the-day banner |
 
 > The weekly test is no longer a file you edit — post it from the Teacher Portal's
 > **Weekly Test** page instead (title, PDF upload, and the time uploads close). See CLAUDE.md
@@ -88,39 +87,37 @@ in the teacher portal.
 
 ---
 
-## 2. owl-facts.json — the owl's study facts
+## 2. owl-facts.json — the owl's study facts, and the dashboard banner
 
 ⚠️ **All the facts currently in this file are placeholders** — check them and replace them with your own.
 
-When a student clicks the little owl, it shows one of these facts in a speech bubble.
+This one file feeds two places: when a student clicks the little owl it shows one of these facts
+in a speech bubble, and the same list supplies the dashboard's fact-of-the-day banner.
 Each fact is one line:
 
 ```json
-{ "tag": "tip", "text": "Read the command word first: 'Describe' wants points, 'Explain' wants reasons." }
+{ "subject": "history", "tag": "date", "text": "The War of Independence broke out at Meerut in May 1857." }
 ```
 
-- `tag` — one of `fact`, `tip`, or `date`. It just picks the little icon shown before the text
-  (`fact` = 📖, `tip` = ✍️, `date` = 📅). Anything else falls back to 💡.
-- `text` — the fact itself. Keep it to one or two short sentences so it fits the bubble.
+- `subject` — one of `history`, `geography`, or `islamiyat`. **The dashboard shows one subject
+  per day and rotates**, so a student who takes everything gets History one day, Geography the
+  next, Islamiyat the next, and round again. A student who only takes one course only ever sees
+  their own subjects.
+- `tag` — one of `fact`, `tip`, or `date`. On the owl it picks the little icon shown before the
+  text (`fact` = 📖, `tip` = ✍️, `date` = 📅, anything else falls back to 💡); on the dashboard
+  banner it becomes the small label above the fact ("History · Key Date", "Islamiyat · Examiner
+  Tip", and so on).
+- `text` — the fact itself. Keep it to **one or two short sentences** — a single fact or figure,
+  not a paragraph. It has to fit in a speech bubble and a banner.
 - Add a fact by copying a line, pasting it after the last one, and putting a comma between them
   (no comma after the last one).
-- The owl picks facts in a shuffled order and never repeats the same one twice in a row.
+- The owl picks facts in a shuffled order and never repeats the same one twice in a row; the
+  dashboard banner always shows the same one all day, based on the date.
+- Adding more facts to a subject makes that subject's turn come round with fresh content for
+  longer before it repeats.
 
-If this file ever has a typo and can't load, the owl quietly falls back to a few built-in facts —
-it won't break the page.
-
----
-
-## 3. hp-quotes.json — the dashboard's quote of the day
-
-Every student sees the same quote on a given day; it changes automatically the next day.
-Each entry is one line:
-
-```json
-{ "text": "It does not do to dwell on dreams and forget to live.", "speaker": "Albus Dumbledore" }
-```
-
-Add, remove, or edit entries freely — same comma rules as the other files below.
+If this file ever has a typo and can't load, the owl quietly falls back to a few built-in facts
+and the dashboard banner just doesn't show — neither will break the page.
 
 ---
 

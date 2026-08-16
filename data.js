@@ -34,20 +34,20 @@ const STUDENT = {
    loadData() must resolve before the first renderAll(). CHAPTERS is no
    longer part of this — it's real and teacher-managed now, populated by
    chapters-data.js (see auth-guard.js / teacher-notes-upload.js). */
-let SUBJECTS  = [];
-let CHAPTERS  = [];
-let QUIZZES   = [];
-let HP_QUOTES = [];
+let SUBJECTS       = [];
+let CHAPTERS       = [];
+let QUIZZES        = [];
+let SYLLABUS_FACTS = [];
 
 async function loadData() {
-  const [content, quizzes, hpQuotes] = await Promise.all([
+  const [content, quizzes, facts] = await Promise.all([
     fetch('data/content.json').then(r => r.json()),
     fetch('data/quizzes.json').then(r => r.json()),
-    fetch('data/hp-quotes.json').then(r => r.json()),
+    fetch('data/owl-facts.json').then(r => r.json()),
   ]);
-  SUBJECTS  = content.subjects;
-  QUIZZES   = quizzes.quizzes;
-  HP_QUOTES = hpQuotes.quotes;
+  SUBJECTS       = content.subjects;
+  QUIZZES        = quizzes.quizzes;
+  SYLLABUS_FACTS = facts.facts;
 }
 
 /* The subjects this student can actually see, in the portal's display order.
@@ -62,11 +62,27 @@ function isEnrolledIn(subjectId) {
   return (STUDENT.subjects || []).includes(subjectId);
 }
 
-/* Same quote for every student on a given calendar day, a new one the next. */
-function quoteOfTheDay() {
-  if (!HP_QUOTES.length) return null;
+/* Same syllabus fact for every student on a given calendar day, a new one
+   the next — same list the study-buddy owl draws from (data/owl-facts.json),
+   just picked deterministically instead of shuffled on click.
+
+   One subject per day, rotating through the subjects this student actually
+   takes, then advancing through that subject's own facts — so an Islamiyat-
+   only student never gets a History fact, and a student taking everything
+   sees each subject come round in turn. */
+function factOfTheDay() {
+  const mine = enrolledSubjects().map(s => s.id);
+  if (!SYLLABUS_FACTS.length || !mine.length) return null;
+
   const dayNumber = Math.floor(Date.now() / 86400000);
-  return HP_QUOTES[dayNumber % HP_QUOTES.length];
+  const subjectId = mine[dayNumber % mine.length];
+  const pool = SYLLABUS_FACTS.filter(f => f.subject === subjectId);
+
+  // A subject with no facts written yet falls back to the whole list rather
+  // than leaving the banner blank for a third of the week.
+  if (!pool.length) return SYLLABUS_FACTS[dayNumber % SYLLABUS_FACTS.length];
+
+  return pool[Math.floor(dayNumber / mine.length) % pool.length];
 }
 
 /* Video lectures — real, cohort-scoped, loaded from Supabase (see

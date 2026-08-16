@@ -84,7 +84,7 @@ function applyIdentity() {
 
 function renderDashboard() {
   renderRings();
-  renderQuoteBanner();
+  renderFactBanner();
 }
 
 function renderRings() {
@@ -348,15 +348,22 @@ function renderQuizResult() {
   quizState = null;
 }
 
-/* ---------- Render: quote-of-the-day banner ---------- */
+/* ---------- Render: syllabus fact-of-the-day banner ---------- */
 
-function renderQuoteBanner() {
-  const q = quoteOfTheDay();
-  const textEl = $('hpQuoteText');
-  const speakerEl = $('hpQuoteSpeaker');
-  if (!q || !textEl || !speakerEl) return;
-  textEl.textContent = `"${q.text}"`;
-  speakerEl.textContent = `— ${q.speaker}`;
+const FACT_TAG_LABEL = { tip: 'Examiner Tip', date: 'Key Date', fact: 'Syllabus Fact' };
+
+function renderFactBanner() {
+  const f = factOfTheDay();
+  const tagEl = $('dashFactTag');
+  const textEl = $('dashFactText');
+  if (!f || !tagEl || !textEl) return;
+
+  // The banner rotates a different subject each day, so name it — otherwise
+  // a Geography fact on a History day reads as a mistake.
+  const subject = SUBJECTS.find(s => s.id === f.subject);
+  const kind = FACT_TAG_LABEL[f.tag] || 'Syllabus Fact';
+  tagEl.textContent = subject ? `${subject.name} · ${kind}` : kind;
+  textEl.textContent = f.text;
 }
 
 /* ---------- Render all ---------- */
