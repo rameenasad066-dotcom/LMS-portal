@@ -75,17 +75,6 @@ function occ(chapterId) {
   return occupancy[chapterId] || { lecture: 0, note: 0 };
 }
 
-// Everything filed under a chapter — both kinds, and its sub-topics when it
-// has them. This is what decides whether Delete is allowed, rather than the
-// count the current tab happens to show.
-function occupiedCount(chapter, withSubs) {
-  const chapters = withSubs ? [chapter, ...subChaptersOf(chapter.id)] : [chapter];
-  return chapters.reduce((sum, c) => {
-    const o = occ(c.id);
-    return sum + o.lecture + o.note;
-  }, 0);
-}
-
 function plural(n, word) {
   return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
@@ -108,15 +97,8 @@ function chapterRow(c, isSub, index) {
   const isOpen = open.has(c.id);
   const o = occ(c.id);
 
-  // Delete is blocked by anything filed under it in EITHER table, not just
-  // the tab being viewed — the database rejects it either way.
-  const blocking = occupiedCount(c, !isSub);
-  const blockedReason = blocking
-    ? `Still holds ${plural(blocking, "item")} — move or merge them first`
-    : "";
-
-  // The other kind is only mentioned when it's there, so a topic that's
-  // empty on this tab but full on the other never looks deletable.
+  // The other kind is only mentioned when it's there, so a topic that looks
+  // empty on this tab never hides content on the other.
   const meta = [plural(kind === "note" ? o.note : o.lecture, KIND[kind].label)];
   const other = kind === "note" ? o.lecture : o.note;
   if (other) meta.push(plural(other, kind === "note" ? "lecture" : "note"));
@@ -134,7 +116,7 @@ function chapterRow(c, isSub, index) {
         ${actionBtn(ICON_PENCIL, "rename", c.id, `Rename ${c.title}`)}
         ${actionBtn(ICON_MOVE, "move-chapter", c.id, `Move ${c.title}`)}
         ${actionBtn(ICON_MERGE, "merge-chapter", c.id, `Merge ${c.title}`)}
-        ${actionBtn(ICONS.trash, "delete-chapter", c.id, `Delete ${c.title}`, blockedReason)}
+        ${actionBtn(ICONS.trash, "delete-chapter", c.id, `Delete ${c.title}`)}
       </span>
     </div>`;
 }
@@ -310,24 +292,63 @@ async function onMergeChapter(id) {
   }
 }
 
+// A topic can be deleted whether or not it holds anything — she's the only
+// person using this page, and refusing outright just left her stuck with no
+// way forward. What's inside goes with it, spelled out in the confirm first.
+// The notes/lectures rows have to be cleared by hand because their
+// chapter_id foreign keys deliberately don't cascade; sub-chapters do.
 async function onDeleteChapter(id) {
   const c = CHAPTERS.find((x) => x.id === id);
   if (!c) return;
-  if (!confirm(`Delete "${c.title}"? This can't be undone.`)) return;
+
+  const subs = subChaptersOf(c.id);
+  const chapterIds = [c.id, ...subs.map((s) => s.id)];
+
+  let notes = [];
+  let lectures = [];
   try {
+    const [n, l] = await Promise.all([
+      supabase.from("notes").select("id, storage_path").in("chapter_id", chapterIds),
+      supabase.from("lectures").select("id").in("chapter_id", chapterIds),
+    ]);
+    if (n.error) throw n.error;
+    if (l.error) throw l.error;
+    notes = n.data || [];
+    lectures = l.data || [];
+  } catch (err) {
+    showToast("Couldn't check its contents", err.message || "Please try again.");
+    return;
+  }
+
+  const inside = [];
+  if (subs.length) inside.push(plural(subs.length, "sub-topic"));
+  if (lectures.length) inside.push(plural(lectures.length, "lecture"));
+  if (notes.length) inside.push(plural(notes.length, "note"));
+
+  const warning = inside.length
+    ? `Delete "${c.title}" and everything inside it — ${inside.join(", ")}? Students lose access immediately. This can't be undone.`
+    : `Delete "${c.title}"? This can't be undone.`;
+  if (!confirm(warning)) return;
+
+  try {
+    if (notes.length) {
+      const { error } = await supabase.from("notes").delete().in("id", notes.map((n) => n.id));
+      if (error) throw error;
+    }
+    if (lectures.length) {
+      const { error } = await supabase.from("lectures").delete().in("id", lectures.map((l) => l.id));
+      if (error) throw error;
+    }
+
     await deleteChapter(id);
-    showToast("Deleted", `"${c.title}" was removed.`);
+
+    const paths = notes.map((n) => n.storage_path).filter(Boolean);
+    if (paths.length) await supabase.storage.from("notes").remove(paths);
+
+    showToast("Deleted", inside.length ? `"${c.title}" and its contents were removed.` : `"${c.title}" was removed.`);
     await refresh();
   } catch (err) {
-    // The raw Postgres foreign-key message is unreadable, and this is the
-    // only way it can realistically fail, so say what it actually means.
-    const fk = /foreign key|violates/i.test(err.message || "");
-    showToast(
-      "Couldn't delete",
-      fk
-        ? "Something is still filed under it — check the Notes tab as well as Lectures."
-        : err.message || "Please try again."
-    );
+    showToast("Couldn't delete", err.message || "Please try again.");
     await refresh();
   }
 }
