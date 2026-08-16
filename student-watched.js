@@ -26,7 +26,7 @@ function localWatchedIds() {
 }
 
 export async function loadWatchedLectures() {
-  if (!STUDENT.id || STUDENT.isPreview) {
+  if (!STUDENT.id) {
     WATCHED_LECTURE_IDS = new Set();
     return;
   }
@@ -37,6 +37,12 @@ export async function loadWatchedLectures() {
     .eq("student_id", STUDENT.id);
 
   WATCHED_LECTURE_IDS = new Set(error ? [] : data.map((r) => r.lecture_id));
+
+  // The migration reads THIS browser's localStorage, which only makes sense
+  // when the person sitting at this browser is the student themselves — in
+  // preview mode this device is Rameen's, so its localStorage has nothing to
+  // do with the student being previewed and must not be touched.
+  if (STUDENT.isPreview) return;
 
   // Only real lecture ids — a stale localStorage entry pointing at a
   // deleted lecture, or a leftover from the pre-Supabase demo array, would
