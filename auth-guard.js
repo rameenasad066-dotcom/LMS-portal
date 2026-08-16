@@ -11,6 +11,7 @@ import { supabase } from "./supabase-config.js";
 import { renderAnnouncements } from "./student-announcements.js";
 import { loadRealNotes } from "./student-notes.js";
 import { loadRealLectures } from "./student-lectures.js";
+import { loadWatchedLectures } from "./student-watched.js";
 import { loadChapters } from "./chapters-data.js";
 import { renderStudentAssignments } from "./student-assignments.js";
 import { renderStudentWeeklyTest } from "./student-weekly-test.js";
@@ -99,10 +100,11 @@ async function init() {
   await loadRealNotes();
   renderNotes();
   await loadRealLectures();
+  await loadWatchedLectures();
   renderVault();
-  // Dashboard's Syllabus Tracker rings also read LECTURES (subjectProgress()
-  // in data.js) — re-render so they reflect real data, not the empty
-  // pre-auth state from student.js's initial renderAll().
+  // Dashboard's Syllabus Tracker rings also read LECTURES + WATCHED_LECTURE_IDS
+  // (subjectProgress() in data.js) — re-render so they reflect real data, not
+  // the empty pre-auth state from student.js's initial renderAll().
   renderDashboard();
   await renderStudentAssignments();
   await renderStudentWeeklyTest();

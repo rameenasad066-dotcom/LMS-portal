@@ -517,11 +517,7 @@ document.addEventListener('click', e => {
     const lec  = card && LECTURES.find(l => l.id === card.dataset.id);
     if (lec && lec.url) {
       window.open(lec.url, '_blank', 'noopener');
-      if (!isWatched(lec.id)) {
-        setWatched(lec.id, true);
-        renderVault();
-        renderDashboard();
-      }
+      window.markWatched(lec.id);
     } else {
       showToast('Video coming soon', 'This lecture will be uploaded to YouTube shortly.');
     }

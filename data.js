@@ -95,6 +95,11 @@ let LECTURES = [];
    student's cohort and fetches their real notes. */
 let NOTES = [];
 
+/* Which lectures this student has watched — real, Supabase-backed (see
+   student-watched.js), not a per-device flag. Empty until auth-guard.js
+   resolves STUDENT.id and fetches their real watch history. */
+let WATCHED_LECTURE_IDS = new Set();
+
 /* ==========================================================================
    Persisted state — download toggles and watched markers survive refresh
    ========================================================================== */
@@ -115,8 +120,7 @@ function isDownloaded(id)       { return !!_state['dl_' + id]; }
 function setDownloadQuality(val) { _state.downloadQuality = val; _save(); }
 function getDownloadQuality()    { return _state.downloadQuality || 'Auto (recommended)'; }
 
-function isWatched(id) { return !!_state['w_' + id]; }
-function setWatched(id, val) { _state['w_' + id] = val; _save(); }
+function isWatched(id) { return WATCHED_LECTURE_IDS.has(id); }
 
 /* ==========================================================================
    Computed helpers
