@@ -3,7 +3,7 @@
    a new tab with ?preview=<id>. auth-guard.js recognises the param + her
    teacher session and loads that student's profile so every page renders
    exactly as they see it. All mutating actions inside the preview
-   (uploads, settings, quiz saves) are gated by STUDENT.isPreview.
+   (uploads, settings) are gated by STUDENT.isPreview.
    Runs as a module — see teacher-auth-guard.js for the script-order
    reasoning. */
 

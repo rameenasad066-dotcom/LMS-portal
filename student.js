@@ -21,7 +21,6 @@ const VIEW_TITLES = {
   dashboard:  'Dashboard',
   vault:      'Lecture Vault',
   notes:      'Notes',
-  quiz:       'Practice Quizzes',
   weekly:     'Weekly Test',
   assignments: 'Assignments & Homework',
   grades:     'My Grades',
@@ -247,107 +246,6 @@ function renderDrill(view) {
 function renderVault() { renderDrill('vault'); }
 function renderNotes() { renderDrill('notes'); }
 
-/* ---------- Render: practice quizzes ---------- */
-
-let quizState = null;
-
-function renderQuizList() {
-  const area = $('quizArea');
-  if (!area) return;
-  quizState = null;
-  area.innerHTML = QUIZZES.filter(q => isEnrolledIn(q.subject)).map(q => {
-    const s = SUBJECTS.find(x => x.id === q.subject);
-    const mcq = q.questions.filter(x => x.question_type === 'mcq').length;
-    const sa  = q.questions.length - mcq;
-    return `
-    <div class="quiz-card">
-      <span class="subject-glyph">${esc(s ? s.name[0] : '?')}</span>
-      <span class="quiz-info">
-        <strong>${esc(q.title)}</strong>
-        <small>${esc(s ? s.name : '')} · ${q.questions.length} questions · ${mcq} MCQ + ${sa} short answer</small>
-      </span>
-      <button class="btn btn-primary btn-sm" data-quiz-start="${esc(q.id)}">Start quiz</button>
-    </div>`;
-  }).join('');
-}
-
-function renderQuizQuestion() {
-  const area = $('quizArea');
-  const { quiz, i } = quizState;
-  const q = quiz.questions[i];
-  const total = quiz.questions.length;
-  const isMcq = q.question_type === 'mcq';
-  area.innerHTML = `
-    <div class="quiz-top">
-      <button class="btn btn-outline btn-sm" data-quiz-exit>← All quizzes</button>
-      <span class="quiz-step">Question ${i + 1} of ${total}</span>
-    </div>
-    <div class="quiz-progress"><span style="width:${Math.round((i / total) * 100)}%"></span></div>
-    <div class="q-card">
-      <span class="q-type ${isMcq ? '' : 'sa'}">${isMcq ? 'Multiple choice' : 'Short answer · self-marked'}</span>
-      <h3 class="q-text">${esc(q.question)}</h3>
-      ${isMcq ? `
-      <div class="q-opts">
-        ${q.options.map((o, oi) => `<button class="q-opt" data-opt="${oi}">${esc(o)}</button>`).join('')}
-      </div>
-      <div class="q-actions" hidden>
-        <button class="btn btn-primary" data-q-next>${i + 1 === total ? 'See my result' : 'Next question →'}</button>
-      </div>` : `
-      <textarea class="q-input" rows="3" placeholder="Type your answer first (optional), then reveal the model answer."></textarea>
-      <div class="q-actions">
-        <button class="btn btn-primary" data-q-reveal>Reveal model answer</button>
-      </div>
-      <div class="model-answer" hidden>
-        <strong>Model answer</strong>
-        <ul>${(q.model_answer || []).map(p => `<li>${esc(p)}</li>`).join('')}</ul>
-        ${q.marking_note ? `<small class="mark-note">${esc(q.marking_note)}</small>` : ''}
-        <div class="self-mark">
-          <span>Be honest — did you get it?</span>
-          <button class="btn btn-success btn-sm" data-self-mark="1">I got it right</button>
-          <button class="btn btn-outline btn-sm" data-self-mark="0">I got it wrong</button>
-        </div>
-      </div>`}
-    </div>`;
-}
-
-function advanceQuiz() {
-  quizState.i++;
-  quizState.answered = false;
-  if (quizState.i >= quizState.quiz.questions.length) renderQuizResult();
-  else renderQuizQuestion();
-}
-
-function renderQuizResult() {
-  const { quiz, score, answers } = quizState;
-  const total = quiz.questions.length;
-  const pct = Math.round((score / total) * 100);
-  const R = 40;
-  const C = 2 * Math.PI * R;
-  $('quizArea').innerHTML = `
-    <div class="quiz-result">
-      <div class="ring-card ${pct === 100 ? 'complete' : ''}">
-        <div class="ring-wrap">
-          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="ring-track" cx="50" cy="50" r="${R}"/>
-            <circle class="ring-fill" cx="50" cy="50" r="${R}"
-                    stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - pct / 100)).toFixed(1)}"
-                    style="--circ:${C.toFixed(1)}"/>
-          </svg>
-          <span class="ring-pct">${score}<small>/${total}</small></span>
-        </div>
-      </div>
-      <h3>${esc(quiz.title)}</h3>
-      <p class="quiz-score-line">You scored ${score} out of ${total}${pct === 100 ? ' — perfect! 🎉' : score >= Math.ceil(total * 0.6) ? ' — well done!' : ' — keep practising!'}</p>
-      <p class="screenshot-note">✓ Saved to your practice history — Miss Rameen can see this on your report.</p>
-      <div class="quiz-result-actions">
-        <button class="btn btn-primary" data-quiz-start="${esc(quiz.id)}">Retake quiz</button>
-        <button class="btn btn-outline" data-quiz-exit>All quizzes</button>
-      </div>
-    </div>`;
-  if (window.saveQuizAttempt) window.saveQuizAttempt({ quiz, score, answers });
-  quizState = null;
-}
-
 /* ---------- Render: syllabus fact-of-the-day banner ---------- */
 
 const FACT_TAG_LABEL = { tip: 'Examiner Tip', date: 'Key Date', fact: 'Syllabus Fact' };
@@ -373,7 +271,6 @@ function renderAll() {
   renderDashboard();
   renderVault();
   renderNotes();
-  renderQuizList();
 }
 
 /* ==========================================================================
@@ -436,79 +333,6 @@ document.addEventListener('click', e => {
       item.classList.add('open');
       scBtn.setAttribute('aria-expanded', 'true');
     }
-    return;
-  }
-
-  const qStart = e.target.closest('[data-quiz-start]');
-  if (qStart) {
-    const quiz = QUIZZES.find(x => x.id === qStart.dataset.quizStart);
-    if (quiz) {
-      quizState = { quiz, i: 0, score: 0, answered: false, answers: [] };
-      renderQuizQuestion();
-    }
-    return;
-  }
-
-  if (e.target.closest('[data-quiz-exit]')) {
-    renderQuizList();
-    return;
-  }
-
-  const opt = e.target.closest('.q-opt');
-  if (opt && quizState && !quizState.answered) {
-    const q = quizState.quiz.questions[quizState.i];
-    const pick = +opt.dataset.opt;
-    quizState.answered = true;
-    const isCorrect = pick === q.correct;
-    if (isCorrect) quizState.score++;
-    quizState.answers.push({
-      topic: q.topic,
-      question_type: 'mcq',
-      question: q.question,
-      correct: isCorrect,
-      picked: q.options[pick],
-      correctOption: q.options[q.correct],
-    });
-    opt.parentElement.querySelectorAll('.q-opt').forEach((b, bi) => {
-      b.disabled = true;
-      if (bi === q.correct) b.classList.add('right');
-      else if (bi === pick) b.classList.add('wrong');
-    });
-    const area = $('quizArea');
-    area.querySelector('.q-actions').hidden = false;
-    area.querySelector('.quiz-progress span').style.width =
-      `${Math.round(((quizState.i + 1) / quizState.quiz.questions.length) * 100)}%`;
-    return;
-  }
-
-  if (e.target.closest('[data-q-next]')) {
-    advanceQuiz();
-    return;
-  }
-
-  if (e.target.closest('[data-q-reveal]')) {
-    const area = $('quizArea');
-    area.querySelector('.model-answer').hidden = false;
-    area.querySelector('[data-q-reveal]').closest('.q-actions').hidden = true;
-    area.querySelector('.quiz-progress span').style.width =
-      `${Math.round(((quizState.i + 1) / quizState.quiz.questions.length) * 100)}%`;
-    return;
-  }
-
-  const selfMark = e.target.closest('[data-self-mark]');
-  if (selfMark) {
-    const q = quizState.quiz.questions[quizState.i];
-    const isCorrect = selfMark.dataset.selfMark === '1';
-    if (isCorrect) quizState.score++;
-    const textarea = $('quizArea').querySelector('.q-input');
-    quizState.answers.push({
-      topic: q.topic,
-      question_type: 'short_answer',
-      question: q.question,
-      correct: isCorrect,
-      typedAnswer: textarea ? textarea.value.trim() : '',
-    });
-    advanceQuiz();
     return;
   }
 

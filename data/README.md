@@ -3,11 +3,10 @@
 Everything in this folder is plain text you can edit with Notepad or VS Code.
 After saving a file, just **refresh the portal in the browser** — changes appear immediately.
 
-There are two files you'll edit:
+There's one file you'll edit:
 
 | File | What it controls |
 |---|---|
-| `quizzes.json` | The practice quizzes |
 | `owl-facts.json` | The study facts the owl says when clicked, **and** the dashboard's fact-of-the-day banner |
 
 > The weekly test is no longer a file you edit — post it from the Teacher Portal's
@@ -21,73 +20,7 @@ There are two files you'll edit:
 
 ---
 
-## 1. quizzes.json — adding or replacing a quiz
-
-⚠️ **All the questions currently in this file are placeholders** — replace them with your own.
-
-A quiz looks like this:
-
-```json
-{
-  "id": "quiz-history-mughal-1",
-  "subject": "history",
-  "title": "Mughal Empire — Quick Check",
-  "questions": [ ...5 question blocks... ]
-}
-```
-
-Aim for **5 questions per quiz** — a mix of multiple choice and short answer.
-
-**Multiple-choice question:**
-
-```json
-{
-  "topic": "The Mughal Empire & Its Decline",
-  "question_type": "mcq",
-  "question": "Your question text here?",
-  "options": ["First option", "Second option", "Third option", "Fourth option"],
-  "correct": 0
-}
-```
-
-- `correct` is the position of the right answer, **counting from 0** —
-  so `0` = first option, `1` = second, `2` = third, `3` = fourth.
-
-**Short-answer question** (self-marked — the student reveals your model answer and marks themselves):
-
-```json
-{
-  "topic": "The Pakistan Movement (1927–1947)",
-  "question_type": "short_answer",
-  "question": "Name four reasons why …",
-  "model_answer": [
-    "Valid point 1",
-    "Valid point 2",
-    "Valid point 3",
-    "Valid point 4",
-    "Valid point 5",
-    "Valid point 6"
-  ],
-  "marking_note": "Any four of these earn full credit."
-}
-```
-
-- For **"name four points"** style questions, list **6–7 valid points**, not just 4 —
-  that way every good answer a student writes is covered by your list.
-- `marking_note` is optional; it shows under the model answer.
-
-**Important:** every question should still keep its `topic` and `question_type` fields, even
-though no feature currently reads `topic` (a past-paper explorer that browsed by topic was
-built and then removed — see CLAUDE.md if you want the history). Keeping the field costs
-nothing and leaves the door open if that idea comes back later.
-
-Quiz results **are saved** — each attempt is stored automatically, and you can see a
-student's practice quiz history (score + what they answered) on their Student Report page
-in the teacher portal.
-
----
-
-## 2. owl-facts.json — the owl's study facts, and the dashboard banner
+## owl-facts.json — the owl's study facts, and the dashboard banner
 
 ⚠️ **All the facts currently in this file are placeholders** — check them and replace them with your own.
 

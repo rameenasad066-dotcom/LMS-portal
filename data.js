@@ -8,7 +8,7 @@
    auth-guard.js). */
 const STUDENT = {
   /* Real auth uid — used by every "my data" query (marks, submissions,
-     weekly-test uploads, quiz attempts, settings). Normally the signed-in
+     weekly-test uploads, settings). Normally the signed-in
      student's uid; when Rameen previews a student from her teacher portal
      (auth-guard.js?preview=<id>), this is overridden with that student's
      uid so the previewed page renders their real personal data. */
@@ -24,9 +24,9 @@ const STUDENT = {
      (history + geography), Islamiyat is the third. */
   subjects:   ['history', 'geography', 'islamiyat'],
   /* True when the teacher is previewing a student's view — every mutating
-     student action (submit assignment, upload weekly test, save quiz
-     attempt, change settings) is disabled so the preview never touches
-     the real student's data. */
+     student action (submit assignment, upload weekly test, change
+     settings) is disabled so the preview never touches the real
+     student's data. */
   isPreview:  false,
 };
 
@@ -36,23 +36,20 @@ const STUDENT = {
    chapters-data.js (see auth-guard.js / teacher-notes-upload.js). */
 let SUBJECTS       = [];
 let CHAPTERS       = [];
-let QUIZZES        = [];
 let SYLLABUS_FACTS = [];
 
 async function loadData() {
-  const [content, quizzes, facts] = await Promise.all([
+  const [content, facts] = await Promise.all([
     fetch('data/content.json').then(r => r.json()),
-    fetch('data/quizzes.json').then(r => r.json()),
     fetch('data/owl-facts.json').then(r => r.json()),
   ]);
   SUBJECTS       = content.subjects;
-  QUIZZES        = quizzes.quizzes;
   SYLLABUS_FACTS = facts.facts;
 }
 
 /* The subjects this student can actually see, in the portal's display order.
-   Every subject-scoped screen (Syllabus Tracker, Lecture Vault, Notes,
-   Practice Quizzes) renders from this rather than the full SUBJECTS list. */
+   Every subject-scoped screen (Syllabus Tracker, Lecture Vault, Notes)
+   renders from this rather than the full SUBJECTS list. */
 function enrolledSubjects() {
   const mine = STUDENT.subjects || [];
   return SUBJECTS.filter(s => mine.includes(s.id));

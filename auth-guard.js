@@ -19,7 +19,6 @@ import { renderStudentScoreboard } from "./student-scoreboard.js";
 import { renderStudentGrades } from "./student-grades.js";
 import { initStudentSettings } from "./student-settings.js";
 import { verifySession, startSessionWatch, clearLocalToken } from "./session-guard.js";
-import "./student-quiz-attempts.js";
 
 document.body.classList.add("auth-checking");
 const overlay = document.getElementById("authOverlay");

@@ -138,14 +138,13 @@ function attendancePct(records) {
 }
 
 async function loadStudentReport(studentId) {
-  const [{ data: student, error: studentErr }, { data: marks, error: markErr }, { data: attendance }, { data: quizAttempts }] = await Promise.all([
+  const [{ data: student, error: studentErr }, { data: marks, error: markErr }, { data: attendance }] = await Promise.all([
     supabase.from("students").select("*").eq("id", studentId).single(),
     supabase
       .from("marks")
       .select("marks, feedback, marked_at, assignments(title, type, max_marks, due_date)")
       .eq("student_id", studentId),
     supabase.from("attendance").select("status").eq("student_id", studentId),
-    supabase.from("quiz_attempts").select("*").eq("student_id", studentId).order("completed_at", { ascending: false }),
   ]);
 
   if (studentErr || markErr) return { studentId, error: (studentErr || markErr).message };
@@ -162,51 +161,11 @@ async function loadStudentReport(studentId) {
     }))
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
-  return { student, items, attendance: attendancePct(attendance), quizAttempts: quizAttempts || [] };
+  return { student, items, attendance: attendancePct(attendance) };
 }
-
-function renderQuizAttempts(attempts) {
-  const list = $("srQuizList");
-  const empty = $("srQuizEmpty");
-  if (!list) return;
-
-  empty.hidden = attempts.length > 0;
-  list.innerHTML = attempts.map((a, idx) => {
-    const pct = Math.round((100 * a.score) / a.total);
-    return `
-    <div class="quiz-attempt-item">
-      <button type="button" class="quiz-attempt-toggle" data-quiz-toggle="${idx}">
-        <span class="quiz-attempt-title">${esc(a.quiz_title)}</span>
-        <span class="quiz-attempt-meta">${esc(a.subject)} · ${fmtDateTime(a.completed_at)}</span>
-        <span class="quiz-attempt-score">${a.score}/${a.total} (${pct}%)</span>
-      </button>
-      <div class="quiz-attempt-detail" id="quizDetail${idx}" hidden>
-        ${(a.answers || []).map((q) => `
-          <div class="quiz-answer-row ${q.correct ? "right" : "wrong"}">
-            <div class="quiz-answer-top">
-              <span class="quiz-answer-topic">${esc(q.topic || "")}</span>
-              <span class="quiz-answer-badge">${q.correct ? "✓ Correct" : "✗ Incorrect"}</span>
-            </div>
-            <p class="quiz-answer-q">${esc(q.question)}</p>
-            ${q.question_type === "mcq"
-              ? `<p class="quiz-answer-detail">Picked: <strong>${esc(q.picked)}</strong>${q.correct ? "" : ` · Correct: <strong>${esc(q.correctOption)}</strong>`}</p>`
-              : `<p class="quiz-answer-detail">Typed answer: ${q.typedAnswer ? `"${esc(q.typedAnswer)}"` : "<em>(left blank)</em>"}</p>`
-            }
-          </div>`).join("")}
-      </div>
-    </div>`;
-  }).join("");
-}
-
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-quiz-toggle]");
-  if (!btn) return;
-  const detail = document.getElementById(`quizDetail${btn.dataset.quizToggle}`);
-  if (detail) detail.hidden = !detail.hidden;
-});
 
 function render(report) {
-  const { student, items, error, attendance, quizAttempts } = report;
+  const { student, items, error, attendance } = report;
 
   if (error || !student) {
     $("srAvatar").textContent = "?";
@@ -227,13 +186,8 @@ function render(report) {
     $("srWorkList").innerHTML = "";
     $("srWorkEmpty").hidden = false;
     $("srWorkEmpty").textContent = "Couldn't load.";
-    $("srQuizList").innerHTML = "";
-    $("srQuizEmpty").hidden = false;
-    $("srQuizEmpty").textContent = "Couldn't load.";
     return;
   }
-
-  renderQuizAttempts(quizAttempts || []);
 
   $("srAvatar").textContent = student.initials;
   $("srName").textContent = student.name;
