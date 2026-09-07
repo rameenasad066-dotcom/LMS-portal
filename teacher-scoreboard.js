@@ -170,11 +170,17 @@ async function renderScoreboardReal() {
   });
 
   currentRows = (!error && data && data.fullList) || [];
+  const unranked = (!error && data && data.unranked) || [];
   const has = currentRows.length > 0;
   const isCurrent = !selectedMonth;
 
   $("sbRows").hidden = !has;
   $("podiumEmpty").hidden = has;
+
+  $("sbUnranked").hidden = unranked.length === 0;
+  $("sbUnrankedList").innerHTML = unranked
+    .map((s) => `<span class="sb-unranked-chip">${esc(s.initials)} · ${esc(s.name)}</span>`)
+    .join("");
   $("scoreboardHint").textContent = has
     ? `${monthLabel(selectedMonth || currentMonthIso())} · computed live from marks`
     : "";

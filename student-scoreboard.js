@@ -108,9 +108,18 @@ export async function renderStudentScoreboard() {
   if (!rows || !empty) return;
 
   const fullList = (!error && data && data.fullList) || [];
+  const unranked = (!error && data && data.unranked) || [];
   const has = fullList.length > 0;
   rows.hidden = !has;
   empty.hidden = has;
+
+  const unrankedBox = $("sbUnranked");
+  if (unrankedBox) {
+    unrankedBox.hidden = unranked.length === 0;
+    $("sbUnrankedList").innerHTML = unranked
+      .map((s) => `<span class="sb-unranked-chip">${esc(s.initials)} · ${esc(s.name)}${s.id === myId ? ' <span class="you-tag">YOU</span>' : ""}</span>`)
+      .join("");
+  }
 
   if (error) {
     empty.textContent = `Couldn't load the scoreboard: ${error.message}`;

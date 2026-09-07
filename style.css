@@ -2013,6 +2013,35 @@ button, input, select {
   color: var(--sb-muted);
 }
 
+.sb-unranked {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 3px dashed var(--sb-ink);
+}
+
+.sb-unranked-title {
+  font: 700 12.5px 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sb-muted);
+  margin-bottom: 10px;
+}
+
+.sb-unranked-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sb-unranked-chip {
+  font: 600 13px 'Inter', sans-serif;
+  background: var(--sb-surface);
+  border: 2px solid var(--sb-ink);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: var(--sb-ink);
+}
+
 @media (max-width: 640px) {
   .sb-panel {
     padding: 20px 16px;
