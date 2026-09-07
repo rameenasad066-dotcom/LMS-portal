@@ -6,7 +6,7 @@
 <script>(function(){try{var t=localStorage.getItem('swr_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <title>Teacher Portal · Study With Rameen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Anton&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-checking">
@@ -587,18 +587,22 @@
 
       <!-- ================= VIEW: SCOREBOARD ================= -->
       <section class="view" data-view="scoreboard" hidden>
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Monthly Scoreboard</h2>
-            <span class="panel-hint" id="scoreboardHint"></span>
-            <div class="panel-tools">
-              <select id="scoreboardMonth" class="tool-select"></select>
+        <div class="sb-panel">
+          <div class="sb-head-row">
+            <div>
+              <span class="sb-live-pill">Live</span>
+              <h1 class="sb-title">Scoreboard</h1>
+              <div class="sb-sub" id="scoreboardHint"></div>
+            </div>
+            <div class="sb-controls">
+              <select id="scoreboardMonth" class="sb-month-select"></select>
             </div>
           </div>
-          <div class="podium" id="podium"></div>
-          <p class="score-note" id="scoreNote">Every student's rank is visible to the whole cohort — raw marks always stay private.</p>
-          <ol class="rank-list" id="rankList"></ol>
+
+          <div class="sb-rows" id="sbRows"></div>
           <p class="empty-note" id="podiumEmpty" hidden>No scoreboard yet — the first monthly ranking is published after the first marked test.</p>
+
+          <div class="sb-footer" id="sbFooter">Students see ranks only — raw marks always stay private. Click a student for a detail card.</div>
         </div>
       </section>
 

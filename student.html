@@ -6,7 +6,7 @@
 <script>(function(){try{var t=localStorage.getItem('swr_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <title>Student Portal · Study With Rameen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Anton&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-checking">
@@ -278,22 +278,22 @@
 
       <!-- ================= VIEW: SCOREBOARD ================= -->
       <section class="view" data-view="scoreboard" hidden>
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Monthly Scoreboard 🏆</h2>
-            <span class="panel-hint" id="sScoreboardHint">Computed live from marked work this month</span>
-            <div class="panel-tools">
-              <select id="sScoreboardMonth" class="tool-select"></select>
+        <div class="sb-panel">
+          <div class="sb-head-row">
+            <div>
+              <span class="sb-live-pill">Live</span>
+              <h1 class="sb-title">Scoreboard</h1>
+              <div class="sb-sub" id="sScoreboardHint">Computed live from marked work this month</div>
+            </div>
+            <div class="sb-controls">
+              <select id="sScoreboardMonth" class="sb-month-select"></select>
             </div>
           </div>
 
-          <p class="rank-callout" id="sRankCallout"></p>
-
-          <div class="podium" id="sPodium"></div>
-
-          <p class="score-note" id="scoreNote" hidden>Every student's rank is visible to the whole cohort — marks are never shown. A fresh scoreboard starts on the 1st of every month.</p>
-          <ol class="rank-list" id="sRankList"></ol>
+          <div class="sb-rows" id="sbRows"></div>
           <p class="empty-note" id="podiumEmpty" hidden>No scoreboard yet — the first monthly ranking is published after the first marked assignment.</p>
+
+          <div class="sb-footer" id="sbFooter">Students see ranks only — raw marks always stay private.</div>
         </div>
       </section>
 
