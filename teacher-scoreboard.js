@@ -1,14 +1,19 @@
 /* Real scoreboard (teacher.html) — Phase 2 of the progress system. Replaces
    the old hardcoded COHORT_SCOREBOARD. Calls the get_scoreboard() Postgres
    function (SECURITY DEFINER — computes ranks server-side so raw marks
-   never need to be exposed to the client at all, teacher included; the
-   teacher only ever sees the same top-3 highlight students do). Runs as a
-   module — see teacher-auth-guard.js for the script-order reasoning.
+   never need to be exposed to the client at all, teacher included). Runs
+   as a module — see teacher-auth-guard.js for the script-order reasoning.
 
    Month picker added 2026-09-04 — get_scoreboard() used to be hard-locked
    to the current calendar month, with no way for her (or a student) to
    look back once it rolled over. get_scoreboard_months() supplies the
-   dropdown's options, scoped to whichever cohort pill is active. */
+   dropdown's options, scoped to whichever cohort pill is active.
+
+   Full ranked list added 2026-09-04, same day — she reported "only 3
+   students are showing" and wanted every student's rank visible, not just
+   the top-3 podium highlight. `data.fullList` (every ranked student, in
+   order) now renders below the podium as `#rankList`; raw marks/percentages
+   still never leave get_scoreboard() at all. */
 
 import { supabase } from "./supabase-config.js";
 
@@ -53,6 +58,7 @@ async function renderScoreboardReal() {
   const isCurrent = !selectedMonth;
   $("podium").hidden = !has;
   $("scoreNote").hidden = !has;
+  $("rankList").hidden = !has;
   $("podiumEmpty").hidden = has;
   $("scoreboardHint").textContent = has
     ? `${monthLabel(selectedMonth || currentMonthIso())} · computed live from marks`
@@ -83,6 +89,14 @@ async function renderScoreboardReal() {
     p1 ? col(p1, "1", "first") : "",
     p3 ? col(p3, "3", "third") : "",
   ].join("");
+
+  const fullList = data.fullList || [];
+  $("rankList").innerHTML = fullList.map((entry) => `
+    <li class="rank-list-item">
+      <span class="rank-list-num">#${entry.rank}</span>
+      <span class="avatar-initials sm">${esc(entry.initials)}</span>
+      <span class="rank-list-name">${esc(entry.name)}</span>
+    </li>`).join("");
 }
 
 document.querySelectorAll(".pill").forEach((pill) =>

@@ -1,11 +1,9 @@
 /* Real scoreboard (dashboard mini-podium + full Scoreboard page,
    student.html) — Phase 2 of the progress system. Replaces the old
    hardcoded SCOREBOARD object. Calls the same get_scoreboard() Postgres
-   function the teacher side uses — it returns only the top-3 names and the
-   caller's own rank, never raw marks or percentages, so the "students see
-   ranks only" rule holds even though the calculation genuinely runs across
-   the whole cohort's marks. Exported rather than self-running because it
-   needs STUDENT.cohortId — auth-guard.js calls this once the profile has
+   function the teacher side uses — raw marks/percentages never leave it,
+   only names + ranks. Exported rather than self-running because it needs
+   STUDENT.cohortId — auth-guard.js calls this once the profile has
    resolved.
 
    Month picker added 2026-09-04 — get_scoreboard() used to be hard-locked
@@ -13,7 +11,13 @@
    finished month's ranking once it rolled over. selectedMonth (an ISO
    'YYYY-MM-01' string, or null for "current") is passed straight through
    to the RPC; get_scoreboard_months() supplies the dropdown's options so
-   it only ever offers months that actually have a scoreboard. */
+   it only ever offers months that actually have a scoreboard.
+
+   Full ranked list added 2026-09-04, same day — she asked for every
+   student's rank to be visible to everyone, not just a top-3 highlight
+   plus your own rank. `data.fullList` (every ranked student, in order)
+   renders below the podium as `#sRankList`, with the caller's own row
+   tagged "YOU" the same way the podium already does. */
 
 import { supabase } from "./supabase-config.js";
 
@@ -80,7 +84,7 @@ export async function renderStudentScoreboard() {
   const rc = document.getElementById("sRankCallout");
   if (rc) {
     rc.textContent = data && data.yourRank
-      ? `Your rank: #${data.yourRank} · visible only to you`
+      ? `Your rank: #${data.yourRank}`
       : isCurrent
       ? "Not yet ranked this month — your rank appears once your work is marked."
       : "You weren't ranked that month — no marked work in that period.";
@@ -88,6 +92,19 @@ export async function renderStudentScoreboard() {
 
   const podium = document.getElementById("sPodium");
   if (podium) podium.innerHTML = has ? podiumRowHTML(data.top3, myId) : "";
+
+  const rankList = $("sRankList");
+  if (rankList) {
+    rankList.hidden = !has;
+    const fullList = (data && data.fullList) || [];
+    rankList.innerHTML = fullList.map((entry) => `
+      <li class="rank-list-item${entry.id === myId ? " you" : ""}">
+        <span class="rank-list-num">#${entry.rank}</span>
+        <span class="avatar-initials sm">${esc(entry.initials)}</span>
+        <span class="rank-list-name">${esc(entry.name)}${entry.id === myId ? ' <span class="you-tag">YOU</span>' : ""}</span>
+      </li>`).join("");
+  }
+
   const note = document.getElementById("scoreNote");
   if (note) note.hidden = !has;
   const empty = document.getElementById("podiumEmpty");

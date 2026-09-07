@@ -1752,6 +1752,50 @@ button, input, select {
   margin-top: 4px;
 }
 
+/* Full ranked list under the top-3 podium — added 2026-09-04 so every
+   student's rank (never their marks) is visible, not just the top 3. */
+.rank-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.rank-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.rank-list-item.you {
+  background: var(--red-blush-soft);
+  border-radius: var(--radius-sm);
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.rank-list-num {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gray);
+  width: 30px;
+  flex-shrink: 0;
+}
+
+.rank-list-item:nth-child(-n+3) .rank-list-num {
+  color: var(--ink-green);
+}
+
+.rank-list-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+
 /* ==========================================================================
    Settings form
    ========================================================================== */
