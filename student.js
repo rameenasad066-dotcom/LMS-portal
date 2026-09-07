@@ -159,12 +159,14 @@ function noteCardHTML(n) {
   </article>`;
 }
 
-/* A top-level chapter either holds items directly, or (if it has
-   sub-chapters) holds them via its sub-chapters — never both. */
+/* Everything under a top-level chapter: items filed on it directly, PLUS
+   items filed on any of its sub-chapters. A topic can hold both at once
+   (Manage Content allows it), so this must never drop one in favour of
+   the other. */
 function chapterItems(chapterId, arr) {
   const subs = CHAPTERS.filter(sc => sc.parentId === chapterId);
-  if (!subs.length) return arr.filter(x => x.chapter === chapterId);
-  return subs.flatMap(sub => arr.filter(x => x.chapter === sub.id));
+  const own = arr.filter(x => x.chapter === chapterId);
+  return own.concat(subs.flatMap(sub => arr.filter(x => x.chapter === sub.id)));
 }
 
 function renderDrill(view) {
@@ -199,9 +201,16 @@ function renderDrill(view) {
   chEl.innerHTML = '<div class="chapter-list">' + chapters.map((c, i) => {
     const subs = CHAPTERS.filter(sc => sc.parentId === c.id);
     const items = chapterItems(c.id, arr);
+    const ownItems = arr.filter(x => x.chapter === c.id);
     const open  = st.chapter === c.id;
 
-    const bodyHTML = subs.length
+    // Items filed directly on the topic (if any) render first, then its
+    // sub-topics below — a topic can hold both at once.
+    const ownHTML = ownItems.length
+      ? `<div class="${isVault ? 'lecture-grid' : 'note-grid'}">${ownItems.map(isVault ? lectureCardHTML : noteCardHTML).join('')}</div>`
+      : '';
+
+    const subsHTML = subs.length
       ? '<div class="sub-chapter-list">' + subs
           .filter(sub => arr.some(x => x.chapter === sub.id))
           .map((sub, j) => {
@@ -224,7 +233,9 @@ function renderDrill(view) {
             </div>
           </div>`;
           }).join('') + '</div>'
-      : `<div class="${isVault ? 'lecture-grid' : 'note-grid'}">${items.map(isVault ? lectureCardHTML : noteCardHTML).join('')}</div>`;
+      : '';
+
+    const bodyHTML = ownHTML + subsHTML;
 
     return `
     <div class="ch-item ${open ? 'open' : ''}">
