@@ -41,7 +41,10 @@ function populateSubChapterDropdown() {
   const empty = $("lecNoSubChapters");
 
   if (subs.length) {
-    sel.innerHTML = subs.map((c) => `<option value="${c.id}">${c.title}</option>`).join("");
+    sel.innerHTML =
+      `<option value="">— No sub-chapter (file directly under ${esc(chapterLabel(chapterId))}) —</option>` +
+      subs.map((c) => `<option value="${c.id}">${c.title}</option>`).join("");
+    sel.value = "";
     sel.hidden = false;
     empty.hidden = true;
   } else {
