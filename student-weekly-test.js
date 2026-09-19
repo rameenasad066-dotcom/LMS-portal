@@ -18,9 +18,28 @@ function fmtDateTime(iso) {
   });
 }
 
+// A device's own clock/timezone is often wrong (phones especially — auto-
+// time off, wrong region), which would make the "uploads closed" UI decision
+// wrong too. Sync once against the server's real clock and use that offset
+// everywhere instead of trusting Date.now() directly. The actual cutoff is
+// still enforced server-side in Postgres regardless — this only fixes what
+// the page decides to *show*.
+let clockOffsetMs = 0;
+
+async function syncServerClock() {
+  const { data, error } = await supabase.rpc("get_server_time");
+  if (!error && data) clockOffsetMs = new Date(data).getTime() - Date.now();
+}
+
+function serverNow() {
+  return Date.now() + clockOffsetMs;
+}
+
 export async function renderStudentWeeklyTest() {
   const area = document.getElementById("weeklyArea");
   if (!area) return;
+
+  await syncServerClock();
 
   const { data: tests, error } = await supabase
     .from("weekly_tests")
@@ -54,7 +73,7 @@ export async function renderStudentWeeklyTest() {
 
   area.innerHTML = tests.map((t) => {
     const sub = subBy[t.id];
-    const closed = new Date() > new Date(t.closes_at);
+    const closed = serverNow() > new Date(t.closes_at).getTime();
 
     let statusHTML;
     if (sub) {
@@ -110,7 +129,7 @@ document.addEventListener("submit", async (e) => {
   // real boundary, but this stops orphaned files landing in storage and gives
   // a clean message instead of leaning on the RLS error text.
   const closesAt = form.dataset.wtCloses;
-  if (closesAt && Date.now() >= new Date(closesAt).getTime()) {
+  if (closesAt && serverNow() >= new Date(closesAt).getTime()) {
     showToast("Uploads closed", "The deadline for this test has passed.");
     await renderStudentWeeklyTest();
     return;
