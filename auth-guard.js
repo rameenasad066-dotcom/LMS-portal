@@ -9,6 +9,7 @@
 
 import { supabase } from "./supabase-config.js";
 import { renderAnnouncements } from "./student-announcements.js";
+import { initNotifications } from "./student-notifications.js";
 import { loadRealNotes } from "./student-notes.js";
 import { loadRealLectures } from "./student-lectures.js";
 import { loadWatchedLectures } from "./student-watched.js";
@@ -94,25 +95,41 @@ async function init() {
 
   applyIdentity();
   if (STUDENT.isPreview) document.body.classList.add("preview-mode");
-  await renderAnnouncements();
-  await loadChapters(STUDENT.cohortId);
-  await loadRealNotes();
-  renderNotes();
-  await loadRealLectures();
-  await loadWatchedLectures();
-  renderVault();
+  // Each loader is isolated: one throwing used to abort init() before the
+  // overlay below was cleared, leaving the student on "Checking your
+  // session…" forever with no error and no retry.
+  await safely("announcements", renderAnnouncements);
+  await safely("notifications", initNotifications);
+  await safely("chapters", () => loadChapters(STUDENT.cohortId));
+  await safely("notes", async () => {
+    await loadRealNotes();
+    renderNotes();
+  });
+  await safely("lectures", async () => {
+    await loadRealLectures();
+    await loadWatchedLectures();
+    renderVault();
+  });
   // Dashboard's Syllabus Tracker rings also read LECTURES + WATCHED_LECTURE_IDS
   // (subjectProgress() in data.js) — re-render so they reflect real data, not
   // the empty pre-auth state from student.js's initial renderAll().
-  renderDashboard();
-  await renderStudentAssignments();
-  await renderStudentWeeklyTest();
-  await renderStudentScoreboard();
-  await renderStudentGrades();
-  initStudentSettings();
+  await safely("dashboard", renderDashboard);
+  await safely("assignments", renderStudentAssignments);
+  await safely("weekly test", renderStudentWeeklyTest);
+  await safely("scoreboard", renderStudentScoreboard);
+  await safely("grades", renderStudentGrades);
+  await safely("settings", initStudentSettings);
   if (!STUDENT.isPreview) startSessionWatch(session.user.id);
   document.body.classList.remove("auth-checking");
   overlay.hidden = true;
+}
+
+async function safely(label, fn) {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`[auth-guard] ${label} failed to load`, err);
+  }
 }
 
 function showPreviewBanner() {

@@ -5,7 +5,7 @@
    table (set up once in the Supabase SQL Editor — ask Claude for the SQL
    if you need to recreate it). */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 export const SUPABASE_URL = "https://dtjdoblwxrikujmkzwgt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_qV4qxDZbeThJXfUJU3cBLg_1VGFbPCA";

@@ -2638,6 +2638,11 @@ body.auth-checking .layout {
   font-size: 18px;
 }
 
+.stat-value.down {
+  color: var(--ink-red);
+  font-size: 18px;
+}
+
 /* ==========================================================================
    Student portal — lecture vault grid & cards
    ========================================================================== */
@@ -4043,6 +4048,10 @@ body.auth-checking .layout {
   color: var(--ink-green);
 }
 
+.stat-sub.down {
+  color: var(--ink-red);
+}
+
 .report-chart-svg {
   width: 100%;
   height: auto;
@@ -4515,6 +4524,139 @@ body.auth-checking .layout {
   }
   .lecture-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Notifications — student topnav bell + unread-announcements panel
+   ========================================================================== */
+
+.icon-btn .badge[hidden] {
+  display: none;
+}
+
+#notifBadge {
+  width: auto;
+  min-width: 17px;
+  padding: 0 3px;
+  border-radius: 999px;
+}
+
+.notif-panel {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  max-height: 460px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 150;
+}
+
+.notif-panel[hidden] {
+  display: none;
+}
+
+.notif-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.notif-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+}
+
+.notif-item + .notif-item {
+  margin-top: 2px;
+}
+
+.notif-item.unread {
+  background: var(--red-blush-soft);
+  border-left-color: var(--red);
+}
+
+.notif-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.notif-item.tag-action .ann-tag {
+  background: var(--red-blush);
+  color: var(--ink-red);
+}
+
+.notif-item.tag-info .ann-tag {
+  background: var(--surface-2);
+  color: var(--gray);
+}
+
+.notif-date {
+  font-size: 11px;
+  color: var(--gray-soft);
+}
+
+.notif-item strong {
+  display: block;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.notif-item p {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--gray);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notif-empty {
+  padding: 18px 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+  text-align: center;
+}
+
+.notif-foot {
+  display: block;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-red);
+  text-align: center;
+  text-decoration: none;
+}
+
+.notif-foot:hover {
+  background: var(--surface-2);
+}
+
+@media (max-width: 640px) {
+  .notif-panel {
+    right: 16px;
   }
 }
 

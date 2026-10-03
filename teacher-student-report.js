@@ -7,6 +7,7 @@
    every student's marks, so no privacy boundary needs crossing here. */
 
 import { supabase, COURSES, subjectsForCourses, coursesForSubjects } from "./supabase-config.js";
+import { byChronology, trendFromPrevious, equalThirdsAvg } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -60,25 +61,6 @@ function letterGrade(pct) {
   if (pct >= 60) return { label: "C", cls: "mid" };
   if (pct >= 50) return { label: "D", cls: "mid" };
   return { label: "U", cls: "risk" };
-}
-
-// Same equal-thirds logic as get_scoreboard() (scoreboard.sql): average the
-// per-category (homework/assignment/test) points-earned/points-possible %,
-// skipping any category with zero graded items rather than counting it as
-// 0 — a category isn't averaged in until it exists. This "Average" stat is
-// all-time (not month-scoped like the Scoreboard's rank), so it reflects
-// the student's whole history, category-balanced the same way.
-function equalThirdsAvg(items) {
-  const byType = {};
-  items.forEach((it) => {
-    if (!byType[it.type]) byType[it.type] = { earned: 0, possible: 0 };
-    byType[it.type].earned += it.marksVal;
-    byType[it.type].possible += it.maxMarks;
-  });
-  const categoryPcts = Object.values(byType)
-    .filter((c) => c.possible > 0)
-    .map((c) => (100 * c.earned) / c.possible);
-  return Math.round(categoryPcts.reduce((s, p) => s + p, 0) / categoryPcts.length);
 }
 
 function zoneColorFor(pct) {
@@ -154,12 +136,13 @@ async function loadStudentReport(studentId) {
       title: m.assignments.title,
       type: m.assignments.type,
       dueDate: m.assignments.due_date,
+      markedAt: m.marked_at,
       marksVal: m.marks,
       maxMarks: m.assignments.max_marks,
       pct: Math.round((100 * m.marks) / m.assignments.max_marks),
       feedback: m.feedback,
     }))
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    .sort(byChronology);
 
   return { student, items, attendance: attendancePct(attendance) };
 }
@@ -175,6 +158,7 @@ function render(report) {
     $("srCourses").innerHTML = "";
     $("srLatestPct").textContent = "—";
     $("srLatestTrend").textContent = "";
+    $("srLatestTrend").classList.remove("up", "down");
     $("srBand").textContent = "—";
     $("srAvgPct").textContent = "—";
     $("srAvgSub").textContent = "";
@@ -203,6 +187,7 @@ function render(report) {
   if (!items.length) {
     $("srLatestPct").textContent = "—";
     $("srLatestTrend").textContent = "";
+    $("srLatestTrend").classList.remove("up", "down");
     $("srBand").textContent = "—";
     $("srAvgPct").textContent = "—";
     $("srAvgSub").textContent = "No graded work yet";
@@ -216,19 +201,15 @@ function render(report) {
   }
 
   const latest = items[items.length - 1];
-  const prev = items.length >= 2 ? items[items.length - 2] : null;
+  const trend = trendFromPrevious(items);
+  // All-time equal-thirds average (the Scoreboard's own is month-scoped).
   const avgPct = equalThirdsAvg(items);
   const band = letterGrade(latest.pct);
 
   $("srLatestPct").textContent = `${latest.pct}%`;
-  if (prev) {
-    const delta = latest.pct - prev.pct;
-    $("srLatestTrend").textContent = `${delta >= 0 ? "+" : ""}${delta}% from previous`;
-    $("srLatestTrend").classList.toggle("up", delta > 0);
-  } else {
-    $("srLatestTrend").textContent = "First graded item";
-    $("srLatestTrend").classList.remove("up");
-  }
+  $("srLatestTrend").textContent = trend ? `${trend.deltaText} · ${trend.label}` : "First graded item";
+  $("srLatestTrend").classList.toggle("up", !!trend && trend.dir === "up");
+  $("srLatestTrend").classList.toggle("down", !!trend && trend.dir === "down");
   $("srBand").textContent = band.label;
   $("srAvgPct").textContent = `${avgPct}%`;
   $("srAvgSub").textContent = `across ${items.length} submission${items.length === 1 ? "" : "s"}`;

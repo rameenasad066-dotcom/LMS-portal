@@ -7,6 +7,7 @@
    Reads globals from teacher.js: activeCohort, COHORT_DATA, esc, subjectName. */
 
 import { supabase } from "./supabase-config.js";
+import { equalThirdsAvg } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -82,19 +83,19 @@ async function renderDashboard() {
   nudge.hidden = !studentList.length || markedToday;
 
   /* ---- Needs attention (real: low average or low attendance) ---- */
+  // Equal-thirds average, same as the Student Report this row links through to.
   const marksByStudent = {};
   markList.forEach((m) => {
-    const max = asgById[m.assignment_id] && asgById[m.assignment_id].max_marks;
-    if (!max) return;
-    (marksByStudent[m.student_id] ||= []).push((100 * m.marks) / max);
+    const a = asgById[m.assignment_id];
+    if (!a || !a.max_marks) return;
+    (marksByStudent[m.student_id] ||= []).push({ type: a.type, marksVal: m.marks, maxMarks: a.max_marks });
   });
   const attByStudent = {};
   attList.forEach((r) => { (attByStudent[r.student_id] ||= []).push(r.status); });
 
   const flagged = [];
   studentList.forEach((s) => {
-    const pcts = marksByStudent[s.id] || [];
-    const avg = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+    const avg = equalThirdsAvg(marksByStudent[s.id] || []);
     // "Leave" is an excused absence — excluded from the % entirely.
     const att = (attByStudent[s.id] || []).filter((x) => x !== "leave");
     const attPct = att.length ? Math.round((100 * att.filter((x) => x === "present").length) / att.length) : null;

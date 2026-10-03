@@ -8,6 +8,7 @@
    the same post-auth render sequence as everything else is simplest). */
 
 import { supabase } from "./supabase-config.js";
+import { byChronology, trendFromPrevious } from "./progress-utils.js";
 
 function letterGrade(pct) {
   if (pct >= 90) return { label: "A*", cls: "" };
@@ -24,8 +25,8 @@ function zoneColorFor(pct) {
   return "var(--red)";
 }
 
-function fmtDate(iso) {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+function fmtDue(isoDate) {
+  return new Date(isoDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 // Same hand-rolled SVG line chart as teacher-student-report.js — kept as a
@@ -71,7 +72,7 @@ export async function renderStudentGrades() {
   const uid = STUDENT.id;
   if (!uid) return;
 
-  const [{ data: marks, error: markErr }, { data: subs }, { data: attendance }] = await Promise.all([
+  const [{ data: marks, error: markErr }, { data: subs }, { data: attendance, error: attErr }] = await Promise.all([
     supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", uid),
     supabase.from("submissions").select("*").eq("student_id", uid),
     supabase.from("attendance").select("status").eq("student_id", uid),
@@ -80,7 +81,10 @@ export async function renderStudentGrades() {
   // "Leave" is an excused absence — excluded from the % entirely, unlike
   // a plain Absent which counts against it.
   const countableAtt = (attendance || []).filter((r) => r.status !== "leave");
-  if (countableAtt.length) {
+  if (attErr) {
+    set("sAttendancePct", "—");
+    set("sAttendanceSub", "Couldn't load attendance");
+  } else if (countableAtt.length) {
     const present = countableAtt.filter((r) => r.status === "present").length;
     set("sAttendancePct", `${Math.round((100 * present) / countableAtt.length)}%`);
     set("sAttendanceSub", `across ${countableAtt.length} class${countableAtt.length === 1 ? "" : "es"}`);
@@ -105,51 +109,51 @@ export async function renderStudentGrades() {
     pendingAssignments = data || [];
   }
 
-  const gradedRows = (marks || []).map((m) => ({
+  // A mark whose assignment this student can no longer read (moved cohort,
+  // or a course removed since it was graded) comes back with a null embed —
+  // skip it rather than throw, which used to lock the whole portal.
+  const gradedRows = (marks || []).filter((m) => m.assignments).map((m) => ({
     title: m.assignments.title,
-    date: fmtDate(m.marked_at),
+    dueDate: m.assignments.due_date,
+    markedAt: m.marked_at,
     status: "graded",
     pct: Math.round((m.marks / m.assignments.max_marks) * 100),
     marksVal: m.marks,
     maxMarks: m.assignments.max_marks,
     feedback: m.feedback,
-    sortTs: new Date(m.marked_at).getTime(),
   }));
 
   const pendingRows = pendingSubs.map((s) => {
     const a = pendingAssignments.find((x) => x.id === s.assignment_id);
     return {
       title: a ? a.title : "Assignment",
-      date: fmtDate(s.submitted_at),
+      dueDate: a ? a.due_date : s.submitted_at.slice(0, 10),
+      markedAt: s.submitted_at,
       status: "pending",
       feedback: null,
-      sortTs: new Date(s.submitted_at).getTime(),
     };
   });
 
-  const allRows = [...gradedRows, ...pendingRows].sort((a, b) => b.sortTs - a.sortTs);
-  const chronological = gradedRows.slice().sort((a, b) => a.sortTs - b.sortTs);
+  const allRows = [...gradedRows, ...pendingRows].sort((a, b) => byChronology(b, a));
+  const chronological = gradedRows.slice().sort(byChronology);
 
-  const latest = gradedRows.slice().sort((a, b) => b.sortTs - a.sortTs)[0];
+  const latest = chronological[chronological.length - 1];
   set("sGradeLatest", latest ? letterGrade(latest.pct).label : "—");
-  set("sGradeLatestSub", latest ? `${latest.title} · ${latest.date}` : "No grades yet");
+  set("sGradeLatestSub", latest ? `${latest.title} · due ${fmtDue(latest.dueDate)}` : "No grades yet");
   set("sGradeTaken", String(allRows.length));
   set("sGradeTakenSub", `${pendingRows.length} pending review`);
 
   const trendEl = document.getElementById("sGradeTrend");
-  if (chronological.length >= 2) {
-    const mid = Math.floor(chronological.length / 2) || 1;
-    const firstAvg = chronological.slice(0, mid).reduce((s, r) => s + r.pct, 0) / mid;
-    const secondAvg = chronological.slice(mid).reduce((s, r) => s + r.pct, 0) / (chronological.length - mid);
-    const diff = secondAvg - firstAvg;
-    if (trendEl) {
-      trendEl.textContent = diff > 3 ? "Improving" : diff < -3 ? "Declining" : "Steady";
-      trendEl.classList.toggle("up", diff > 3);
-    }
-    set("sGradeTrendSub", chronological.slice(-4).map((r) => letterGrade(r.pct).label).join(" → "));
+  const trend = trendFromPrevious(chronological);
+  if (trendEl) {
+    trendEl.textContent = trend ? trend.label : "—";
+    trendEl.classList.toggle("up", !!trend && trend.dir === "up");
+    trendEl.classList.toggle("down", !!trend && trend.dir === "down");
+  }
+  if (trend) {
+    set("sGradeTrendSub", `${trend.deltaText} · ${chronological.slice(-4).map((r) => letterGrade(r.pct).label).join(" → ")}`);
   } else {
-    if (trendEl) { trendEl.textContent = "—"; trendEl.classList.remove("up"); }
-    set("sGradeTrendSub", chronological.length ? letterGrade(chronological[0].pct).label : "No grades yet");
+    set("sGradeTrendSub", chronological.length ? `First graded item · ${letterGrade(chronological[0].pct).label}` : "No grades yet");
   }
 
   const chartEl = document.getElementById("sGradeChart");
@@ -170,7 +174,7 @@ export async function renderStudentGrades() {
         return `
       <tr>
         <td data-label="Item"><strong>${esc(r.title)}</strong></td>
-        <td data-label="Submitted">${esc(r.date)}</td>
+        <td data-label="Due">${esc(fmtDue(r.dueDate))}</td>
         <td data-label="Status"><span class="status-pill ${r.status === "graded" ? "ontime" : "muted"}">${r.status === "graded" ? "Graded" : "Pending review"}</span></td>
         <td data-label="Grade">${g ? `
           <span class="grade-chip ${g.cls}">${g.label}</span> <small>${r.marksVal}/${r.maxMarks} · ${r.pct}%</small>

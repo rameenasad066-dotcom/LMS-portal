@@ -19,7 +19,7 @@
 // custom names above and the SUPABASE_-prefixed auto-injected ones, in case
 // those turn out to be available too.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 // Only the real deployed site (and local dev) may call this function from a
 // browser. The JWT + TEACHER_UID check below is the actual security
@@ -28,7 +28,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const ALLOWED_ORIGINS = [
   "https://studywithrameen-lms.netlify.app",
   "http://localhost:5501",
-  "http://localhost:5500",
 ];
 
 function corsHeaders(req: Request) {

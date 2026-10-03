@@ -15,12 +15,11 @@
 //   TEACHER_UID, PROJECT_URL, ANON_KEY, SERVICE_ROLE_KEY
 // Add them again for this function (Supabase secrets are per-function).
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 const ALLOWED_ORIGINS = [
   "https://studywithrameen-lms.netlify.app",
   "http://localhost:5501",
-  "http://localhost:5500",
 ];
 
 function corsHeaders(req: Request) {

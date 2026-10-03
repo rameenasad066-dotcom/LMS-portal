@@ -41,10 +41,12 @@ let SYLLABUS_FACTS = [];
 async function loadData() {
   const [content, facts] = await Promise.all([
     fetch('data/content.json').then(r => r.json()),
-    fetch('data/owl-facts.json').then(r => r.json()),
+    // Decorative — a broken facts file must not block the portals, which
+    // wait on loadData() before rendering anything real.
+    fetch('data/owl-facts.json').then(r => r.json()).catch(() => ({ facts: [] })),
   ]);
   SUBJECTS       = content.subjects;
-  SYLLABUS_FACTS = facts.facts;
+  SYLLABUS_FACTS = facts.facts || [];
 }
 
 /* The subjects this student can actually see, in the portal's display order.
