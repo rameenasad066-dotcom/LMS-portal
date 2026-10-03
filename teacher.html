@@ -531,6 +531,21 @@
 
         <div class="panel">
           <div class="panel-head">
+            <h2>Monthly report</h2>
+            <span class="panel-hint">Download a PDF progress report for one calendar month</span>
+          </div>
+          <form class="settings-form mr-form" id="mrForm">
+            <label for="mrMonth">Month</label>
+            <select id="mrMonth"></select>
+            <p class="mr-summary" id="mrSummary"></p>
+            <label for="mrRemarks">Teacher remarks</label>
+            <textarea id="mrRemarks" rows="4" maxlength="1500" placeholder="A few words for the student and their parents — printed on the report as written."></textarea>
+            <button type="submit" class="btn btn-primary" id="mrExport">Export Monthly PDF Report</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
             <h2>Marks over time</h2>
             <span class="panel-hint">Every graded item, in order</span>
           </div>
@@ -643,6 +658,7 @@
     </div>
   </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.14.0/html2pdf.bundle.min.js" integrity="sha384-EaWTV/aVUkLz3tfwg3+5ycX7Q/d9ET9ruOKUgUuFIRUCfzHO1eo2J62a844iWPmY" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script src="data.js"></script>
 <script src="teacher.js"></script>
 <script src="owl.js"></script>

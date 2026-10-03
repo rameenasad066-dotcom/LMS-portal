@@ -4661,6 +4661,261 @@ body.auth-checking .layout {
 }
 
 /* ==========================================================================
+   Monthly PDF report — Student Report panel + the exported document.
+   The .mr-pdf document deliberately uses fixed light hex values, not theme
+   tokens: it's rendered to a PDF, which must stay white-on-paper even when
+   the portal is in dark mode.
+   ========================================================================== */
+
+.mr-form {
+  max-width: 560px;
+}
+
+.mr-form select {
+  max-width: 260px;
+}
+
+.mr-summary {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+.mr-summary:empty {
+  display: none;
+}
+
+.mr-pdf-host {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  pointer-events: none;
+}
+
+.mr-pdf {
+  width: 720px;
+  padding: 4px 6px;
+  background: #ffffff;
+  color: #1A1A1A;
+  font-family: "Inter", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mr-pdf h3,
+.mr-pdf h4 {
+  font-family: "Poppins", Arial, sans-serif;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.mr-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid #C8202C;
+}
+
+.mr-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.mr-brand {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.mr-brand strong {
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #C8202C;
+}
+
+.mr-brand span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #3C9A44;
+}
+
+.mr-period {
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.mr-id {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: #FDF3F4;
+  border: 1px solid #EFCED1;
+  border-radius: 8px;
+}
+
+.mr-id span,
+.mr-card-label {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6B7280;
+}
+
+.mr-id strong {
+  font-size: 12.5px;
+}
+
+.mr-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mr-card {
+  padding: 12px 14px;
+  border: 1px solid #E5E7EB;
+  border-top: 3px solid #C8202C;
+  border-radius: 8px;
+}
+
+.mr-card-value {
+  display: block;
+  margin: 4px 0 2px;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.mr-card-sub {
+  font-size: 10.5px;
+  color: #6B7280;
+}
+
+.mr-trend-up { color: #2E7D36; }
+.mr-trend-same { color: #1A1A1A; }
+.mr-trend-down { color: #971822; }
+
+.mr-section {
+  margin-bottom: 12px;
+}
+
+.mr-section h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.mr-chart-img {
+  display: block;
+  width: 680px;
+  max-width: 100%;
+}
+
+.mr-group {
+  font-size: 12px;
+  margin: 10px 0 6px;
+  color: #971822;
+}
+
+.mr-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.mr-table th {
+  text-align: left;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #6B7280;
+  padding: 6px 8px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.mr-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #F1EFEF;
+  vertical-align: top;
+}
+
+.mr-table td:nth-child(n+2),
+.mr-table th:nth-child(n+2) {
+  white-space: nowrap;
+}
+
+.mr-type {
+  display: block;
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.mr-band {
+  display: inline-block;
+  min-width: 28px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  background: #E7F5E8;
+  color: #2E7D36;
+}
+
+.mr-band.mid {
+  background: #F3F1F1;
+  color: #1A1A1A;
+}
+
+.mr-band.risk {
+  background: #FBE7E9;
+  color: #971822;
+}
+
+.mr-empty {
+  margin: 0;
+  color: #6B7280;
+  font-style: italic;
+}
+
+.mr-remarks {
+  min-height: 60px;
+  padding: 12px 14px;
+  border: 1px solid #E5E7EB;
+  border-left: 3px solid #3C9A44;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mr-sign {
+  margin: 8px 0 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.mr-foot {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #E5E7EB;
+  font-size: 9.5px;
+  color: #9CA3AF;
+  text-align: center;
+}
+
+/* ==========================================================================
    Theme toggle + dark-mode component overrides
    (kept at the end so these win by source order over the base rules)
    ========================================================================== */
