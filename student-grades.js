@@ -74,7 +74,8 @@ export async function renderStudentGrades() {
 
   const [{ data: marks, error: markErr }, { data: subs }, { data: attendance, error: attErr }] = await Promise.all([
     supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", uid),
-    supabase.from("submissions").select("*").eq("student_id", uid),
+    // Assignment embedded so pending rows need no second round trip.
+    supabase.from("submissions").select("assignment_id, submitted_at, assignments(title, due_date)").eq("student_id", uid),
     supabase.from("attendance").select("status, subject").eq("student_id", uid),
   ]);
 
@@ -101,11 +102,6 @@ export async function renderStudentGrades() {
   const markedAssignmentIds = new Set((marks || []).map((m) => m.assignment_id));
   const pendingSubs = (subs || []).filter((s) => !markedAssignmentIds.has(s.assignment_id));
 
-  let pendingAssignments = [];
-  if (pendingSubs.length) {
-    const { data } = await supabase.from("assignments").select("*").in("id", pendingSubs.map((s) => s.assignment_id));
-    pendingAssignments = data || [];
-  }
 
   // A mark whose assignment this student can no longer read (moved cohort,
   // or a course removed since it was graded) comes back with a null embed —
@@ -122,7 +118,7 @@ export async function renderStudentGrades() {
   }));
 
   const pendingRows = pendingSubs.map((s) => {
-    const a = pendingAssignments.find((x) => x.id === s.assignment_id);
+    const a = s.assignments;
     return {
       title: a ? a.title : "Assignment",
       dueDate: a ? a.due_date : s.submitted_at.slice(0, 10),

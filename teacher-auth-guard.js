@@ -2,15 +2,16 @@
    just "any logged-in session," since student accounts share the same
    Supabase Auth user pool. Runs as a module (deferred until after teacher.js
    has run), same script-order reasoning as auth-guard.js on the student
-   side. Body gets .auth-checking (hides content) and #authOverlay is shown
-   until this resolves. The session check is raced against a timeout so a
-   stalled connection shows a retry prompt instead of hanging forever. */
+   side. teacher.html's <head> script has already sent anyone who isn't
+   signed in as her to teacher-login.html before first paint; until this
+   confirms the session, body.auth-checking shows the shell with a skeleton
+   in place of the views. #authOverlay is only for errors: the session
+   check is raced against a timeout so a stalled connection shows a retry
+   prompt instead of hanging forever. */
 
 import { supabase, TEACHER_UID } from "./supabase-config.js";
 
-document.body.classList.add("auth-checking");
 const overlay = document.getElementById("authOverlay");
-overlay.hidden = false;
 
 function withTimeout(promise, ms) {
   return Promise.race([
@@ -28,6 +29,7 @@ function showRetry(message) {
   btn.textContent = "Retry";
   btn.addEventListener("click", () => location.reload());
   overlay.append(msg, btn);
+  overlay.hidden = false;
 }
 
 async function init() {
@@ -46,7 +48,7 @@ async function init() {
   }
 
   document.body.classList.remove("auth-checking");
-  overlay.hidden = true;
+  document.querySelector("main.content").removeAttribute("aria-busy");
 }
 
 init();

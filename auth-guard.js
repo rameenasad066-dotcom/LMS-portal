@@ -1,11 +1,21 @@
 /* Gates student.html behind a real Supabase session. Runs as a module, which
    is deferred until after student.js has defined applyIdentity() and
    registered its own DOMContentLoaded handler — see CLAUDE.md for the
-   script-order reasoning. Body gets .auth-checking (hides content) and
-   #authOverlay is shown until this resolves, so nobody ever sees the
-   placeholder demo student flash before the real profile loads. Every
-   Supabase call is raced against a timeout so a stalled connection shows a
-   retry prompt instead of hanging on "Checking your session…" forever. */
+   script-order reasoning.
+
+   Boot sequence (reworked 2026-10-05 for speed):
+   1. student.html's <head> script already sent anyone with no stored
+      session to login.html before first paint, and — if this account's
+      profile was cached on a previous load — pre-filled STUDENT (data.js)
+      so the name/cohort are right from the first frame.
+   2. body.auth-checking shows the shell with a skeleton in place of the
+      views (style.css); no "Checking your session…" text any more.
+   3. Here: getSession, then the single-device check and the profile fetch
+      IN PARALLEL, then every data loader in parallel groups (only real
+      dependencies are sequenced). The page is revealed when they finish,
+      or after REVEAL_CAP_MS at the latest so one slow query can't hold the
+      whole portal hostage; stragglers keep rendering into place.
+   #authOverlay is now only for errors (retry prompt). */
 
 import { supabase } from "./supabase-config.js";
 import { renderAnnouncements } from "./student-announcements.js";
@@ -19,11 +29,10 @@ import { renderStudentWeeklyTest } from "./student-weekly-test.js";
 import { renderStudentScoreboard } from "./student-scoreboard.js";
 import { renderStudentGrades } from "./student-grades.js";
 import { initStudentSettings } from "./student-settings.js";
-import { verifySession, startSessionWatch, clearLocalToken } from "./session-guard.js";
+import { verifySession, startSessionWatch, clearLocalToken, cacheProfile } from "./session-guard.js";
 
-document.body.classList.add("auth-checking");
+const REVEAL_CAP_MS = 4000;
 const overlay = document.getElementById("authOverlay");
-overlay.hidden = false;
 
 function withTimeout(promise, ms) {
   return Promise.race([
@@ -41,6 +50,48 @@ function showRetry(message) {
   btn.textContent = "Retry";
   btn.addEventListener("click", () => location.reload());
   overlay.append(msg, btn);
+  overlay.hidden = false;
+}
+
+function reveal() {
+  document.body.classList.remove("auth-checking");
+  document.querySelector("main.content").removeAttribute("aria-busy");
+}
+
+async function safely(label, fn) {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`[auth-guard] ${label} failed to load`, err);
+  }
+}
+
+// Each loader is isolated (one throwing used to abort init() and leave the
+// student stuck on the loading screen forever) and independent ones run
+// concurrently. Notes/Vault need CHAPTERS, and watched-state needs LECTURES,
+// so those three fetch together and render after; everything else is free.
+function loadEverything() {
+  return Promise.all([
+    safely("announcements", renderAnnouncements),
+    safely("notifications", initNotifications),
+    safely("content", async () => {
+      await Promise.all([
+        safely("chapters", () => loadChapters(STUDENT.cohortId)),
+        safely("notes", loadRealNotes),
+        safely("lectures", loadRealLectures),
+      ]);
+      await safely("watched lectures", loadWatchedLectures);
+      renderNotes();
+      renderVault();
+      // Syllabus Tracker rings read LECTURES + WATCHED_LECTURE_IDS.
+      renderDashboard();
+    }),
+    safely("assignments", renderStudentAssignments),
+    safely("weekly test", renderStudentWeeklyTest),
+    safely("scoreboard", renderStudentScoreboard),
+    safely("grades", renderStudentGrades),
+    safely("settings", initStudentSettings),
+  ]);
 }
 
 async function init() {
@@ -62,74 +113,49 @@ async function init() {
   // while signed in as herself, load THAT student's profile into STUDENT so
   // every page renders as they see it. Session-guard is skipped (teacher
   // shouldn't get device-kicked), mutating student actions are gated by
-  // STUDENT.isPreview across the student-*.js modules. Teacher RLS already
-  // grants read access to all the tables the student pages read.
+  // STUDENT.isPreview across the student-*.js modules, and nothing is
+  // cached. Teacher RLS already grants read access to every table read here.
   const previewId = new URLSearchParams(location.search).get("preview");
   const TEACHER_UID = "e6e72a6c-2242-42f4-8a09-116af571bb95";
-  const isPreview = previewId && session.user.id === TEACHER_UID;
+  const isPreview = !!previewId && session.user.id === TEACHER_UID;
+  const targetId = isPreview ? previewId : session.user.id;
 
-  if (!isPreview && !(await verifySession(session.user.id))) return;
+  const [verified, profile] = await Promise.all([
+    isPreview ? true : verifySession(session.user.id),
+    withTimeout(supabase.from("students").select("*").eq("id", targetId).single(), 10000)
+      .then(({ data }) => data)
+      .catch(() => null),
+  ]);
+  if (!verified) return; // verifySession has already signed out + redirected
 
-  try {
-    const targetId = isPreview ? previewId : session.user.id;
-    const { data: profile } = await withTimeout(
-      supabase.from("students").select("*").eq("id", targetId).single(),
-      10000
-    );
-    if (profile) {
-      STUDENT.id = profile.id;
-      STUDENT.name = profile.name;
-      STUDENT.initials = profile.initials;
-      STUDENT.cohortName = profile.cohort_name;
-      STUDENT.cohortId = profile.cohort_id;
-      STUDENT.email = profile.email;
-      if (Array.isArray(profile.subjects) && profile.subjects.length) STUDENT.subjects = profile.subjects;
-    }
-    STUDENT.isPreview = !!isPreview;
-  } catch {
-    /* Profile fetch failed or timed out — falls back to the demo STUDENT
-       values already in data.js rather than blocking the page. */
+  if (profile) {
+    STUDENT.id = profile.id;
+    STUDENT.name = profile.name;
+    STUDENT.initials = profile.initials;
+    STUDENT.cohortName = profile.cohort_name;
+    STUDENT.cohortId = profile.cohort_id;
+    STUDENT.email = profile.email;
+    if (Array.isArray(profile.subjects) && profile.subjects.length) STUDENT.subjects = profile.subjects;
+    if (!isPreview) cacheProfile(STUDENT);
+  } else if (!isPreview && window.__SWR_PROFILE__) {
+    // Profile fetch failed but this account's cached profile is already
+    // applied (data.js) — carry on with it rather than block the student.
+    STUDENT.id = session.user.id;
+  } else {
+    showRetry("Couldn't load your profile — check your connection and try again.");
+    return;
   }
+  STUDENT.isPreview = isPreview;
 
-  if (isPreview) showPreviewBanner();
-
+  if (isPreview) {
+    showPreviewBanner();
+    document.body.classList.add("preview-mode");
+  }
   applyIdentity();
-  if (STUDENT.isPreview) document.body.classList.add("preview-mode");
-  // Each loader is isolated: one throwing used to abort init() before the
-  // overlay below was cleared, leaving the student on "Checking your
-  // session…" forever with no error and no retry.
-  await safely("announcements", renderAnnouncements);
-  await safely("notifications", initNotifications);
-  await safely("chapters", () => loadChapters(STUDENT.cohortId));
-  await safely("notes", async () => {
-    await loadRealNotes();
-    renderNotes();
-  });
-  await safely("lectures", async () => {
-    await loadRealLectures();
-    await loadWatchedLectures();
-    renderVault();
-  });
-  // Dashboard's Syllabus Tracker rings also read LECTURES + WATCHED_LECTURE_IDS
-  // (subjectProgress() in data.js) — re-render so they reflect real data, not
-  // the empty pre-auth state from student.js's initial renderAll().
-  await safely("dashboard", renderDashboard);
-  await safely("assignments", renderStudentAssignments);
-  await safely("weekly test", renderStudentWeeklyTest);
-  await safely("scoreboard", renderStudentScoreboard);
-  await safely("grades", renderStudentGrades);
-  await safely("settings", initStudentSettings);
-  if (!STUDENT.isPreview) startSessionWatch(session.user.id);
-  document.body.classList.remove("auth-checking");
-  overlay.hidden = true;
-}
 
-async function safely(label, fn) {
-  try {
-    await fn();
-  } catch (err) {
-    console.error(`[auth-guard] ${label} failed to load`, err);
-  }
+  await Promise.race([loadEverything(), new Promise((r) => setTimeout(r, REVEAL_CAP_MS))]);
+  reveal();
+  if (!isPreview) startSessionWatch(session.user.id);
 }
 
 function showPreviewBanner() {
@@ -139,11 +165,8 @@ function showPreviewBanner() {
     <span>Previewing as <strong id="previewBannerName">this student</strong> — nothing you do here is saved.</span>
     <a href="teacher.html" class="btn btn-outline btn-sm">Back to teacher portal</a>`;
   document.body.prepend(banner);
-  // Fill the name once STUDENT is populated.
-  queueMicrotask(() => {
-    const el = document.getElementById("previewBannerName");
-    if (el && STUDENT.name) el.textContent = STUDENT.name;
-  });
+  const el = document.getElementById("previewBannerName");
+  if (el && STUDENT.name) el.textContent = STUDENT.name;
 }
 
 init();

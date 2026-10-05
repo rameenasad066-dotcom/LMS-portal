@@ -10,13 +10,32 @@
 import { supabase } from "./supabase-config.js";
 
 const TOKEN_KEY = "swr_session_token";
+// Read back synchronously by student.html's <head> script (by this literal
+// name) to paint the right name/cohort before any network call.
+const PROFILE_KEY = "swr_profile";
 const CHECK_INTERVAL_MS = 30000;
 
+// Wipes the device token AND the cached profile — every way out (logout,
+// kicked by another device) must leave nothing of this student behind on a
+// possibly shared computer.
 export function clearLocalToken() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(PROFILE_KEY);
+}
+
+export function cacheProfile(s) {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({
+      id: s.id, name: s.name, initials: s.initials,
+      cohortId: s.cohortId, cohortName: s.cohortName, email: s.email, subjects: s.subjects,
+    }));
+  } catch {
+    /* Storage full or blocked — the cache is only a speed-up. */
+  }
 }
 
 export async function registerSession(studentId) {
+  localStorage.removeItem(PROFILE_KEY);
   const token = crypto.randomUUID();
   await supabase.from("active_sessions").upsert({
     student_id: studentId,

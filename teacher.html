@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>(function(){try{var t=localStorage.getItem('swr_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>(function(){try{var raw=localStorage.getItem('sb-dtjdoblwxrikujmkzwgt-auth-token');var s=raw&&JSON.parse(raw);if(!s||!s.user||s.user.id!=='e6e72a6c-2242-42f4-8a09-116af571bb95')location.replace('teacher-login.html');}catch(e){}})();</script>
 <title>Teacher Portal · Study With Rameen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Anton&display=swap" rel="stylesheet">
@@ -11,7 +12,7 @@
 </head>
 <body class="auth-checking">
 
-  <div class="auth-overlay" id="authOverlay">Checking your session…</div>
+  <div class="auth-overlay" id="authOverlay" role="alert" hidden></div>
 
   <!-- ============ TOP NAV ============ -->
   <header class="topnav">
@@ -112,7 +113,13 @@
     </aside>
 
     <!-- ============ MAIN CONTENT ============ -->
-    <main class="content">
+    <main class="content" aria-busy="true">
+
+      <div class="boot-skeleton" aria-hidden="true">
+        <div class="sk-row"><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span></div>
+        <span class="sk-block sk-panel"></span>
+        <span class="sk-block sk-panel short"></span>
+      </div>
 
       <div class="page-head">
         <div>

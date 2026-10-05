@@ -2525,10 +2525,76 @@ button, input, select {
   background: var(--green-light);
 }
 
-body.auth-checking .topnav,
-body.auth-checking .cohort-bar,
-body.auth-checking .layout {
-  visibility: hidden;
+/* Boot state. The <head> script already sent anyone without a stored
+   session to the login page before first paint, so the shell (nav,
+   sidebar) is safe to show at once; only the data-dependent parts wait,
+   behind a skeleton. The full-screen overlay is now for errors only. */
+body.auth-checking .content > .view {
+  display: none !important;
+}
+
+.boot-skeleton {
+  display: none;
+}
+
+body.auth-checking .boot-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sk-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.sk-block {
+  display: block;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border-soft) 40%, var(--surface-2) 55%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+.sk-card { height: 96px; }
+.sk-panel { height: 230px; }
+.sk-panel.short { height: 150px; }
+
+/* Student identity (name chip, avatar, cohort pill) shimmers too — unless
+   the head script found this account's cached profile, in which case the
+   real name is already painted. Never shows another account's details:
+   the cache is only used when its id matches the signed-in session. */
+html:not(.identity-cached) body.auth-checking[data-portal="student"] .topnav .user-chip-name,
+html:not(.identity-cached) body.auth-checking[data-portal="student"] .topnav .avatar-initials,
+html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPillLabel {
+  color: transparent;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border-soft) 40%, var(--surface-2) 55%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+@media (max-width: 640px) {
+  .sk-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-block,
+  body.auth-checking .topnav .user-chip-name,
+  body.auth-checking .topnav .avatar-initials,
+  body.auth-checking #cohortPillLabel {
+    animation: none;
+  }
+}
+
+.auth-overlay[hidden] {
+  display: none;
 }
 
 .auth-overlay {

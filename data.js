@@ -3,9 +3,10 @@
    Content is organised subject → chapter → items; shape mirrors
    teacher.js arrays so a future backend pass can wire both ends. */
 
-/* Demo values below are shown until auth-guard.js overwrites them with the
-   signed-in student's real profile from Supabase (see teacher-login.js /
-   auth-guard.js). */
+/* Filled from the cached profile below (if any), then overwritten by
+   auth-guard.js with the signed-in student's real profile. The identity
+   fields start blank on purpose: while loading they sit under a skeleton
+   shimmer, and a placeholder name must never be shown to a real student. */
 const STUDENT = {
   /* Real auth uid — used by every "my data" query (marks, submissions,
      weekly-test uploads, settings). Normally the signed-in
@@ -13,8 +14,8 @@ const STUDENT = {
      (auth-guard.js?preview=<id>), this is overridden with that student's
      uid so the previewed page renders their real personal data. */
   id:         '',
-  name:       'Ayesha Khan',
-  initials:   'AK',
+  name:       '',
+  initials:   '',
   cohortName: 'October/November 2026',
   cohortId:   'on26',
   email:      '',
@@ -29,6 +30,22 @@ const STUDENT = {
      student's data. */
   isPreview:  false,
 };
+
+/* The last load's profile (localStorage `swr_profile`, written by
+   auth-guard.js), already checked by student.html's <head> script to belong
+   to the signed-in account. Lets the very first render show the right name,
+   cohort and subjects; auth-guard.js still re-fetches and overwrites it.
+   `id` is deliberately NOT taken from here — nothing queries the database
+   until auth-guard.js has confirmed the session. */
+if (window.__SWR_PROFILE__) {
+  const p = window.__SWR_PROFILE__;
+  if (p.name) STUDENT.name = p.name;
+  if (p.initials) STUDENT.initials = p.initials;
+  if (p.cohortName) STUDENT.cohortName = p.cohortName;
+  if (p.cohortId) STUDENT.cohortId = p.cohortId;
+  if (p.email) STUDENT.email = p.email;
+  if (Array.isArray(p.subjects) && p.subjects.length) STUDENT.subjects = p.subjects;
+}
 
 /* Owner-editable content loads from data/*.json (see data/README.md);
    loadData() must resolve before the first renderAll(). CHAPTERS is no

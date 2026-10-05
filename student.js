@@ -394,6 +394,9 @@ document.addEventListener('change', e => {
 /* ---------- Init ---------- */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Paints the cached profile (data.js) straight away; auth-guard.js
+  // repaints once the real one has loaded.
+  applyIdentity();
   showView();
   loadData()
     .then(renderAll)

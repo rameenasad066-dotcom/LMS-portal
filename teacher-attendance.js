@@ -28,6 +28,19 @@ let legacyIds = new Set();
 // Bumped on every render so a slow response for a previous subject/date
 // can't overwrite the list for the one now selected.
 let renderSeq = 0;
+// Roster per cohort, so flipping subject/date during a roll-call doesn't
+// re-download every student each time. Opening the Attendance view drops
+// every cohort's copy, not just the selected one, so a student added, moved
+// or re-enrolled elsewhere is never missing after a cohort-pill switch.
+const rosterByCohort = new Map();
+
+async function cohortRoster(fresh) {
+  if (fresh) rosterByCohort.clear();
+  if (rosterByCohort.has(activeCohort)) return { data: rosterByCohort.get(activeCohort), error: null };
+  const res = await supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", activeCohort).order("name");
+  if (!res.error) rosterByCohort.set(activeCohort, res.data);
+  return res;
+}
 
 function todayISO() {
   return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local time
@@ -51,7 +64,7 @@ function showMessage(text) {
   $("attEmpty").textContent = text;
 }
 
-async function renderAttendance() {
+async function renderAttendance(fresh = false) {
   const seq = ++renderSeq;
   const dateInput = $("attDate");
   if (!dateInput.value) dateInput.value = todayISO();
@@ -66,7 +79,7 @@ async function renderAttendance() {
   }
 
   const [{ data: students, error: studentsErr }, { data: records, error: recordsErr }] = await Promise.all([
-    supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", activeCohort).order("name"),
+    cohortRoster(fresh),
     supabase
       .from("attendance")
       .select("student_id, status, subject")
@@ -156,15 +169,15 @@ $("attBody").addEventListener("click", async (e) => {
   }
 });
 
-$("attSubject").addEventListener("change", renderAttendance);
-$("attDate").addEventListener("change", renderAttendance);
-document.querySelectorAll(".pill").forEach((pill) => pill.addEventListener("click", renderAttendance));
+$("attSubject").addEventListener("change", () => renderAttendance());
+$("attDate").addEventListener("change", () => renderAttendance());
+document.querySelectorAll(".pill").forEach((pill) => pill.addEventListener("click", () => renderAttendance()));
 
 document.addEventListener("swr-view", (e) => {
-  if (e.detail === "attendance") renderAttendance();
+  if (e.detail === "attendance") renderAttendance(true);
 });
 
 window.dataReadyPromise.then(() => {
   $("attDate").max = todayISO();
-  renderAttendance();
+  renderAttendance(true);
 });

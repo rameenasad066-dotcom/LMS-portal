@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>(function(){try{var t=localStorage.getItem('swr_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>(function(){try{var raw=localStorage.getItem('sb-dtjdoblwxrikujmkzwgt-auth-token');if(!raw){location.replace('login.html');return;}if(/[?&]preview=/.test(location.search))return;var uid=(JSON.parse(raw).user||{}).id;var p=JSON.parse(localStorage.getItem('swr_profile')||'null');if(uid&&p&&p.id===uid){window.__SWR_PROFILE__=p;document.documentElement.classList.add('identity-cached');}}catch(e){}})();</script>
 <title>Student Portal · Study With Rameen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Anton&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="auth-checking">
+<body class="auth-checking" data-portal="student">
 
-  <div class="auth-overlay" id="authOverlay">Checking your session…</div>
+  <div class="auth-overlay" id="authOverlay" role="alert" hidden></div>
 
   <!-- ============ TOP NAV ============ -->
   <header class="topnav">
@@ -45,8 +46,8 @@
       </div>
       <div class="divider-v"></div>
       <button class="user-chip">
-        <span class="avatar-initials">AK</span>
-        <span class="user-chip-name">Ayesha Khan</span>
+        <span class="avatar-initials"></span>
+        <span class="user-chip-name"></span>
         <svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
       </button>
     </div>
@@ -104,7 +105,13 @@
     </aside>
 
     <!-- ============ MAIN CONTENT ============ -->
-    <main class="content">
+    <main class="content" aria-busy="true">
+
+      <div class="boot-skeleton" aria-hidden="true">
+        <div class="sk-row"><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span><span class="sk-block sk-card"></span></div>
+        <span class="sk-block sk-panel"></span>
+        <span class="sk-block sk-panel short"></span>
+      </div>
 
       <div class="page-head">
         <div>
