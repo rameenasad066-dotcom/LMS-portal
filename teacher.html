@@ -578,10 +578,14 @@
             <h2>Attendance</h2>
             <span class="panel-hint" id="attHint"></span>
             <div class="panel-tools">
+              <select id="attSubject" class="tool-select" aria-label="Subject" required>
+                <option value="">Choose a subject…</option>
+              </select>
               <input type="date" id="attDate" class="tool-select" aria-label="Class date">
             </div>
           </div>
-          <div class="table-wrap">
+          <p class="att-legacy-note" id="attLegacyNote" hidden></p>
+          <div class="table-wrap" id="attTableWrap">
             <table class="sub-table">
               <thead>
                 <tr>
@@ -592,7 +596,7 @@
               <tbody id="attBody"></tbody>
             </table>
           </div>
-          <p class="empty-note" id="attEmpty" hidden>No students enrolled yet in this cohort.</p>
+          <p class="empty-note" id="attEmpty" hidden></p>
         </div>
       </section>
 

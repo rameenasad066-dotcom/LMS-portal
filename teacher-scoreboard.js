@@ -25,7 +25,8 @@
    from an actual student session would just get zero rows back, same
    protection teacher-student-report.js already relies on. */
 
-import { supabase } from "./supabase-config.js";
+import { supabase, coursesForSubjects, ALL_SUBJECT_IDS } from "./supabase-config.js";
+import { attendanceSummary } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -59,16 +60,6 @@ async function populateMonthSelect() {
   selectedMonth = sel.value === current ? null : sel.value;
 }
 
-// "Leave" is an excused absence, excluded from the % entirely — same rule
-// as everywhere else attendance is shown (teacher-student-report.js, etc).
-function attendancePct(records) {
-  if (!records || !records.length) return null;
-  const countable = records.filter((r) => r.status !== "leave");
-  if (!countable.length) return null;
-  const present = countable.filter((r) => r.status === "present").length;
-  return Math.round((100 * present) / countable.length);
-}
-
 async function loadDetail(studentId, monthIso) {
   const key = `${studentId}:${monthIso}`;
   if (detailCache.has(key)) return detailCache.get(key);
@@ -76,12 +67,13 @@ async function loadDetail(studentId, monthIso) {
   const monthStart = new Date(monthIso + "T00:00:00");
   const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
 
-  const [{ data: marks }, { data: attendance }] = await Promise.all([
+  const [{ data: marks }, { data: attendance }, { data: student }] = await Promise.all([
     supabase
       .from("marks")
       .select("marks, assignments(title, type, max_marks, due_date)")
       .eq("student_id", studentId),
-    supabase.from("attendance").select("status").eq("student_id", studentId),
+    supabase.from("attendance").select("status, subject").eq("student_id", studentId),
+    supabase.from("students").select("subjects").eq("id", studentId).maybeSingle(),
   ]);
 
   const items = (marks || [])
@@ -92,7 +84,9 @@ async function loadDetail(studentId, monthIso) {
     .map((m) => ({ title: m.assignments.title, marks: m.marks, maxMarks: m.assignments.max_marks }))
     .sort((a, b) => a.title.localeCompare(b.title));
 
-  const detail = { items, attendance: attendancePct(attendance) };
+  // Same rule as everywhere attendance is shown: only their own courses' classes.
+  const enrolled = coursesForSubjects(student ? student.subjects : ALL_SUBJECT_IDS);
+  const detail = { items, attendance: attendanceSummary(attendance, enrolled).pct };
   detailCache.set(key, detail);
   return detail;
 }

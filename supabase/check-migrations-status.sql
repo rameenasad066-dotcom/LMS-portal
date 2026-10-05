@@ -50,6 +50,8 @@ select * from (values
        to_regclass('public.announcement_reads') is not null
    and exists (select 1 from pg_policies where tablename = 'announcement_reads' and policyname = 'Students can update their own announcement reads')),
   (17, 'assignments-retain-graded.sql',
-       exists (select 1 from pg_policies where tablename = 'assignments' and policyname = 'Students can view assignments they were graded on'))
+       exists (select 1 from pg_policies where tablename = 'assignments' and policyname = 'Students can view assignments they were graded on')),
+  (18, 'attendance-subjects.sql',
+       exists (select 1 from pg_constraint where conrelid = 'public.attendance'::regclass and conname = 'attendance_date_student_subject_key'))
 ) as t(step, migration, applied)
 order by step;

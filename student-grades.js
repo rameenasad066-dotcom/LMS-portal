@@ -7,8 +7,8 @@
    resolved (this page doesn't strictly need cohortId, but keeping it in
    the same post-auth render sequence as everything else is simplest). */
 
-import { supabase } from "./supabase-config.js";
-import { byChronology, trendFromPrevious } from "./progress-utils.js";
+import { supabase, coursesForSubjects } from "./supabase-config.js";
+import { byChronology, trendFromPrevious, attendanceSummary } from "./progress-utils.js";
 
 function letterGrade(pct) {
   if (pct >= 90) return { label: "A*", cls: "" };
@@ -75,19 +75,17 @@ export async function renderStudentGrades() {
   const [{ data: marks, error: markErr }, { data: subs }, { data: attendance, error: attErr }] = await Promise.all([
     supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", uid),
     supabase.from("submissions").select("*").eq("student_id", uid),
-    supabase.from("attendance").select("status").eq("student_id", uid),
+    supabase.from("attendance").select("status, subject").eq("student_id", uid),
   ]);
 
-  // "Leave" is an excused absence — excluded from the % entirely, unlike
-  // a plain Absent which counts against it.
-  const countableAtt = (attendance || []).filter((r) => r.status !== "leave");
+  // Only classes for courses this student takes count; leave is excused.
+  const att = attendanceSummary(attendance, coursesForSubjects(STUDENT.subjects));
   if (attErr) {
     set("sAttendancePct", "—");
     set("sAttendanceSub", "Couldn't load attendance");
-  } else if (countableAtt.length) {
-    const present = countableAtt.filter((r) => r.status === "present").length;
-    set("sAttendancePct", `${Math.round((100 * present) / countableAtt.length)}%`);
-    set("sAttendanceSub", `across ${countableAtt.length} class${countableAtt.length === 1 ? "" : "es"}`);
+  } else if (att.counted) {
+    set("sAttendancePct", `${att.pct}%`);
+    set("sAttendanceSub", `${att.present} of ${att.counted} class${att.counted === 1 ? "" : "es"} attended`);
   } else {
     set("sAttendancePct", "—");
     set("sAttendanceSub", "No classes marked yet");

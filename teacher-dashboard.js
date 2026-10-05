@@ -6,8 +6,8 @@
    re-renders on cohort switch, same pattern as teacher-roster.js et al.
    Reads globals from teacher.js: activeCohort, COHORT_DATA, esc, subjectName. */
 
-import { supabase } from "./supabase-config.js";
-import { equalThirdsAvg } from "./progress-utils.js";
+import { supabase, coursesForSubjects } from "./supabase-config.js";
+import { equalThirdsAvg, attendanceSummary } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,7 +42,7 @@ async function renderDashboard() {
 
   const [{ data: assignments }, { data: students }, { data: notes }] = await Promise.all([
     supabase.from("assignments").select("*").eq("cohort_id", cohort).order("due_date", { ascending: true }),
-    supabase.from("students").select("id, name, initials").eq("cohort_id", cohort),
+    supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", cohort),
     supabase.from("notes").select("*").eq("cohort_id", cohort).order("created_at", { ascending: false }).limit(5),
   ]);
 
@@ -57,7 +57,7 @@ async function renderDashboard() {
     assignmentIds.length
       ? supabase.from("marks").select("assignment_id, student_id, marks").in("assignment_id", assignmentIds)
       : Promise.resolve({ data: [] }),
-    supabase.from("attendance").select("student_id, status, class_date").eq("cohort_id", cohort),
+    supabase.from("attendance").select("student_id, status, class_date, subject").eq("cohort_id", cohort),
   ]);
 
   const subList = submissions || [];
@@ -91,14 +91,13 @@ async function renderDashboard() {
     (marksByStudent[m.student_id] ||= []).push({ type: a.type, marksVal: m.marks, maxMarks: a.max_marks });
   });
   const attByStudent = {};
-  attList.forEach((r) => { (attByStudent[r.student_id] ||= []).push(r.status); });
+  attList.forEach((r) => { (attByStudent[r.student_id] ||= []).push(r); });
 
   const flagged = [];
   studentList.forEach((s) => {
     const avg = equalThirdsAvg(marksByStudent[s.id] || []);
-    // "Leave" is an excused absence — excluded from the % entirely.
-    const att = (attByStudent[s.id] || []).filter((x) => x !== "leave");
-    const attPct = att.length ? Math.round((100 * att.filter((x) => x === "present").length) / att.length) : null;
+    // Same rule as the Student Report: only their own courses' classes, leave excused.
+    const attPct = attendanceSummary(attByStudent[s.id], coursesForSubjects(s.subjects)).pct;
 
     const reasons = [];
     if (avg !== null && avg < 60) reasons.push(`Avg ${avg}%`);

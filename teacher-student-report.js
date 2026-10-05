@@ -7,7 +7,7 @@
    every student's marks, so no privacy boundary needs crossing here. */
 
 import { supabase, COURSES, subjectsForCourses, coursesForSubjects, courseLabel } from "./supabase-config.js";
-import { byChronology, trendFromPrevious, equalThirdsAvg } from "./progress-utils.js";
+import { byChronology, trendFromPrevious, equalThirdsAvg, attendanceSummary } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,6 +51,12 @@ $("srCourses").addEventListener("change", async (e) => {
     return;
   }
   box.closest(".course-option").classList.toggle("on", box.checked);
+  // Enrolment decides which attendance sessions count, so recompute.
+  if (currentReport && currentReport.student && currentReport.student.id === reportStudentId) {
+    currentReport.student.subjects = subjectsForCourses(chosen);
+    currentReport.attendance = attendanceSummary(currentReport.attendanceRows, chosen);
+    render(currentReport);
+  }
   showToast("Subjects updated", "Their portal now matches this straight away.");
 });
 
@@ -109,16 +115,6 @@ function buildChart(items) {
   </svg>`;
 }
 
-// "Leave" is an excused absence — excluded from the % entirely (neither
-// numerator nor denominator), unlike a plain Absent which counts against it.
-function attendancePct(records) {
-  if (!records || !records.length) return null;
-  const countable = records.filter((r) => r.status !== "leave");
-  if (!countable.length) return null;
-  const present = countable.filter((r) => r.status === "present").length;
-  return { pct: Math.round((100 * present) / countable.length), total: countable.length };
-}
-
 async function loadStudentReport(studentId) {
   const [{ data: student, error: studentErr }, { data: marks, error: markErr }, { data: attendance }] = await Promise.all([
     supabase.from("students").select("*").eq("id", studentId).single(),
@@ -126,7 +122,7 @@ async function loadStudentReport(studentId) {
       .from("marks")
       .select("marks, feedback, marked_at, assignments(title, type, max_marks, due_date, subjects)")
       .eq("student_id", studentId),
-    supabase.from("attendance").select("status, class_date").eq("student_id", studentId),
+    supabase.from("attendance").select("status, class_date, subject").eq("student_id", studentId),
   ]);
 
   if (studentErr || markErr) return { studentId, error: (studentErr || markErr).message };
@@ -145,7 +141,13 @@ async function loadStudentReport(studentId) {
     }))
     .sort(byChronology);
 
-  return { student, items, attendance: attendancePct(attendance), attendanceRows: attendance || [] };
+  const attendanceRows = attendance || [];
+  return {
+    student,
+    items,
+    attendance: attendanceSummary(attendanceRows, coursesForSubjects(student.subjects)),
+    attendanceRows,
+  };
 }
 
 function render(report) {
@@ -181,9 +183,9 @@ function render(report) {
   reportStudentId = student.id;
   renderCoursePicker(student.subjects);
 
-  $("srAttendancePct").textContent = attendance ? `${attendance.pct}%` : "—";
-  $("srAttendanceSub").textContent = attendance
-    ? `across ${attendance.total} class${attendance.total === 1 ? "" : "es"}`
+  $("srAttendancePct").textContent = attendance.pct !== null ? `${attendance.pct}%` : "—";
+  $("srAttendanceSub").textContent = attendance.counted
+    ? `${attendance.present} of ${attendance.counted} class${attendance.counted === 1 ? "" : "es"} attended`
     : "No classes marked yet";
 
   if (!items.length) {
@@ -291,10 +293,11 @@ function courseGroupOf(subjects) {
 
 function monthlyData(report, key) {
   const items = report.items.filter((it) => monthKeyOf(it.dueDate) === key);
-  const att = report.attendanceRows.filter((r) => r.class_date && monthKeyOf(r.class_date) === key);
-  const present = att.filter((r) => r.status === "present").length;
-  const leave = att.filter((r) => r.status === "leave").length;
-  const counted = att.length - leave;
+  // Only sessions for courses this student takes count (attendanceSummary).
+  const { present, leave, counted } = attendanceSummary(
+    report.attendanceRows.filter((r) => r.class_date && monthKeyOf(r.class_date) === key),
+    coursesForSubjects(report.student.subjects)
+  );
 
   const avg = equalThirdsAvg(items);
   const prevKey = shiftMonth(key, -1);

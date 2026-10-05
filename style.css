@@ -4197,6 +4197,28 @@ body.auth-checking .layout {
   border-color: var(--red-blush);
 }
 
+/* An untagged mark from before attendance had subjects — still counted,
+   but visibly not yet confirmed for the subject being marked. */
+.att-btn.active.legacy {
+  opacity: 0.6;
+  border-style: dashed;
+  border-color: var(--gray-soft);
+}
+
+.att-legacy-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.att-legacy-note[hidden],
+.table-wrap[hidden] {
+  display: none;
+}
+
 /* ==========================================================================
    Motion & interaction polish
    ========================================================================== */

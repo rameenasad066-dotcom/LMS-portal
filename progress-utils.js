@@ -1,7 +1,8 @@
-/* Shared grade-progress maths for the teacher Student Report
-   (teacher-student-report.js), the student's My Grades page
-   (student-grades.js) and the teacher dashboard's Needs Attention list
-   (teacher-dashboard.js). One copy on purpose: the two report pages used to
+/* Shared grade-progress + attendance maths for the teacher Student Report
+   and Monthly PDF (teacher-student-report.js), the student's My Grades page
+   (student-grades.js), the teacher dashboard's Needs Attention list
+   (teacher-dashboard.js) and the scoreboard detail card
+   (teacher-scoreboard.js). One copy on purpose: the two report pages used to
    order marks by different dates (due_date vs marked_at) and compute trend
    two different ways, so the same student could read "+50% from previous"
    on one and "Declining" on the other. */
@@ -34,6 +35,22 @@ export function trendFromPrevious(items) {
     label: dir === "up" ? "Improving" : dir === "down" ? "Declining" : "Steady",
     deltaText: `${delta >= 0 ? "+" : ""}${delta}% from previous`,
   };
+}
+
+// The one attendance rule, used by every page that shows a %. Only rows for
+// a course the student is enrolled in count — a session for a subject they
+// don't take (e.g. left over after dropping a course) is ignored, not
+// counted as absent. Untagged legacy rows (subject null, marked before
+// attendance-subjects.sql) always count. "Leave" is an excused absence:
+// in neither numerator nor denominator. `enrolledCourses` is a list of
+// course ids — callers pass coursesForSubjects(student.subjects).
+export function attendanceSummary(rows, enrolledCourses) {
+  const relevant = (rows || []).filter((r) => !r.subject || enrolledCourses.includes(r.subject));
+  const present = relevant.filter((r) => r.status === "present").length;
+  const absent = relevant.filter((r) => r.status === "absent").length;
+  const leave = relevant.filter((r) => r.status === "leave").length;
+  const counted = present + absent;
+  return { present, absent, leave, counted, pct: counted ? Math.round((100 * present) / counted) : null };
 }
 
 // Same equal-thirds weighting as get_scoreboard(): average the per-category
