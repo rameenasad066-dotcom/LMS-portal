@@ -89,6 +89,14 @@
   --shadow-pop: 0 12px 34px rgba(0, 0, 0, 0.6);
 }
 
+/* Safety net against sideways page scroll on phones. `clip`, not `hidden`:
+   hidden would turn body into a scroll container and break every sticky
+   header (topnav, cohort bar, sidebar). */
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
@@ -719,6 +727,13 @@ button, input, select {
   display: grid;
   grid-template-columns: 5fr 4fr;
   gap: 22px;
+}
+
+/* Grid items default to min-width:auto, so a long <select> option or file
+   name could push the whole column wider than a phone screen. */
+.upload-grid > *,
+.two-col > * {
+  min-width: 0;
 }
 
 .tag-red {
@@ -2200,6 +2215,7 @@ button, input, select {
 
 .as-password-row input {
   flex: 1;
+  min-width: 0;
   font-family: 'Inter', monospace;
 }
 
@@ -4377,10 +4393,10 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
     align-items: flex-start;
   }
   .subject-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .note-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .publish-row {
     flex-direction: column;
@@ -4449,14 +4465,70 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
   .cohort-meta {
     display: none;
   }
+  /* Wrap rather than a hidden sideways scroll, so both cohorts are always
+     visible. Not a full-width vertical stack: this bar is sticky, and every
+     extra row of it is screen lost on every page. */
   .cohort-pills {
-    overflow-x: auto;
-    max-width: 100%;
-    padding-bottom: 2px;
+    flex-wrap: wrap;
+    min-width: 0;
   }
   .page-head {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+  .page-head-actions {
+    flex-wrap: wrap;
+  }
+  .page-head-actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* Panel heads (Attendance subject + date, Scoreboard month, etc.): the
+     controls sat on the title's row with no wrapping and pushed ~230px off
+     a 360px screen. Title on its own line, each control full-width below. */
+  .panel-head {
+    flex-wrap: wrap;
+  }
+  .panel-tools {
+    margin-left: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panel-tools > * {
+    width: 100%;
+    min-width: 0;
+  }
+  .tool-select {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .settings-form {
+    max-width: none;
+  }
+  .settings-form input,
+  .settings-form select,
+  .settings-form textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .settings-form .btn {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .asg-upload-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .asg-file-input {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .asg-upload-form .btn {
+    justify-content: center;
   }
   /* Logo alone stands in for the brand on mobile — the wordmark plus the
      hamburger would overflow a narrow topnav. */
@@ -4612,6 +4684,44 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
   }
   .lecture-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .topnav {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .topnav-right {
+    gap: 6px;
+    min-width: 0;
+  }
+  .topnav .icon-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  .topnav .divider-v {
+    display: none;
+  }
+  .user-chip {
+    padding: 4px;
+  }
+  .cohort-bar {
+    padding: 8px 12px;
+  }
+  .pill {
+    padding: 7px 12px;
+    font-size: 12.5px;
+  }
+  .layout {
+    padding: 14px 12px 32px;
+  }
+  .panel {
+    padding: 16px 14px;
+  }
+  .sub-table tr {
+    padding: 4px 10px;
   }
 }
 
