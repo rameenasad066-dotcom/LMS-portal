@@ -63,30 +63,59 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --red: #E2434E;             /* brightened so it reads as an accent on dark */
-  --red-deep: #B0202B;        /* hover background — stays dark enough for white text */
-  --red-blush: #3A2327;       /* dark red tint (pill/active backgrounds) */
-  --red-blush-soft: #2A191D;  /* darker tint (hover surfaces) */
-  --red-blush-line: #55343A;  /* border on dark tint */
+  /* Surfaces — cool charcoal layers; depth comes from the step between
+     them, not from shadows. Darkest = the page, lightest = hover. */
+  --bg: #111318;              /* app background */
+  --bg-header: #171A21;       /* top bar + cohort bar */
+  --bg-sidebar: #191C24;
+  --surface: #1C2029;         /* cards & panels */
+  --surface-2: #232834;       /* elevated: popovers, modals, nested fills, row hover */
+  --bg-hover: #292F3B;        /* hover on controls and menu rows */
+  --input-bg: #171A21;
 
-  --green: #3C9A44;           /* kept level with light — white-on-green fills stay legible; never used as small text */
-  --green-deep: #2E7D36;      /* hover background — white text stays legible */
-  --green-light: #1B3323;     /* dark green tint */
+  /* Brand red. White text needs 4.5:1, which #E63946 can't give (4.17:1) —
+     so filled buttons use a notch deeper (--red, 5.1:1) and lighten to
+     --red-deep on hover (4.6:1, still AA). #E63946 survives as
+     --brand-primary for marks that never carry white text: the nav
+     indicator, focus rings, accent dots. */
+  --red: #CF2F3C;
+  --red-deep: #D93644;
+  --red-pressed: #B9222F;
+  --brand-primary: #E63946;
+  --red-blush: #351F27;       /* red-tinted surface (active nav, active pill) */
+  --red-blush-soft: #2B1B21;
+  --red-blush-line: #71313A;  /* red border */
 
-  --ink-red: #F3A6AC;         /* light red text — readable on dark tints & surfaces */
-  --ink-green: #85D890;       /* light green text */
+  --green: #2F8238;           /* fills with white text: 4.8:1 (#3C9A44 was 3.6:1) */
+  --green-deep: #276B2E;
+  --green-light: #1A2F22;
 
-  --ink: #EAEBEE;
-  --gray: #A2A6B0;
-  --gray-soft: #787C86;
-  --gray-light: #34353C;
-  --bg: #121317;
-  --surface: #1E1F24;
-  --surface-2: #282A31;
-  --border-soft: #2B2D34;
+  --ink-red: #FF7A84;         /* red as text/glyph — 5.4:1 or better on every dark surface */
+  --ink-green: #7FD18B;
 
-  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.45);
-  --shadow-pop: 0 12px 34px rgba(0, 0, 0, 0.6);
+  /* Text */
+  --ink: #F1F3F5;             /* primary */
+  --gray: #B0B8C5;            /* secondary */
+  --gray-soft: #8E97A7;       /* muted — 4.6:1 even on the hover surface */
+  --gray-disabled: #626B79;
+
+  /* Borders. Cards and rows take the two quiet tiers; anything the user has
+     to find and operate (inputs, selects) takes --border-control, which
+     clears WCAG 1.4.11's 3:1 against every surface it sits on. */
+  --gray-light: #303642;      /* standard */
+  --border-soft: #292E38;     /* subtle divider */
+  --border-strong: #414958;   /* emphasised */
+  --border-control: #6B768A;
+
+  /* Semantic status colours — tinted background + readable text, kept apart
+     from the brand red. */
+  --success: #7FD18B;  --success-bg: #1A2F22;  --success-border: #2B5A36;
+  --warning: #F2B84B;  --warning-bg: #33290F;  --warning-border: #5C4A17;
+  --danger: #FF8A92;   --danger-bg: #3A1F26;   --danger-border: #71313A;
+  --info: #7DB8FF;     --info-bg: #1B2A3F;     --info-border: #2C4A73;
+
+  --shadow-card: none;
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 /* Safety net against sideways page scroll on phones. `clip`, not `hidden`:
@@ -1796,39 +1825,47 @@ button, input, select {
   --sb-on-accent: #FDF6EC;
   --sb-muted: rgba(26, 26, 26, 0.55);
   --sb-shadow: #1A1A1A;
+  --sb-line: var(--sb-ink);     /* borders + rules; split from the text colour so dark mode can keep thick frames from going near-white */
 
   background: var(--sb-bg);
-  border: 6px solid var(--sb-ink);
+  border: 6px solid var(--sb-line);
   border-radius: 20px;
   box-shadow: 12px 12px 0 0 var(--sb-shadow);
   padding: 26px 30px;
   color: var(--sb-ink);
 }
 
-:root:not([data-theme="light"]) .sb-panel {
-  --sb-bg: #1C1A1A;
-  --sb-surface: #2A2726;
-  --sb-red: #E2434E;
+/* Dark follows the portal's explicit theme only. It used to key off
+   :root:not([data-theme="light"]), which also matched a visitor who had never
+   toggled anything — so the scoreboard rendered dark inside an otherwise
+   light page. Fills (green/blue) are mid-tone with DARK text on them: the old
+   cream-on-light-fill pairs measured 2.3–2.9:1. --sb-red is only ever text
+   here (the title and the ▼ arrow), so it takes the readable soft red. */
+:root[data-theme="dark"] .sb-panel {
+  --sb-bg: #1C2029;
+  --sb-surface: #232834;
+  --sb-red: #FF7A84;
   --sb-green: #4CAF55;
   --sb-blue: #6E8CF0;
-  --sb-ink: #F2EFEF;
-  --sb-on-accent: #FDF6EC;
-  --sb-muted: rgba(242, 239, 239, 0.55);
+  --sb-ink: #F1F3F5;
+  --sb-on-accent: #11131A;
+  --sb-muted: #9AA3B2;
   --sb-shadow: #000000;
+  --sb-line: #4A5364;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .sb-panel {
-    --sb-bg: #1C1A1A;
-    --sb-surface: #2A2726;
-    --sb-red: #E2434E;
-    --sb-green: #4CAF55;
-    --sb-blue: #6E8CF0;
-    --sb-ink: #F2EFEF;
-    --sb-on-accent: #FDF6EC;
-    --sb-muted: rgba(242, 239, 239, 0.55);
-    --sb-shadow: #000000;
-  }
+:root[data-theme="dark"] .sb-row.clickable:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* The pulse fades the whole pill to 35%, which drags its "LIVE" text below
+   legible contrast for part of every cycle — hold it steady in dark. */
+:root[data-theme="dark"] .sb-live-pill {
+  animation: none;
+}
+
+:root[data-theme="dark"] .sb-month-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2311131A'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
 .sb-head-row {
@@ -1854,7 +1891,7 @@ button, input, select {
   text-transform: uppercase;
   padding: 5px 13px;
   border-radius: 999px;
-  border: 3px solid var(--sb-ink);
+  border: 3px solid var(--sb-line);
   animation: sbLivePulse 2.4s ease-in-out infinite;
 }
 
@@ -1883,7 +1920,7 @@ button, input, select {
   letter-spacing: 0.04em;
   padding: 7px 30px 7px 14px;
   border-radius: 999px;
-  border: 3px solid var(--sb-ink);
+  border: 3px solid var(--sb-line);
   background: var(--sb-blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FDF6EC'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 8px center / 16px no-repeat;
   color: var(--sb-on-accent);
   appearance: none;
@@ -1920,7 +1957,7 @@ button, input, select {
   align-items: center;
   justify-content: center;
   font: 800 12px 'Poppins', sans-serif;
-  border: 2px solid var(--sb-ink);
+  border: 2px solid var(--sb-line);
   flex-shrink: 0;
   background: var(--sb-surface);
   color: var(--sb-ink);
@@ -1939,7 +1976,7 @@ button, input, select {
   align-items: center;
   justify-content: center;
   font: 700 11px 'Poppins', sans-serif;
-  border: 3px solid var(--sb-ink);
+  border: 3px solid var(--sb-line);
   flex-shrink: 0;
   background: var(--sb-surface);
   color: var(--sb-ink);
@@ -1974,7 +2011,7 @@ button, input, select {
   min-width: 40px;
   height: 15px;
   background: var(--sb-surface);
-  border: 3px solid var(--sb-ink);
+  border: 3px solid var(--sb-line);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -2005,7 +2042,7 @@ button, input, select {
   margin: 0 0 0 88px;
   padding: 12px 16px;
   background: var(--sb-surface);
-  border: 3px solid var(--sb-ink);
+  border: 3px solid var(--sb-line);
   border-radius: 10px;
   font: 500 12px 'Poppins', sans-serif;
   color: var(--sb-ink);
@@ -2037,7 +2074,7 @@ button, input, select {
   text-align: center;
   padding-top: 16px;
   margin-top: 16px;
-  border-top: 3px solid var(--sb-ink);
+  border-top: 3px solid var(--sb-line);
   font: 500 12.5px 'Poppins', sans-serif;
   color: var(--sb-muted);
 }
@@ -2045,7 +2082,7 @@ button, input, select {
 .sb-unranked {
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 3px dashed var(--sb-ink);
+  border-top: 3px dashed var(--sb-line);
 }
 
 .sb-unranked-title {
@@ -2065,7 +2102,7 @@ button, input, select {
 .sb-unranked-chip {
   font: 600 13px 'Inter', sans-serif;
   background: var(--sb-surface);
-  border: 2px solid var(--sb-ink);
+  border: 2px solid var(--sb-line);
   border-radius: 999px;
   padding: 5px 12px;
   color: var(--sb-ink);
@@ -5164,20 +5201,394 @@ body,
   box-shadow: var(--shadow-card);
 }
 
-/* Form controls: give the ones without an explicit surface a dark background,
-   and keep placeholders legible. color-scheme (set on :root) already themes
-   native date/datetime/file pickers and scrollbars. */
-:root[data-theme="dark"] input,
-:root[data-theme="dark"] select,
-:root[data-theme="dark"] textarea {
-  background: var(--surface);
+/* ==========================================================================
+   Dark theme refinement — dark-only; light mode is untouched.
+   The tokens in the :root[data-theme="dark"] block at the top do most of the
+   work. These rules cover where a token swap alone gives the wrong result:
+   the chrome layers, nav states, red that was doing too many jobs, form
+   controls and status badges. Two rules of thumb keep the red a deliberate
+   accent: primary actions are the only solid-red controls, and red TEXT or
+   glyphs use --ink-red (readable), never the fill red.
+   ========================================================================== */
+
+:root[data-theme="dark"] {
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+:root[data-theme="dark"] :focus-visible {
+  outline-color: var(--brand-primary);
+}
+
+/* :where() keeps this at the lowest specificity so a component's own accent
+   (e.g. the green course checkboxes) still wins. */
+:root[data-theme="dark"] :where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--brand-primary);
+}
+
+/* -- Chrome: header + cohort bar are one quiet layer above the page ------- */
+
+:root[data-theme="dark"] .topnav {
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+:root[data-theme="dark"] .cohort-bar {
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--gray-light);
+}
+
+:root[data-theme="dark"] .brand-text small {
+  color: var(--ink-red);
+}
+
+:root[data-theme="dark"] .icon-btn {
+  background: transparent;
+  border-color: var(--gray-light);
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .icon-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
   color: var(--ink);
+}
+
+:root[data-theme="dark"] .icon-btn .badge {
+  border-color: var(--bg-header);
+}
+
+:root[data-theme="dark"] .theme-toggle.floating {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .user-chip:hover {
+  background: var(--bg-hover);
+}
+
+/* Cohort pills: the active one is a red-tinted pill with a dot, not a solid
+   red block — recognisable without the dot's colour, and not shouting. */
+:root[data-theme="dark"] .pill {
+  background: transparent;
+  border-color: var(--gray-light);
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .pill:hover {
+  background: var(--bg-hover);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .pill.active {
+  background: var(--red-blush);
+  border-color: var(--red-blush-line);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .pill.active::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+/* -- Sidebar --------------------------------------------------------------- */
+
+:root[data-theme="dark"] .sidebar {
+  background: var(--bg-sidebar);
+  border-color: var(--border-soft);
+}
+
+:root[data-theme="dark"] .snav-item {
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .snav-item svg {
+  opacity: 1;
+  color: var(--gray-soft);
+}
+
+:root[data-theme="dark"] .snav-item:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .snav-item:hover svg {
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .snav-item.active {
+  background: var(--red-blush);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .snav-item.active svg {
+  color: var(--ink-red);
+}
+
+:root[data-theme="dark"] .snav-item.active::before {
+  background: var(--brand-primary);
+}
+
+:root[data-theme="dark"] .snav-item.logout:hover {
+  background: var(--red-blush);
+  color: var(--ink-red);
+}
+
+:root[data-theme="dark"] .snav-sep {
+  background: var(--border-soft);
+}
+
+/* -- Red as text/glyph: --red is a fill colour now, so every place that used
+      it to colour text or an icon points at --ink-red instead ------------- */
+
+:root[data-theme="dark"] :is(
+  .stat-icon, .file-chip, .mc-item-icon, .subject-glyph, .ch-idx,
+  .jump, .auth-forgot, .mc-tab.active, .attn-pending.zero .attn-icon,
+  .attn-nudge .attn-icon, .ch-item.open .ch-chev,
+  .sub-ch-item.open > .sub-ch-row .ch-chev
+) {
+  color: var(--ink-red);
+}
+
+:root[data-theme="dark"] :is(
+  .mc-ico.danger:hover, .report-back:hover, .student-cell-link:hover
+) {
+  color: var(--ink-red);
+}
+
+/* -- Cards ----------------------------------------------------------------- */
+
+:root[data-theme="dark"] .stat-card:hover {
+  box-shadow: none;
+  border-color: var(--border-strong);
+}
+
+:root[data-theme="dark"] .stat-card::before {
+  background: var(--red-blush-line);
+}
+
+/* Attention banners: a tinted surface rather than a solid red gradient slab. */
+:root[data-theme="dark"] .attn-pending:not(.zero) {
+  background: var(--red-blush);
+  box-shadow: inset 0 0 0 1px var(--red-blush-line);
+}
+
+:root[data-theme="dark"] .attn-nudge:hover {
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .upload-item:hover {
+  background: var(--surface-2);
+}
+
+/* Cards that sit inside a panel step up a surface so they don't melt into it.
+   Subject tags and file-kind icons are metadata, not accents — neutral. */
+:root[data-theme="dark"] .res-card {
+  background: var(--surface-2);
   border-color: var(--gray-light);
 }
 
-:root[data-theme="dark"] input::placeholder,
-:root[data-theme="dark"] textarea::placeholder {
+:root[data-theme="dark"] .res-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .res-tag {
+  background: var(--bg-hover);
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .res-kind {
   color: var(--gray-soft);
+}
+
+/* -- Buttons: one solid-red action per view; everything else is neutral ---- */
+
+:root[data-theme="dark"] .btn-primary:hover,
+:root[data-theme="dark"] .btn-download:hover {
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .btn-primary:active {
+  background: var(--red-pressed);
+}
+
+:root[data-theme="dark"] .btn-outline {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .btn-outline:hover {
+  background: var(--bg-hover);
+  border-color: var(--red-blush-line);
+  color: var(--ink);
+}
+
+/* Active filter chips match the active nav item and cohort pill: tinted
+   surface + red border, neutral label. */
+:root[data-theme="dark"] .mc-subj.active {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .mc-subj:hover {
+  background: var(--bg-hover);
+}
+
+:root[data-theme="dark"] .mc-subj.active:hover {
+  background: var(--red-blush);
+}
+
+/* A column of identical per-row Save/Update buttons would be a wall of solid
+   red, so inside tables they take the restrained tint; page-level primary
+   actions (Upload Content, Post, Add Student…) keep the solid fill. */
+:root[data-theme="dark"] .sub-table .btn-primary {
+  background: var(--red-blush);
+  box-shadow: inset 0 0 0 1px var(--red-blush-line);
+  color: var(--ink-red);
+}
+
+:root[data-theme="dark"] .sub-table .btn-primary:hover {
+  background: var(--red);
+  box-shadow: none;
+  color: #fff;
+}
+
+:root[data-theme="dark"] .sub-table .btn-primary:active {
+  background: var(--red-pressed);
+}
+
+/* Destructive stays recognisable (soft red label) without a red fill. */
+:root[data-theme="dark"] .btn-outline.asg-delete,
+:root[data-theme="dark"] .btn-outline.roster-remove {
+  color: var(--danger);
+}
+
+:root[data-theme="dark"] .btn-outline.asg-delete:hover,
+:root[data-theme="dark"] .btn-outline.roster-remove:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+/* -- Form controls --------------------------------------------------------- */
+
+:root[data-theme="dark"] input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]),
+:root[data-theme="dark"] select:not(.sb-month-select),
+:root[data-theme="dark"] textarea {
+  background-color: var(--input-bg);
+  color: var(--ink);
+  border-color: var(--border-control);
+}
+
+:root[data-theme="dark"] input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]):focus,
+:root[data-theme="dark"] select:not(.sb-month-select):focus,
+:root[data-theme="dark"] textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.28);
+  outline: none;
+}
+
+:root[data-theme="dark"] ::placeholder {
+  color: var(--gray-soft);
+  opacity: 1;
+}
+
+:root[data-theme="dark"] :is(input, select, textarea):disabled {
+  color: var(--gray-disabled);
+  border-color: var(--gray-light);
+  cursor: not-allowed;
+}
+
+:root[data-theme="dark"] input[type="file"] {
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] input[type="file"]::file-selector-button:hover {
+  background: var(--bg-hover);
+}
+
+/* -- Tables and status badges --------------------------------------------- */
+
+:root[data-theme="dark"] .sub-table th {
+  color: var(--gray-soft);
+  border-bottom-color: var(--border-strong);
+}
+
+:root[data-theme="dark"] .avatar-initials.sm {
+  background: var(--surface-2);
+  color: var(--gray);
+  box-shadow: inset 0 0 0 1px var(--gray-light);
+}
+
+:root[data-theme="dark"] .status-pill.muted {
+  background: var(--bg-hover);
+  color: var(--gray);
+}
+
+:root[data-theme="dark"] .status-pill.ontime {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+:root[data-theme="dark"] .status-pill.late {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+:root[data-theme="dark"] .auth-error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+:root[data-theme="dark"] .auth-error.auth-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+/* -- Overlays: modals, popovers, toasts sit one step above the cards ------- */
+
+:root[data-theme="dark"] .modal-overlay {
+  background: rgba(5, 7, 10, 0.66);
+}
+
+:root[data-theme="dark"] .modal-card {
+  background: var(--surface-2);
+  border: 1px solid var(--gray-light);
+}
+
+:root[data-theme="dark"] .preview-picker,
+:root[data-theme="dark"] .notif-panel,
+:root[data-theme="dark"] .toast {
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] .preview-picker-row:hover {
+  background: var(--bg-hover);
+}
+
+/* The first-place shine sweep is a white 45% streak — far too bright on dark. */
+:root[data-theme="dark"] .podium-col.first .podium-bar::after {
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%);
 }
 
 /* Decorative tints that were hardcoded light — restated for dark so they
@@ -5187,7 +5598,8 @@ body,
 }
 
 :root[data-theme="dark"] .welcome-banner {
-  background: linear-gradient(120deg, #A81F29 0%, #7C1620 100%);
+  background: linear-gradient(120deg, #5C2230 0%, #3B1F29 100%);
+  box-shadow: inset 0 0 0 1px var(--red-blush-line);
 }
 
 :root[data-theme="dark"] .lec-thumb {
