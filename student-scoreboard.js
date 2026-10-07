@@ -30,6 +30,8 @@ const $ = (id) => document.getElementById(id);
 
 let selectedMonth = null; // null = current month
 let selectedCourse = null;
+// Quick tab/month clicks overlap; only the newest render may draw.
+let renderSeq = 0;
 
 function myCourses() {
   const mine = coursesForSubjects(STUDENT.subjects);
@@ -71,11 +73,12 @@ function currentMonthIso() {
   return new Date().toISOString().slice(0, 8) + "01";
 }
 
-async function populateMonthSelect() {
+async function populateMonthSelect(seq) {
   const sel = $("sScoreboardMonth");
   if (!sel) return;
 
   const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: STUDENT.cohortId, target_course: selectedCourse });
+  if (seq !== renderSeq) return;
   const months = error || !data ? [] : data.map((r) => r.month_start);
   const current = currentMonthIso();
   if (!months.includes(current)) months.unshift(current);
@@ -111,13 +114,16 @@ export async function renderStudentScoreboard() {
   if (!courses.some((c) => c.id === selectedCourse)) selectedCourse = courses[0].id;
   const courseName = courses.find((c) => c.id === selectedCourse).name;
   renderCourseTabs(courses);
-  await populateMonthSelect();
+  const seq = ++renderSeq;
+  await populateMonthSelect(seq);
+  if (seq !== renderSeq) return;
 
   const { data, error } = await supabase.rpc("get_scoreboard", {
     target_cohort: STUDENT.cohortId,
     target_month: selectedMonth,
     target_course: selectedCourse,
   });
+  if (seq !== renderSeq) return;
   const myId = STUDENT.id || null;
   const isCurrent = !selectedMonth;
 

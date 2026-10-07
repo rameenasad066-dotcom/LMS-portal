@@ -36,6 +36,8 @@ const $ = (id) => document.getElementById(id);
 
 let selectedMonth = null; // null = current month
 let selectedCourse = COURSES[0].id;
+// Quick tab/month/cohort clicks overlap; only the newest render may draw.
+let renderSeq = 0;
 let currentRows = [];
 let openId = null;
 const detailCache = new Map(); // keyed `${course}:${studentId}:${monthIso}`
@@ -54,11 +56,12 @@ function monthLabel(iso) {
   return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 }
 
-async function populateMonthSelect() {
+async function populateMonthSelect(seq) {
   const sel = $("scoreboardMonth");
   if (!sel) return;
 
   const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: activeCohort, target_course: selectedCourse });
+  if (seq !== renderSeq) return;
   const months = error || !data ? [] : data.map((r) => r.month_start);
   const current = currentMonthIso();
   if (!months.includes(current)) months.unshift(current);
@@ -166,7 +169,9 @@ async function toggleDetail(studentId) {
 
 async function renderScoreboardReal() {
   renderCourseTabs();
-  await populateMonthSelect();
+  const seq = ++renderSeq;
+  await populateMonthSelect(seq);
+  if (seq !== renderSeq) return;
   openId = null;
   detailCache.clear();
 
@@ -175,6 +180,7 @@ async function renderScoreboardReal() {
     target_month: selectedMonth,
     target_course: selectedCourse,
   });
+  if (seq !== renderSeq) return;
 
   currentRows = (!error && data && data.fullList) || [];
   const unranked = (!error && data && data.unranked) || [];

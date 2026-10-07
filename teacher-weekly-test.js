@@ -422,17 +422,18 @@ $("weeklyTestArea").addEventListener("click", async (e) => {
 $("weeklyTestArea").addEventListener("change", async (e) => {
   if (e.target.id !== "wtCourseEdit" || !currentTest) return;
   const subjects = subjectsForCourseChoice(e.target.value);
+  const previous = currentTest.subjects || ALL_SUBJECT_IDS;
   e.target.disabled = true;
   const { error } = await supabase.from("weekly_tests").update({ subjects }).eq("id", currentTest.id);
-  const { error: asgError } = !error && currentTest.assignment_id
-    ? await supabase.from("assignments").update({ subjects }).eq("id", currentTest.assignment_id)
-    : { error: null };
-  if (error || asgError) {
-    e.target.disabled = false;
-    showToast("Couldn't change the course", (error || asgError).message);
-    return;
+  let asgError = null;
+  if (!error && currentTest.assignment_id) {
+    ({ error: asgError } = await supabase.from("assignments").update({ subjects }).eq("id", currentTest.assignment_id));
+    // Never leave the test visible to one course while its marks count for another.
+    if (asgError) await supabase.from("weekly_tests").update({ subjects: previous }).eq("id", currentTest.id);
   }
-  showToast("Course updated", "The student list and scoreboard now follow the new course.");
+  if (error || asgError) showToast("Couldn't change the course", (error || asgError).message);
+  else showToast("Course updated", "The student list and scoreboard now follow the new course.");
+  // Re-render either way, so the picker always shows what's actually saved.
   await renderDetailView();
 });
 

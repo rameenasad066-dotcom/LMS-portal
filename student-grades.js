@@ -126,12 +126,18 @@ export async function renderStudentGrades() {
     };
   });
 
-  // A tab per course they take, plus any course they still have work in
-  // (e.g. one they've since dropped), so no grade silently disappears.
+  // A tab per course they take, plus any course they still have work tagged
+  // to alone (e.g. one they've since dropped), so no grade silently
+  // disappears. Untagged pre-split work doesn't count here — it would hand
+  // every single-course student a tab for the course they don't take.
   const enrolled = coursesForSubjects(STUDENT.subjects);
   const items = [...gradedRows, ...pendingRows];
-  const courses = COURSES.filter((c) => enrolled.includes(c.id) || items.some((it) => it.courses.includes(c.id)));
-  if (!courses.some((c) => c.id === gradeCourse)) gradeCourse = (courses[0] || COURSES[0]).id;
+  const courses = COURSES.filter((c) =>
+    enrolled.includes(c.id) || items.some((it) => it.courses.length === 1 && it.courses[0] === c.id));
+  if (!courses.some((c) => c.id === gradeCourse)) {
+    const own = courses.find((c) => enrolled.includes(c.id));
+    gradeCourse = (own || courses[0] || COURSES[0]).id;
+  }
 
   gradeData = { gradedRows, pendingRows, courses, attendance: attErr ? null : attendance };
   renderGradesForCourse();
