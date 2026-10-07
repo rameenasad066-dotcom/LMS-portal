@@ -5,17 +5,17 @@
    WhatsApp. Runs as a module — see teacher-auth-guard.js for the
    script-order reasoning. */
 
-import { supabase, COURSES, ALL_SUBJECT_IDS, subjectsForCourses, courseLabel } from "./supabase-config.js";
+import { supabase, COURSES, ALL_SUBJECT_IDS, subjectsForCourses, courseLabel, courseSelectHTML, subjectsForCourseChoice } from "./supabase-config.js";
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABEL = { homework: "Homework", assignment: "Assignment", test: "Test" };
 
-/* An assignment carries the subjects it's aimed at; a student sees it when
-   their own subjects overlap. All three = everyone, which is also what every
-   assignment posted before subject enrolment existed was backfilled to. */
+/* An assignment carries the subjects of the one course it's for; a student
+   sees it when their own subjects overlap. All three = posted before the
+   courses were separated — it counts for both until re-tagged. */
 function audienceLabel(subjects) {
   const list = subjects || [];
-  return ALL_SUBJECT_IDS.every((s) => list.includes(s)) ? "All students" : courseLabel(list);
+  return ALL_SUBJECT_IDS.every((s) => list.includes(s)) ? "Both courses (not yet tagged)" : courseLabel(list);
 }
 
 function isFor(student, assignment) {
@@ -74,10 +74,10 @@ async function renderListView() {
         <option value="assignment">Assignment</option>
         <option value="test">Test</option>
       </select>
-      <label for="caAudience">For</label>
-      <select id="caAudience" class="tool-select">
-        <option value="all">All students</option>
-        ${COURSES.map((c) => `<option value="${c.id}">${c.name} only</option>`).join("")}
+      <label for="caCourse">Course</label>
+      <select id="caCourse" class="tool-select" required>
+        <option value="">Choose a course…</option>
+        ${COURSES.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
       </select>
       <label for="caTitle">Title</label>
       <input type="text" id="caTitle" required placeholder="e.g. Homework 2 — Causes of the War of Independence">
@@ -158,6 +158,11 @@ async function renderMarkingView() {
       <strong class="asg-detail-title"></strong>
       <button class="btn btn-outline btn-sm asg-delete" data-delete-asg>Delete</button>
     </div>
+    <div class="course-retag">
+      <label for="asgCourse">Course</label>
+      ${courseSelectHTML("asgCourse", a.subjects)}
+      <span class="date-hint">Only students taking this course are listed, and its marks count on that course's scoreboard.</span>
+    </div>
     <div class="table-wrap">
       <table class="sub-table">
         <thead>
@@ -186,14 +191,15 @@ $("assignmentsArea").addEventListener("submit", async (e) => {
   const btn = e.target.querySelector("button[type=submit]");
   btn.disabled = true;
   try {
-    const audience = $("caAudience").value;
+    const course = $("caCourse").value;
+    if (!course) throw new Error("Choose which course this is for.");
     const { error } = await supabase.from("assignments").insert({
       cohort_id: activeCohort,
       type: $("caType").value,
       title: $("caTitle").value.trim(),
       due_date: $("caDue").value,
       max_marks: Number($("caMax").value),
-      subjects: audience === "all" ? ALL_SUBJECT_IDS : subjectsForCourses([audience]),
+      subjects: subjectsForCourses([course]),
     });
     if (error) throw error;
     showToast("Posted", `Now visible to ${COHORT_DATA[activeCohort].name} students.`);
@@ -270,6 +276,22 @@ $("assignmentsArea").addEventListener("click", async (e) => {
     saveBtn.textContent = "Update";
     showToast("Mark saved", "The student can see it on their portal now.");
   }
+});
+
+$("assignmentsArea").addEventListener("change", async (e) => {
+  if (e.target.id !== "asgCourse") return;
+  e.target.disabled = true;
+  const { error } = await supabase
+    .from("assignments")
+    .update({ subjects: subjectsForCourseChoice(e.target.value) })
+    .eq("id", openAssignmentId);
+  if (error) {
+    e.target.disabled = false;
+    showToast("Couldn't change the course", error.message);
+    return;
+  }
+  showToast("Course updated", "The student list and scoreboard now follow the new course.");
+  await renderMarkingView();
 });
 
 document.querySelectorAll(".pill").forEach((pill) =>

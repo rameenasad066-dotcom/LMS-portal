@@ -4398,6 +4398,80 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
 }
 
 /* ==========================================================================
+   Course tabs — Pakistan Studies / Islamiyat switch (scoreboards, the
+   dashboard leaderboard, My Grades) + the teacher's per-item course picker
+   ========================================================================== */
+
+.course-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.course-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--red-blush-line);
+  background: var(--surface);
+  color: var(--ink-red);
+  font: 600 13px 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.course-tab:hover {
+  background: var(--red-blush);
+}
+
+.course-tab.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.grade-course-tabs {
+  margin-bottom: 18px;
+}
+
+.sb-course-tabs .course-tab {
+  font: 700 12.5px 'Poppins', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: 3px solid var(--sb-line);
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+}
+
+.sb-course-tabs .course-tab:hover {
+  background: var(--sb-bg);
+}
+
+.sb-course-tabs .course-tab.active {
+  background: var(--sb-red);
+  color: var(--sb-on-accent);
+}
+
+.course-retag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 4px 0 16px;
+}
+
+.course-retag label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.course-retag .date-hint {
+  flex-basis: 100%;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -4559,6 +4633,12 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
   .asg-upload-form {
     flex-direction: column;
     align-items: stretch;
+  }
+  .course-retag .tool-select {
+    width: 100%;
+  }
+  .course-tab {
+    flex: 1 1 0;
   }
   .asg-file-input {
     max-width: 100%;

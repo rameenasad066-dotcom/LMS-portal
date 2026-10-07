@@ -17,13 +17,33 @@
    NOT clickable here — the click-to-expand marks/attendance detail is
    teacher-only, on the teacher-scoreboard.js side of this same feature.
    The Dashboard's small mini-podium widget is untouched — it still reads
-   `data.top3` via the pre-existing podiumRowHTML(). */
+   `data.top3` via the pre-existing podiumRowHTML().
 
-import { supabase } from "./supabase-config.js";
+   Per-course boards (2026-10-07) — Pakistan Studies and Islamiyat are
+   ranked separately. A student sees a board for each course they take;
+   tabs (on the page AND the dashboard widget, kept in step) only appear
+   when that's both. */
+
+import { supabase, COURSES, coursesForSubjects } from "./supabase-config.js";
 
 const $ = (id) => document.getElementById(id);
 
 let selectedMonth = null; // null = current month
+let selectedCourse = null;
+
+function myCourses() {
+  const mine = coursesForSubjects(STUDENT.subjects);
+  return COURSES.filter((c) => mine.includes(c.id));
+}
+
+function renderCourseTabs(courses) {
+  document.querySelectorAll("[data-course-tabs]").forEach((box) => {
+    box.hidden = courses.length < 2;
+    box.innerHTML = courses.map((c) => `
+      <button type="button" class="course-tab${c.id === selectedCourse ? " active" : ""}" role="tab"
+        aria-selected="${c.id === selectedCourse}" data-s-course-tab="${c.id}">${c.name}</button>`).join("");
+  });
+}
 
 function podiumColHTML(p, cls, place, myId) {
   return `
@@ -55,7 +75,7 @@ async function populateMonthSelect() {
   const sel = $("sScoreboardMonth");
   if (!sel) return;
 
-  const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: STUDENT.cohortId });
+  const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: STUDENT.cohortId, target_course: selectedCourse });
   const months = error || !data ? [] : data.map((r) => r.month_start);
   const current = currentMonthIso();
   if (!months.includes(current)) months.unshift(current);
@@ -87,21 +107,26 @@ function rowHTML(entry, maxScore, myId) {
 }
 
 export async function renderStudentScoreboard() {
+  const courses = myCourses().length ? myCourses() : COURSES;
+  if (!courses.some((c) => c.id === selectedCourse)) selectedCourse = courses[0].id;
+  const courseName = courses.find((c) => c.id === selectedCourse).name;
+  renderCourseTabs(courses);
   await populateMonthSelect();
 
   const { data, error } = await supabase.rpc("get_scoreboard", {
     target_cohort: STUDENT.cohortId,
     target_month: selectedMonth,
+    target_course: selectedCourse,
   });
   const myId = STUDENT.id || null;
   const isCurrent = !selectedMonth;
 
   const mini = document.querySelector('[data-list="mini-podium"]');
   const has3 = !error && data && data.top3 && data.top3.length > 0;
-  if (mini) mini.innerHTML = has3 ? podiumRowHTML(data.top3, myId) : '<p class="empty-note">No scoreboard yet this month.</p>';
+  if (mini) mini.innerHTML = has3 ? podiumRowHTML(data.top3, myId) : `<p class="empty-note">No ${esc(courseName)} scoreboard yet this month.</p>`;
 
   const hint = $("sScoreboardHint");
-  if (hint) hint.textContent = isCurrent ? "Computed live from marked work this month" : "A past month — no longer changes";
+  if (hint) hint.textContent = `${courseName} · ${isCurrent ? "computed live from marked work this month" : "a past month — no longer changes"}`;
 
   const rows = $("sbRows");
   const empty = $("podiumEmpty");
@@ -128,8 +153,8 @@ export async function renderStudentScoreboard() {
   }
   if (!has) {
     empty.textContent = isCurrent
-      ? "No scoreboard yet — the first monthly ranking is published after the first marked assignment."
-      : "No scoreboard for that month — nothing was marked in that period.";
+      ? `No ${courseName} scoreboard yet — the first monthly ranking is published after the first marked ${courseName} work.`
+      : `No ${courseName} scoreboard for that month — nothing was marked in that period.`;
     rows.innerHTML = "";
     return;
   }
@@ -140,5 +165,12 @@ export async function renderStudentScoreboard() {
 
 document.addEventListener("change", (e) => {
   if (e.target.id !== "sScoreboardMonth") return;
+  renderStudentScoreboard();
+});
+
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-s-course-tab]");
+  if (!tab || tab.dataset.sCourseTab === selectedCourse) return;
+  selectedCourse = tab.dataset.sCourseTab;
   renderStudentScoreboard();
 });

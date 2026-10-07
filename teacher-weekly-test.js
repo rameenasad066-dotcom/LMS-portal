@@ -8,13 +8,23 @@
    pick them up with no student-side changes. Runs as a module — see
    teacher-auth-guard.js for the script-order reasoning. */
 
-import { supabase, ALL_SUBJECT_IDS } from "./supabase-config.js";
+import { supabase, COURSES, ALL_SUBJECT_IDS, subjectsForCourses, courseLabel, courseSelectHTML, subjectsForCourseChoice } from "./supabase-config.js";
 import { safeFileName } from "./storage-upload.js";
 
 const $ = (id) => document.getElementById(id);
 
 let openTestId = null;
 let currentPdfPath = null;
+
+function courseText(subjects) {
+  const list = subjects || ALL_SUBJECT_IDS;
+  return ALL_SUBJECT_IDS.every((s) => list.includes(s)) ? "Both courses (not yet tagged)" : courseLabel(list);
+}
+
+function isFor(student, test) {
+  const theirs = student.subjects || [];
+  return (test.subjects || ALL_SUBJECT_IDS).some((s) => theirs.includes(s));
+}
 
 function fmtDateTime(iso) {
   return new Date(iso).toLocaleString("en-GB", {
@@ -71,7 +81,7 @@ async function ensureShadowAssignment(wt, maxMarks) {
       title: wt.title,
       due_date: dueDate,
       max_marks: maxMarks,
-      subjects: ALL_SUBJECT_IDS,
+      subjects: wt.subjects,
     })
     .select()
     .single();
@@ -115,6 +125,11 @@ async function renderListView() {
 
   area.innerHTML = `
     <form class="settings-form" id="createWtForm">
+      <label for="wtCourse">Course</label>
+      <select id="wtCourse" class="tool-select" required>
+        <option value="">Choose a course…</option>
+        ${COURSES.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
+      </select>
       <label for="wtTitle">Title</label>
       <input type="text" id="wtTitle" required placeholder="e.g. Weekly Test 5 — Mughal Empire">
       <label for="wtFile">Test paper (PDF)</label>
@@ -135,7 +150,7 @@ async function renderListView() {
       <li class="upload-item">
         <span class="u-info">
           <strong></strong>
-          <small>Closes ${fmtDateTime(t.closes_at)} · ${subCounts[t.id] || 0} uploaded</small>
+          <small>${esc(courseText(t.subjects))} · closes ${fmtDateTime(t.closes_at)} · ${subCounts[t.id] || 0} uploaded</small>
         </span>
         <button class="btn btn-outline btn-sm" data-open-wt="${t.id}">Open →</button>
         <button class="kebab" data-delete-wt-list="${t.id}" data-delete-wt-pdf="${esc(t.pdf_path)}" data-delete-wt-title="${esc(t.title)}" aria-label="Delete ${esc(t.title)}">${ICONS.trash}</button>
@@ -159,17 +174,17 @@ async function renderDetailView() {
   currentTest = t;
   const closed = new Date() > new Date(t.closes_at);
   const maxLabel = t.max_marks ? ` · out of ${t.max_marks}` : "";
-  $("wtHint").textContent = `Closes ${fmtDateTime(t.closes_at)} · ${closed ? "Closed" : "Open"}${maxLabel}`;
+  $("wtHint").textContent = `${courseText(t.subjects)} · closes ${fmtDateTime(t.closes_at)} · ${closed ? "Closed" : "Open"}${maxLabel}`;
 
   const queries = [
-    supabase.from("students").select("id, name, initials").eq("cohort_id", t.cohort_id).order("name"),
+    supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", t.cohort_id).order("name"),
     supabase.from("weekly_test_submissions").select("*").eq("weekly_test_id", t.id),
   ];
   if (t.assignment_id) {
     queries.push(supabase.from("marks").select("*").eq("assignment_id", t.assignment_id));
   }
   const results = await Promise.all(queries);
-  const students = results[0].data;
+  const students = (results[0].data || []).filter((st) => isFor(st, t));
   const subs = results[1].data;
   const mks = t.assignment_id ? results[2].data : [];
 
@@ -179,7 +194,7 @@ async function renderDetailView() {
   (mks || []).forEach((m) => { markBy[m.student_id] = m; });
 
   const maxPlaceholder = t.max_marks ? `/${t.max_marks}` : "—";
-  const rows = (students || []).map((st) => {
+  const rows = students.map((st) => {
     const sub = subBy[st.id];
     const mark = markBy[st.id];
     const status = sub
@@ -214,6 +229,11 @@ async function renderDetailView() {
       <button type="button" class="btn btn-outline btn-sm" data-view-pdf>View test paper</button>
       <button class="btn btn-outline btn-sm asg-delete" data-delete-wt>Delete</button>
     </div>
+    <div class="course-retag">
+      <label for="wtCourseEdit">Course</label>
+      ${courseSelectHTML("wtCourseEdit", t.subjects)}
+      <span class="date-hint">Only students taking this course see the test and are listed here; its marks count on that course's scoreboard.</span>
+    </div>
     ${maxSetter}
     <div class="table-wrap">
       <table class="sub-table">
@@ -230,7 +250,7 @@ async function renderDetailView() {
         <tbody>${rows}</tbody>
       </table>
     </div>
-    ${(students || []).length ? "" : '<p class="empty-note">No students in this cohort yet.</p>'}`;
+    ${students.length ? "" : `<p class="empty-note">No students in this cohort are taking ${esc(courseText(t.subjects))}.</p>`}`;
 
   area.querySelector(".asg-detail-title").textContent = t.title;
 }
@@ -245,6 +265,13 @@ $("weeklyTestArea").addEventListener("submit", async (e) => {
   const title = $("wtTitle").value.trim();
   const file = $("wtFile").files[0];
   const closesLocal = $("wtCloses").value;
+  const course = $("wtCourse").value;
+
+  if (!course) {
+    $("wtError").textContent = "Choose which course this test is for.";
+    $("wtError").hidden = false;
+    return;
+  }
 
   if (!file) {
     $("wtError").textContent = "Choose the test paper PDF first.";
@@ -275,6 +302,7 @@ $("weeklyTestArea").addEventListener("submit", async (e) => {
       pdf_path: path,
       closes_at: new Date(closesLocal).toISOString(),
       max_marks: Number($("wtMax").value) || null,
+      subjects: subjectsForCourses([course]),
     });
     if (insertError) throw insertError;
 
@@ -387,6 +415,25 @@ $("weeklyTestArea").addEventListener("click", async (e) => {
     }
     return;
   }
+});
+
+// Re-tagging moves the test AND its shadow assignment, since the scoreboard
+// and My Grades read the assignment, while student visibility reads the test.
+$("weeklyTestArea").addEventListener("change", async (e) => {
+  if (e.target.id !== "wtCourseEdit" || !currentTest) return;
+  const subjects = subjectsForCourseChoice(e.target.value);
+  e.target.disabled = true;
+  const { error } = await supabase.from("weekly_tests").update({ subjects }).eq("id", currentTest.id);
+  const { error: asgError } = !error && currentTest.assignment_id
+    ? await supabase.from("assignments").update({ subjects }).eq("id", currentTest.assignment_id)
+    : { error: null };
+  if (error || asgError) {
+    e.target.disabled = false;
+    showToast("Couldn't change the course", (error || asgError).message);
+    return;
+  }
+  showToast("Course updated", "The student list and scoreboard now follow the new course.");
+  await renderDetailView();
 });
 
 document.querySelectorAll(".pill").forEach((pill) =>

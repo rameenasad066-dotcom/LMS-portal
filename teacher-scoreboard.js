@@ -23,17 +23,28 @@
    place, and the marks/attendance queries below ride the teacher's
    existing "can view all students" RLS policies — a tampered request
    from an actual student session would just get zero rows back, same
-   protection teacher-student-report.js already relies on. */
+   protection teacher-student-report.js already relies on.
 
-import { supabase, coursesForSubjects, ALL_SUBJECT_IDS } from "./supabase-config.js";
+   Per-course boards (2026-10-07) — Pakistan Studies and Islamiyat are
+   ranked separately (course tabs); see course-separation.sql. The detail
+   card follows the same course: only that course's marks and classes. */
+
+import { supabase, COURSES, coursesForItem } from "./supabase-config.js";
 import { attendanceSummary } from "./progress-utils.js";
 
 const $ = (id) => document.getElementById(id);
 
 let selectedMonth = null; // null = current month
+let selectedCourse = COURSES[0].id;
 let currentRows = [];
 let openId = null;
-const detailCache = new Map(); // keyed `${studentId}:${monthIso}`
+const detailCache = new Map(); // keyed `${course}:${studentId}:${monthIso}`
+
+function renderCourseTabs() {
+  $("sbCourseTabs").innerHTML = COURSES.map((c) => `
+    <button type="button" class="course-tab${c.id === selectedCourse ? " active" : ""}" role="tab"
+      aria-selected="${c.id === selectedCourse}" data-course-tab="${c.id}">${c.name}</button>`).join("");
+}
 
 function currentMonthIso() {
   return new Date().toISOString().slice(0, 8) + "01";
@@ -47,7 +58,7 @@ async function populateMonthSelect() {
   const sel = $("scoreboardMonth");
   if (!sel) return;
 
-  const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: activeCohort });
+  const { data, error } = await supabase.rpc("get_scoreboard_months", { target_cohort: activeCohort, target_course: selectedCourse });
   const months = error || !data ? [] : data.map((r) => r.month_start);
   const current = currentMonthIso();
   if (!months.includes(current)) months.unshift(current);
@@ -61,32 +72,32 @@ async function populateMonthSelect() {
 }
 
 async function loadDetail(studentId, monthIso) {
-  const key = `${studentId}:${monthIso}`;
+  const key = `${selectedCourse}:${studentId}:${monthIso}`;
   if (detailCache.has(key)) return detailCache.get(key);
 
   const monthStart = new Date(monthIso + "T00:00:00");
   const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
 
-  const [{ data: marks }, { data: attendance }, { data: student }] = await Promise.all([
+  const course = selectedCourse;
+  const [{ data: marks }, { data: attendance }] = await Promise.all([
     supabase
       .from("marks")
-      .select("marks, assignments(title, type, max_marks, due_date)")
+      .select("marks, assignments(title, type, max_marks, due_date, subjects)")
       .eq("student_id", studentId),
     supabase.from("attendance").select("status, subject").eq("student_id", studentId),
-    supabase.from("students").select("subjects").eq("id", studentId).maybeSingle(),
   ]);
 
   const items = (marks || [])
     .filter((m) => {
+      if (!m.assignments || !coursesForItem(m.assignments.subjects).includes(course)) return false;
       const due = new Date(m.assignments.due_date + "T00:00:00");
       return due >= monthStart && due < monthEnd;
     })
     .map((m) => ({ title: m.assignments.title, marks: m.marks, maxMarks: m.assignments.max_marks }))
     .sort((a, b) => a.title.localeCompare(b.title));
 
-  // Same rule as everywhere attendance is shown: only their own courses' classes.
-  const enrolled = coursesForSubjects(student ? student.subjects : ALL_SUBJECT_IDS);
-  const detail = { items, attendance: attendanceSummary(attendance, enrolled).pct };
+  // Everyone on this board takes this course, so count just its classes.
+  const detail = { items, attendance: attendanceSummary(attendance, [course]).pct };
   detailCache.set(key, detail);
   return detail;
 }
@@ -154,6 +165,7 @@ async function toggleDetail(studentId) {
 }
 
 async function renderScoreboardReal() {
+  renderCourseTabs();
   await populateMonthSelect();
   openId = null;
   detailCache.clear();
@@ -161,6 +173,7 @@ async function renderScoreboardReal() {
   const { data, error } = await supabase.rpc("get_scoreboard", {
     target_cohort: activeCohort,
     target_month: selectedMonth,
+    target_course: selectedCourse,
   });
 
   currentRows = (!error && data && data.fullList) || [];
@@ -175,9 +188,8 @@ async function renderScoreboardReal() {
   $("sbUnrankedList").innerHTML = unranked
     .map((s) => `<span class="sb-unranked-chip">${esc(s.initials)} · ${esc(s.name)}</span>`)
     .join("");
-  $("scoreboardHint").textContent = has
-    ? `${monthLabel(selectedMonth || currentMonthIso())} · computed live from marks`
-    : "";
+  const courseName = COURSES.find((c) => c.id === selectedCourse).name;
+  $("scoreboardHint").textContent = `${courseName} · ${monthLabel(selectedMonth || currentMonthIso())}${has ? " · computed live from marks" : ""}`;
 
   if (error) {
     $("podiumEmpty").hidden = false;
@@ -187,8 +199,8 @@ async function renderScoreboardReal() {
   }
   if (!has) {
     $("podiumEmpty").textContent = isCurrent
-      ? "No marks entered yet this month — the scoreboard fills in as you grade work."
-      : "No marks were entered that month.";
+      ? `No ${courseName} marks entered yet this month — the scoreboard fills in as you grade work.`
+      : `No ${courseName} marks were entered that month.`;
     $("sbRows").innerHTML = "";
     return;
   }
@@ -208,6 +220,13 @@ document.querySelectorAll(".pill").forEach((pill) =>
 );
 
 $("scoreboardMonth").addEventListener("change", renderScoreboardReal);
+
+$("sbCourseTabs").addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-course-tab]");
+  if (!tab || tab.dataset.courseTab === selectedCourse) return;
+  selectedCourse = tab.dataset.courseTab;
+  renderScoreboardReal();
+});
 
 document.addEventListener("swr-view", (e) => {
   if (e.detail === "scoreboard") renderScoreboardReal();

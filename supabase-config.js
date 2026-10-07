@@ -52,6 +52,30 @@ export function coursesForSubjects(subjects) {
   return COURSES.filter((c) => c.subjects.every((s) => list.includes(s))).map((c) => c.id);
 }
 
+/* Which courses an assignment / weekly test counts toward. Overlap, not
+   "every": items posted before the courses were separated hold all three
+   subjects and count for both until re-tagged — same `&&` test the
+   scoreboard SQL uses (supabase/migrations/course-separation.sql). */
+export function coursesForItem(subjects) {
+  const list = subjects || [];
+  return COURSES.filter((c) => c.subjects.some((s) => list.includes(s))).map((c) => c.id);
+}
+
+/* The teacher-side "Course" picker on an already-posted item: one option per
+   course, plus "Both" only for an untagged item, so it can be re-tagged but
+   nothing new can be made cohort-wide. Value "both" = all subject ids. */
+export function courseSelectHTML(id, subjects) {
+  const courses = coursesForItem(subjects);
+  const current = courses.length === 1 ? courses[0] : "both";
+  const opts = COURSES.map((c) => `<option value="${c.id}"${c.id === current ? " selected" : ""}>${c.name}</option>`);
+  if (current === "both") opts.unshift('<option value="both" selected>Both courses (posted before they were separated)</option>');
+  return `<select id="${id}" class="tool-select" aria-label="Course">${opts.join("")}</select>`;
+}
+
+export function subjectsForCourseChoice(value) {
+  return value === "both" ? ALL_SUBJECT_IDS : subjectsForCourses([value]);
+}
+
 export function courseLabel(subjects) {
   const names = COURSES.filter((c) => c.subjects.every((s) => (subjects || []).includes(s))).map((c) => c.name);
   return names.length ? names.join(" + ") : "No subjects";

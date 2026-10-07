@@ -5,9 +5,14 @@
    matching mark yet, merged into one chronological tracker. Exported
    rather than self-running — auth-guard.js calls it once the profile has
    resolved (this page doesn't strictly need cohortId, but keeping it in
-   the same post-auth render sequence as everything else is simplest). */
+   the same post-auth render sequence as everything else is simplest).
 
-import { supabase, coursesForSubjects } from "./supabase-config.js";
+   Split by course (2026-10-07): course tabs switch the stat cards, chart,
+   attendance and table between Pakistan Studies and Islamiyat, from one
+   fetch. Work posted before the courses were separated counts for both
+   (tagged "Both courses"), matching the scoreboard. */
+
+import { supabase, COURSES, coursesForSubjects, coursesForItem } from "./supabase-config.js";
 import { byChronology, trendFromPrevious, attendanceSummary } from "./progress-utils.js";
 
 function letterGrade(pct) {
@@ -64,6 +69,9 @@ function buildChart(items) {
   </svg>`;
 }
 
+let gradeData = null;
+let gradeCourse = null;
+
 export async function renderStudentGrades() {
   const body = document.getElementById("gradeTableBody");
   if (!body) return;
@@ -73,26 +81,15 @@ export async function renderStudentGrades() {
   if (!uid) return;
 
   const [{ data: marks, error: markErr }, { data: subs }, { data: attendance, error: attErr }] = await Promise.all([
-    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks)").eq("student_id", uid),
+    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks, subjects)").eq("student_id", uid),
     // Assignment embedded so pending rows need no second round trip.
-    supabase.from("submissions").select("assignment_id, submitted_at, assignments(title, due_date)").eq("student_id", uid),
+    supabase.from("submissions").select("assignment_id, submitted_at, assignments(title, due_date, subjects)").eq("student_id", uid),
     supabase.from("attendance").select("status, subject").eq("student_id", uid),
   ]);
 
-  // Only classes for courses this student takes count; leave is excused.
-  const att = attendanceSummary(attendance, coursesForSubjects(STUDENT.subjects));
-  if (attErr) {
-    set("sAttendancePct", "—");
-    set("sAttendanceSub", "Couldn't load attendance");
-  } else if (att.counted) {
-    set("sAttendancePct", `${att.pct}%`);
-    set("sAttendanceSub", `${att.present} of ${att.counted} class${att.counted === 1 ? "" : "es"} attended`);
-  } else {
-    set("sAttendancePct", "—");
-    set("sAttendanceSub", "No classes marked yet");
-  }
-
   if (markErr) {
+    gradeData = null;
+    document.querySelectorAll("[data-grade-course-tabs]").forEach((b) => { b.hidden = true; });
     set("sGradeLatest", "—");
     set("sGradeLatestSub", "Couldn't load grades");
     body.innerHTML = `<tr><td colspan="5">Couldn't load your grades right now.</td></tr>`;
@@ -102,7 +99,6 @@ export async function renderStudentGrades() {
   const markedAssignmentIds = new Set((marks || []).map((m) => m.assignment_id));
   const pendingSubs = (subs || []).filter((s) => !markedAssignmentIds.has(s.assignment_id));
 
-
   // A mark whose assignment this student can no longer read (moved cohort,
   // or a course removed since it was graded) comes back with a null embed —
   // skip it rather than throw, which used to lock the whole portal.
@@ -110,6 +106,7 @@ export async function renderStudentGrades() {
     title: m.assignments.title,
     dueDate: m.assignments.due_date,
     markedAt: m.marked_at,
+    courses: coursesForItem(m.assignments.subjects),
     status: "graded",
     pct: Math.round((m.marks / m.assignments.max_marks) * 100),
     marksVal: m.marks,
@@ -123,17 +120,62 @@ export async function renderStudentGrades() {
       title: a ? a.title : "Assignment",
       dueDate: a ? a.due_date : s.submitted_at.slice(0, 10),
       markedAt: s.submitted_at,
+      courses: a ? coursesForItem(a.subjects) : COURSES.map((c) => c.id),
       status: "pending",
       feedback: null,
     };
   });
 
+  // A tab per course they take, plus any course they still have work in
+  // (e.g. one they've since dropped), so no grade silently disappears.
+  const enrolled = coursesForSubjects(STUDENT.subjects);
+  const items = [...gradedRows, ...pendingRows];
+  const courses = COURSES.filter((c) => enrolled.includes(c.id) || items.some((it) => it.courses.includes(c.id)));
+  if (!courses.some((c) => c.id === gradeCourse)) gradeCourse = (courses[0] || COURSES[0]).id;
+
+  gradeData = { gradedRows, pendingRows, courses, attendance: attErr ? null : attendance };
+  renderGradesForCourse();
+}
+
+function renderGradesForCourse() {
+  const body = document.getElementById("gradeTableBody");
+  if (!body || !gradeData) return;
+  const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  const course = gradeCourse;
+  const courseName = COURSES.find((c) => c.id === course).name;
+
+  document.querySelectorAll("[data-grade-course-tabs]").forEach((box) => {
+    box.hidden = gradeData.courses.length < 2;
+    box.innerHTML = gradeData.courses.map((c) => `
+      <button type="button" class="course-tab${c.id === course ? " active" : ""}" role="tab"
+        aria-selected="${c.id === course}" data-grade-course="${c.id}">${c.name}</button>`).join("");
+  });
+  set("sGradeCourseName", courseName);
+
+  // Only this course's classes; untagged (pre-split) classes count for both.
+  if (!gradeData.attendance) {
+    set("sAttendancePct", "—");
+    set("sAttendanceSub", "Couldn't load attendance");
+  } else {
+    const att = attendanceSummary(gradeData.attendance, [course]);
+    if (att.counted) {
+      set("sAttendancePct", `${att.pct}%`);
+      set("sAttendanceSub", `${att.present} of ${att.counted} ${courseName} class${att.counted === 1 ? "" : "es"} attended`);
+    } else {
+      set("sAttendancePct", "—");
+      set("sAttendanceSub", `No ${courseName} classes marked yet`);
+    }
+  }
+
+  const inCourse = (r) => r.courses.includes(course);
+  const gradedRows = gradeData.gradedRows.filter(inCourse);
+  const pendingRows = gradeData.pendingRows.filter(inCourse);
   const allRows = [...gradedRows, ...pendingRows].sort((a, b) => byChronology(b, a));
   const chronological = gradedRows.slice().sort(byChronology);
 
   const latest = chronological[chronological.length - 1];
   set("sGradeLatest", latest ? letterGrade(latest.pct).label : "—");
-  set("sGradeLatestSub", latest ? `${latest.title} · due ${fmtDue(latest.dueDate)}` : "No grades yet");
+  set("sGradeLatestSub", latest ? `${latest.title} · due ${fmtDue(latest.dueDate)}` : `No ${courseName} grades yet`);
   set("sGradeTaken", String(allRows.length));
   set("sGradeTakenSub", `${pendingRows.length} pending review`);
 
@@ -147,7 +189,7 @@ export async function renderStudentGrades() {
   if (trend) {
     set("sGradeTrendSub", `${trend.deltaText} · ${chronological.slice(-4).map((r) => letterGrade(r.pct).label).join(" → ")}`);
   } else {
-    set("sGradeTrendSub", chronological.length ? `First graded item · ${letterGrade(chronological[0].pct).label}` : "No grades yet");
+    set("sGradeTrendSub", chronological.length ? `First graded item · ${letterGrade(chronological[0].pct).label}` : `No ${courseName} grades yet`);
   }
 
   const chartEl = document.getElementById("sGradeChart");
@@ -165,9 +207,10 @@ export async function renderStudentGrades() {
   body.innerHTML = allRows.length
     ? allRows.map((r) => {
         const g = r.status === "graded" ? letterGrade(r.pct) : null;
+        const both = r.courses.length > 1 ? ' <span class="cat-tag">Both courses</span>' : "";
         return `
       <tr>
-        <td data-label="Item"><strong>${esc(r.title)}</strong></td>
+        <td data-label="Item"><strong>${esc(r.title)}</strong>${both}</td>
         <td data-label="Due">${esc(fmtDue(r.dueDate))}</td>
         <td data-label="Status"><span class="status-pill ${r.status === "graded" ? "ontime" : "muted"}">${r.status === "graded" ? "Graded" : "Pending review"}</span></td>
         <td data-label="Grade">${g ? `
@@ -178,5 +221,12 @@ export async function renderStudentGrades() {
       </tr>
       ${r.feedback ? `<tr class="feedback-row" hidden><td colspan="5"><div>"${esc(r.feedback)}"</div></td></tr>` : ""}`;
       }).join("")
-    : `<tr><td colspan="5">Nothing submitted or marked yet.</td></tr>`;
+    : `<tr><td colspan="5">No ${esc(courseName)} work submitted or marked yet.</td></tr>`;
 }
+
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-grade-course]");
+  if (!tab || tab.dataset.gradeCourse === gradeCourse) return;
+  gradeCourse = tab.dataset.gradeCourse;
+  renderGradesForCourse();
+});

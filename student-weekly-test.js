@@ -41,11 +41,16 @@ export async function renderStudentWeeklyTest() {
 
   await syncServerClock();
 
-  const { data: tests, error } = await supabase
+  const { data: allTests, error } = await supabase
     .from("weekly_tests")
     .select("*")
     .eq("cohort_id", STUDENT.cohortId)
     .order("created_at", { ascending: false });
+
+  // RLS already limits a student to their own courses' tests; this repeats
+  // it for preview mode, where the teacher's RLS returns every test.
+  const mine = STUDENT.subjects || [];
+  const tests = (allTests || []).filter((t) => !t.subjects || t.subjects.some((s) => mine.includes(s)));
 
   if (error) {
     area.innerHTML = '<p class="empty-note">Couldn\'t load the weekly test right now — try refreshing.</p>';

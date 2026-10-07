@@ -144,6 +144,7 @@
               <h2>Leaderboard</h2>
               <a class="jump" href="#scoreboard">Full scoreboard →</a>
             </div>
+            <div class="course-tabs" data-course-tabs role="tablist" aria-label="Course" hidden></div>
             <div class="podium mini" data-list="mini-podium"></div>
           </div>
 
@@ -208,6 +209,8 @@
       <!-- ================= VIEW: MY GRADES ================= -->
       <section class="view" data-view="grades" hidden>
 
+        <div class="course-tabs grade-course-tabs" data-grade-course-tabs role="tablist" aria-label="Course" hidden></div>
+
         <div class="stats" aria-label="Grade summary">
           <div class="stat-card">
             <div class="stat-icon">
@@ -254,7 +257,7 @@
         <div class="panel">
           <div class="panel-head">
             <h2>Marks over time</h2>
-            <span class="panel-hint">Every graded item, in order</span>
+            <span class="panel-hint">Every graded <span id="sGradeCourseName"></span> item, in order</span>
           </div>
           <div id="sGradeChart"></div>
           <p class="empty-note" id="sGradeChartEmpty" hidden>No graded work yet — your chart appears once Miss Rameen marks something.</p>
@@ -304,6 +307,8 @@
               <select id="sScoreboardMonth" class="sb-month-select"></select>
             </div>
           </div>
+
+          <div class="course-tabs sb-course-tabs" data-course-tabs role="tablist" aria-label="Course" hidden></div>
 
           <div class="sb-rows" id="sbRows"></div>
           <p class="empty-note" id="podiumEmpty" hidden>No scoreboard yet — the first monthly ranking is published after the first marked assignment.</p>
