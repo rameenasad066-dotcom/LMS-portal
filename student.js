@@ -21,6 +21,7 @@ const VIEW_TITLES = {
   dashboard:  'Dashboard',
   vault:      'Lecture Vault',
   notes:      'Notes',
+  practice:   'AI Practice',
   weekly:     'Weekly Test',
   assignments: 'Assignments & Homework',
   grades:     'My Grades',

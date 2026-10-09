@@ -38,6 +38,7 @@ LMS portal/
 ├── teacher-attendance.js      — Attendance roll-call, per subject (course)
 ├── teacher-scoreboard.js      — Bar-leaderboard scoreboard + detail cards
 ├── teacher-announcements.js   — Broadcast noticeboard
+├── teacher-practice.js        — AI Practice monitoring: live attempts feed, by student / question / topic, detail modal, Realtime
 ├── teacher-settings.js        — Teacher settings (teacher_settings table)
 ├── teacher-preview.js         — "View as a student" picker
 │
@@ -54,6 +55,7 @@ LMS portal/
 ├── student-scoreboard.js      — Scoreboard + dashboard mini podium
 ├── student-announcements.js   — Announcement board
 ├── student-notifications.js   — Topnav bell: unread announcements (announcement_reads)
+├── student-practice.js        — AI Practice: pick section → question → answer → grade via the grade-answer Edge Function
 ├── student-settings.js        — Student settings (name)
 │
 ├── data/
@@ -390,6 +392,7 @@ Sections are delimited by `/* === SECTION NAME === */` comments. Current section
 4. ~~Real hosting decision~~ — **resolved 2026-07-27**: deployed to Netlify (free tier), live at `https://studywithrameen-lms.netlify.app` (renamed 2026-07-28 from `studywithrameenlms.netlify.app` — she changed the site name in Netlify; the Edge Function CORS allowlist in both `create-student` and `reset-student-password` was updated to match and needs redeploying, see item 8). Code pushed via GitHub (`rameenasad066-dotcom/LMS-portal`, `main` branch) — Netlify can be connected to that repo for auto-deploy on push, or she can keep re-uploading the folder manually. `Past papers for pak studies/`, `source-notes/`, and other non-site source material are excluded via `.gitignore` so they aren't publicly served.
 
 **In progress:**
+23. AI Practice (History 4-mark questions, Gemini grading) — **built 2026-10-09, SQL not yet run, Edge Function not yet deployed.** (a) Run `supabase/migrations/ai-practice.sql` (adds nullable `questions.topic` filled with a 26-theme DRAFT taxonomy she should review/edit, RLS + column-level grants on `questions` so `mark_scheme` stays service-role-only, and table `student_attempts` + Realtime). (b) Deploy `supabase/functions/grade-answer/index.ts` with secrets `PROJECT_URL`, `ANON_KEY`, `SERVICE_ROLE_KEY` plus new `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default `gemini-flash-latest`). Students never write attempts: only the function inserts (service role), so marks can't be forged. Score = count of validated credited points, never a model-stated number. Limits: per-student 20 graded answers/24h, identical resubmits return the earlier attempt, and the Gemini FREE tier allows only ~20 requests/day per model for the whole project — enable billing before real class use. Student nav "AI Practice" shows only for students enrolled in History; preview mode never calls the function. `student_attempts` cascades away with a removed student. Until the SQL/function exist the student page shows a load error and the teacher page is empty.
 22. Courses separated (PST / ISL) — **built 2026-10-07, SQL not yet run.** Run `supabase/migrations/course-separation.sql`. Until then **both Scoreboards and the dashboard Leaderboard show a load error** (the pages call the new 3-argument `get_scoreboard`), and posting a weekly test fails (no `weekly_tests.subjects` column yet). Posting assignments, marking and My Grades work before and after. Deploy and run it together.
 21. Subject-specific attendance — **built 2026-10-05, SQL not yet run.** Run `supabase/migrations/attendance-subjects.sql`. **Run it at the same time as deploying the front-end, and don't mark attendance in between:** the new page writes a `subject` column and upserts on the new 3-column key (neither exists before the SQL), while the OLD page upserts on the old 2-column key (which the SQL drops) — so marking fails in either mismatched order. Viewing percentages works throughout (untagged rows always count).
 20. Notification bell — **built 2026-10-04, SQL not yet run.** Run `supabase/migrations/announcement-reads.sql`. Until then the bell opens a list of recent announcements but never shows a badge (by design — see the Notification bell note).

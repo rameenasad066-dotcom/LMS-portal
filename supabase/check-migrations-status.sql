@@ -52,6 +52,14 @@ select * from (values
   (17, 'assignments-retain-graded.sql',
        exists (select 1 from pg_policies where tablename = 'assignments' and policyname = 'Students can view assignments they were graded on')),
   (18, 'attendance-subjects.sql',
-       exists (select 1 from pg_constraint where conrelid = 'public.attendance'::regclass and conname = 'attendance_date_student_subject_key'))
+       exists (select 1 from pg_constraint con where con.conrelid = 'public.attendance'::regclass and con.contype = 'u'
+         and (select array_agg(att.attname::text order by att.attname) from unnest(con.conkey) k
+              join pg_attribute att on att.attrelid = con.conrelid and att.attnum = k) = array['class_date', 'student_id', 'subject'])
+   and not exists (select 1 from pg_constraint con where con.conrelid = 'public.attendance'::regclass and con.contype = 'u'
+         and (select array_agg(att.attname::text order by att.attname) from unnest(con.conkey) k
+              join pg_attribute att on att.attrelid = con.conrelid and att.attnum = k) = array['class_date', 'student_id'])),
+  (19, 'ai-practice.sql',
+       exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'questions' and column_name = 'topic')
+   and to_regclass('public.student_attempts') is not null)
 ) as t(step, migration, applied)
 order by step;
