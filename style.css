@@ -2402,6 +2402,12 @@ button, input, select {
   color: var(--gray);
 }
 
+.asg-upload-form > .asg-meta {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: 12px;
+}
+
 /* Weekly-test paper download — a big, tactile download card (brand green)
    in place of a thin outline button. The whole tile is the click target. */
 .wt-paper {

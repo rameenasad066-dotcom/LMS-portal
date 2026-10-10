@@ -89,6 +89,7 @@ export async function renderStudentWeeklyTest() {
       statusHTML = `
         <form class="asg-upload-form" data-wt-id="${t.id}" data-wt-closes="${t.closes_at}">
           <input type="file" class="asg-file-input" multiple accept="image/*,application/pdf" required>
+          <small class="asg-meta">Tip: choose files saved on your phone (Downloads or Gallery), not from Google Drive.</small>
           <button type="submit" class="btn btn-primary btn-sm">Upload my answers</button>
         </form>`;
     }

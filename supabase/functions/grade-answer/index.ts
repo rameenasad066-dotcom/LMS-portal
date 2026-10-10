@@ -288,7 +288,11 @@ Deno.serve(async (req) => {
   // is the real boundary.
   const admin = createClient(supabaseUrl, serviceRoleKey);
 
-  const { data: student } = await admin.from("students").select("id, subjects").eq("id", caller.id).maybeSingle();
+  const { data: student, error: studentErr } = await admin.from("students").select("id, subjects").eq("id", caller.id).maybeSingle();
+  if (studentErr) {
+    console.error("student lookup failed", studentErr);
+    return reply({ error: "Couldn't check your enrolment. Please tell your teacher.", code: "server_error" }, 500);
+  }
   if (!student || !(student.subjects || []).includes("history")) {
     return reply({ error: "AI Practice is for History students.", code: "not_enrolled" }, 403);
   }

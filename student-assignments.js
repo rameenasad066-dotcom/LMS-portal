@@ -69,6 +69,7 @@ export async function renderStudentAssignments() {
       statusHTML = `
         <form class="asg-upload-form" data-asg-id="${a.id}">
           <input type="file" class="asg-file-input" multiple accept="image/*,application/pdf" required>
+          <small class="asg-meta">Tip: choose files saved on your phone (Downloads or Gallery), not from Google Drive.</small>
           <button type="submit" class="btn btn-primary btn-sm">Submit work</button>
         </form>
         ${pastDue(a.due_date) ? '<span class="asg-meta">Past the deadline — your submission will be flagged Late.</span>' : ""}`;
