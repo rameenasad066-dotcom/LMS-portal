@@ -26,6 +26,12 @@ function isFor(student, test) {
   return (test.subjects || ALL_SUBJECT_IDS).some((s) => theirs.includes(s));
 }
 
+function toLocalInput(iso) {
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function fmtDateTime(iso) {
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
@@ -229,6 +235,22 @@ async function renderDetailView() {
       <button type="button" class="btn btn-outline btn-sm" data-view-pdf>View test paper</button>
       <button class="btn btn-outline btn-sm asg-delete" data-delete-wt>Delete</button>
     </div>
+    <form class="wt-edit" id="wtEditForm">
+      <div class="wt-edit-field">
+        <label for="wtEditTitle">Title</label>
+        <input type="text" id="wtEditTitle" required maxlength="200">
+      </div>
+      <div class="wt-edit-field">
+        <label for="wtEditMax">Max marks</label>
+        <input type="number" id="wtEditMax" min="1" step="1" required value="${t.max_marks || ""}" placeholder="e.g. 20">
+      </div>
+      <div class="wt-edit-field">
+        <label for="wtEditCloses">Uploads close at</label>
+        <input type="datetime-local" id="wtEditCloses" required value="${toLocalInput(t.closes_at)}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Save details</button>
+      <span class="date-hint">Changing the close time reopens or closes uploads straight away. Marks already entered are kept as typed, not rescaled.</span>
+    </form>
     <div class="course-retag">
       <label for="wtCourseEdit">Course</label>
       ${courseSelectHTML("wtCourseEdit", t.subjects)}
@@ -253,11 +275,57 @@ async function renderDetailView() {
     ${students.length ? "" : `<p class="empty-note">No students in this cohort are taking ${esc(courseText(t.subjects))}.</p>`}`;
 
   area.querySelector(".asg-detail-title").textContent = t.title;
+  $("wtEditTitle").value = t.title;
 }
 
 let currentTest = null;
 
+// Keeps the paired shadow assignment (title, max marks, due date) in step
+// with the test, since My Grades and the scoreboard read the assignment.
+async function saveTestDetails() {
+  const title = $("wtEditTitle").value.trim();
+  const maxMarks = Number($("wtEditMax").value);
+  const closesLocal = $("wtEditCloses").value;
+  if (!title) return showToast("Title needed", "Give the test a name.");
+  if (!Number.isInteger(maxMarks) || maxMarks < 1) return showToast("Check max marks", "Enter a whole number of marks, 1 or more.");
+  if (!closesLocal) return showToast("Close time needed", "Set when uploads should close.");
+
+  const t = currentTest;
+  if (t.assignment_id && maxMarks < (t.max_marks || 0)) {
+    const { data: over } = await supabase.from("marks").select("student_id").eq("assignment_id", t.assignment_id).gt("marks", maxMarks);
+    if (over && over.length) {
+      showToast("Can't lower max marks yet", `${over.length} student${over.length === 1 ? " has" : "s have"} more than ${maxMarks}. Correct those marks first.`);
+      return;
+    }
+  }
+
+  const closesAt = new Date(closesLocal).toISOString();
+  const before = { title: t.title, max_marks: t.max_marks, closes_at: t.closes_at };
+  const { error } = await supabase.from("weekly_tests").update({ title, max_marks: maxMarks, closes_at: closesAt }).eq("id", t.id);
+  if (error) return showToast("Couldn't save", error.message);
+
+  if (t.assignment_id) {
+    const { error: asgError } = await supabase.from("assignments")
+      .update({ title, max_marks: maxMarks, due_date: closesAt.slice(0, 10) })
+      .eq("id", t.assignment_id);
+    if (asgError) {
+      await supabase.from("weekly_tests").update(before).eq("id", t.id);
+      showToast("Couldn't save", asgError.message);
+      return renderDetailView();
+    }
+  }
+  showToast("Details saved", "Students see the new name, marks total and close time.");
+  await renderDetailView();
+}
+
 $("weeklyTestArea").addEventListener("submit", async (e) => {
+  if (e.target.id === "wtEditForm") {
+    e.preventDefault();
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true;
+    try { await saveTestDetails(); } finally { btn.disabled = false; }
+    return;
+  }
   if (e.target.id !== "createWtForm") return;
   e.preventDefault();
   $("wtError").hidden = true;

@@ -4477,6 +4477,40 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
   flex-basis: 100%;
 }
 
+/* Weekly test "Edit details" form (teacher) */
+.wt-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 14px;
+  margin: 4px 0 16px;
+}
+
+.wt-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wt-edit-field:first-child {
+  flex: 1 1 240px;
+}
+
+.wt-edit label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.wt-edit .date-hint {
+  flex-basis: 100%;
+}
+
+@media (max-width: 640px) {
+  .wt-edit-field, .wt-edit .btn { flex: 1 1 100%; }
+}
+
 /* ==========================================================================
    AI Practice — student practice flow + teacher monitoring (2026-10-09)
    Brand tokens only, so light/dark follow automatically. The mark chip always
