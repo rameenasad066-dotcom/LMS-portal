@@ -6,7 +6,7 @@
    once the profile has resolved. */
 
 import { supabase } from "./supabase-config.js";
-import { uploadToSubmissions } from "./storage-upload.js";
+import { uploadToSubmissions, retryNetwork, isNetworkError, forgetStored } from "./storage-upload.js";
 
 const TYPE_LABEL = { homework: "Homework", assignment: "Assignment", test: "Test" };
 
@@ -112,14 +112,23 @@ document.addEventListener("submit", async (e) => {
   btn.textContent = "Uploading…";
   try {
     const assignmentId = form.dataset.asgId;
-    const paths = await uploadToSubmissions(files, `${STUDENT.id}/${assignmentId}`);
+    const prefix = `${STUDENT.id}/${assignmentId}`;
+    const paths = await uploadToSubmissions(files, prefix, (done, total) => {
+      btn.textContent = `Uploading ${done + 1} of ${total}…`;
+    });
 
-    const { error: insertError } = await supabase.from("submissions").insert({
+    btn.textContent = "Saving…";
+    const { error: insertError } = await retryNetwork(() => supabase.from("submissions").insert({
       assignment_id: assignmentId,
       student_id: STUDENT.id,
       file_paths: paths,
-    });
-    if (insertError) throw insertError;
+    }));
+    if (insertError && insertError.code !== "23505") {
+      throw isNetworkError(insertError)
+        ? new Error("Your files are uploaded but the final save didn't go through. Check your internet and press the button again — nothing will be re-uploaded.")
+        : insertError;
+    }
+    forgetStored(prefix, files);
 
     showToast("Work submitted", "Miss Rameen will mark it soon.");
     await renderStudentAssignments();

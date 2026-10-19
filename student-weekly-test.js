@@ -7,7 +7,7 @@
    renderStudentWeeklyTest() once the profile has resolved. */
 
 import { supabase } from "./supabase-config.js";
-import { uploadToSubmissions } from "./storage-upload.js";
+import { uploadToSubmissions, retryNetwork, isNetworkError, forgetStored } from "./storage-upload.js";
 
 const ICON_PDF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
 const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>';
@@ -151,14 +151,25 @@ document.addEventListener("submit", async (e) => {
   btn.textContent = "Uploading…";
   try {
     const weeklyTestId = form.dataset.wtId;
-    const paths = await uploadToSubmissions(files, `${STUDENT.id}/wt-${weeklyTestId}`);
+    const prefix = `${STUDENT.id}/wt-${weeklyTestId}`;
+    const paths = await uploadToSubmissions(files, prefix, (done, total) => {
+      btn.textContent = `Uploading ${done + 1} of ${total}…`;
+    });
 
-    const { error: insertError } = await supabase.from("weekly_test_submissions").insert({
+    btn.textContent = "Saving…";
+    const { error: insertError } = await retryNetwork(() => supabase.from("weekly_test_submissions").insert({
       weekly_test_id: weeklyTestId,
       student_id: STUDENT.id,
       file_paths: paths,
-    });
-    if (insertError) throw insertError;
+    }));
+    // 23505 = a row already exists: an earlier try's reply was lost on the way
+    // back but the save did land, so this is a success, not a failure.
+    if (insertError && insertError.code !== "23505") {
+      throw isNetworkError(insertError)
+        ? new Error("Your files are uploaded but the final save didn't go through. Check your internet and press the button again — nothing will be re-uploaded.")
+        : insertError;
+    }
+    forgetStored(prefix, files);
 
     showToast("Uploaded", "Miss Rameen can see your submission time now.");
     await renderStudentWeeklyTest();

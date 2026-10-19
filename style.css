@@ -1802,70 +1802,21 @@ button, input, select {
 }
 
 /* ==========================================================================
-   Scoreboard v2 — bar leaderboard (2026-09-04)
-   Deliberately its own visual language, built to an exact reference
-   (cream/black-border/hard-shadow, Anton headline) rather than the site's
-   red/green tokens — a one-off choice confirmed with her, not a drift in
-   the design system. Scoped entirely under .sb-panel so nothing here
-   leaks into or collides with the rest of the site (note the class names
-   are all sb-prefixed — .row/.pill/.name/.avatar already mean something
-   else elsewhere in this file). Same rule as everywhere else still
-   applies: ranks only, never a raw mark or percentage rendered as a
-   number — the bar width uses an aggregate rollup score for that reason
-   alone, and it's never printed as text.
+   Scoreboard — bar leaderboard (restyled 2026-10-16)
+   Was a one-off poster look (cream, 6px black frame, hard shadow, Anton);
+   now built from the portal's own tokens so it matches every other page and
+   follows light/dark automatically. Same markup and class names as before
+   (all sb-prefixed, scoped under .sb-panel). Ranks only: the bar width uses
+   an internal rollup score for sizing and is never printed as a number.
    ========================================================================== */
 
 .sb-panel {
-  --sb-bg: #FDF6EC;
-  --sb-ink: #1A1A1A;
-  --sb-surface: #FFFFFF;
-  --sb-red: #B8272A;
-  --sb-green: #1F5C40;
-  --sb-blue: #1E3A8A;
-  --sb-on-accent: #FDF6EC;
-  --sb-muted: rgba(26, 26, 26, 0.55);
-  --sb-shadow: #1A1A1A;
-  --sb-line: var(--sb-ink);     /* borders + rules; split from the text colour so dark mode can keep thick frames from going near-white */
-
-  background: var(--sb-bg);
-  border: 6px solid var(--sb-line);
-  border-radius: 20px;
-  box-shadow: 12px 12px 0 0 var(--sb-shadow);
-  padding: 26px 30px;
-  color: var(--sb-ink);
-}
-
-/* Dark follows the portal's explicit theme only. It used to key off
-   :root:not([data-theme="light"]), which also matched a visitor who had never
-   toggled anything — so the scoreboard rendered dark inside an otherwise
-   light page. Fills (green/blue) are mid-tone with DARK text on them: the old
-   cream-on-light-fill pairs measured 2.3–2.9:1. --sb-red is only ever text
-   here (the title and the ▼ arrow), so it takes the readable soft red. */
-:root[data-theme="dark"] .sb-panel {
-  --sb-bg: #1C2029;
-  --sb-surface: #232834;
-  --sb-red: #FF7A84;
-  --sb-green: #4CAF55;
-  --sb-blue: #6E8CF0;
-  --sb-ink: #F1F3F5;
-  --sb-on-accent: #11131A;
-  --sb-muted: #9AA3B2;
-  --sb-shadow: #000000;
-  --sb-line: #4A5364;
-}
-
-:root[data-theme="dark"] .sb-row.clickable:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* The pulse fades the whole pill to 35%, which drags its "LIVE" text below
-   legible contrast for part of every cycle — hold it steady in dark. */
-:root[data-theme="dark"] .sb-live-pill {
-  animation: none;
-}
-
-:root[data-theme="dark"] .sb-month-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2311131A'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background: var(--surface);
+  border: 1px solid var(--gray-light);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.06));
+  padding: 24px 26px;
+  color: var(--ink);
 }
 
 .sb-head-row {
@@ -1873,39 +1824,47 @@ button, input, select {
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
-@keyframes sbLivePulse {
+@keyframes sbLiveDot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50% { opacity: 0.3; }
 }
 
 .sb-live-pill {
-  display: inline-block;
-  background: var(--sb-green);
-  color: var(--sb-on-accent);
-  font: 700 12px 'Poppins', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-light);
+  color: var(--ink-green);
+  font: 700 11px 'Poppins', sans-serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 5px 13px;
+  padding: 4px 11px;
   border-radius: 999px;
-  border: 3px solid var(--sb-line);
-  animation: sbLivePulse 2.4s ease-in-out infinite;
+}
+
+.sb-live-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: sbLiveDot 2.4s ease-in-out infinite;
 }
 
 .sb-title {
-  font: 400 30px 'Anton', sans-serif;
-  color: var(--sb-red);
-  letter-spacing: 0.01em;
-  margin: 6px 0 0;
+  font: 700 24px 'Poppins', sans-serif;
+  color: var(--ink);
+  margin: 8px 0 0;
   text-wrap: balance;
 }
 
 .sb-sub {
-  font: 500 13px 'Poppins', sans-serif;
-  color: var(--sb-muted);
+  font: 400 13px 'Inter', sans-serif;
+  color: var(--gray);
   margin-top: 4px;
 }
 
@@ -1916,29 +1875,32 @@ button, input, select {
 
 .sb-month-select {
   cursor: pointer;
-  font: 700 12.5px 'Poppins', sans-serif;
-  letter-spacing: 0.04em;
-  padding: 7px 30px 7px 14px;
-  border-radius: 999px;
-  border: 3px solid var(--sb-line);
-  background: var(--sb-blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FDF6EC'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 8px center / 16px no-repeat;
-  color: var(--sb-on-accent);
+  font: 600 13px 'Inter', sans-serif;
+  padding: 8px 34px 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-control, var(--gray-light));
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239CA3AF'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 8px center / 18px no-repeat;
+  color: var(--ink);
   appearance: none;
-  outline: none;
+}
+
+.sb-month-select:focus-visible {
+  outline: 2px solid var(--brand-primary, var(--red));
+  outline-offset: 2px;
 }
 
 .sb-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 
 .sb-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 7px 8px;
-  border-radius: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
 }
 
 .sb-row.clickable {
@@ -1946,26 +1908,25 @@ button, input, select {
 }
 
 .sb-row.clickable:hover {
-  background: rgba(26, 26, 26, 0.05);
+  background: var(--surface-2);
 }
 
 .sb-rank-badge {
-  width: 26px;
-  height: 26px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 800 12px 'Poppins', sans-serif;
-  border: 2px solid var(--sb-line);
+  font: 700 12px 'Poppins', sans-serif;
   flex-shrink: 0;
-  background: var(--sb-surface);
-  color: var(--sb-ink);
+  background: var(--surface-2);
+  color: var(--gray);
 }
 
 .sb-rank-badge.top {
-  background: var(--sb-green);
-  color: var(--sb-on-accent);
+  background: var(--green-light);
+  color: var(--ink-green);
 }
 
 .sb-avatar {
@@ -1976,26 +1937,20 @@ button, input, select {
   align-items: center;
   justify-content: center;
   font: 700 11px 'Poppins', sans-serif;
-  border: 3px solid var(--sb-line);
   flex-shrink: 0;
-  background: var(--sb-surface);
-  color: var(--sb-ink);
+  background: var(--red-blush);
+  color: var(--ink-red);
 }
 
 .sb-avatar.top {
-  background: var(--sb-green);
-  color: var(--sb-on-accent);
-}
-
-.sb-avatar.podium {
-  background: var(--sb-blue);
-  color: var(--sb-on-accent);
+  background: var(--green-light);
+  color: var(--ink-green);
 }
 
 .sb-name {
   width: 148px;
-  font: 600 13px 'Poppins', sans-serif;
-  color: var(--sb-ink);
+  font: 600 14px 'Inter', sans-serif;
+  color: var(--ink);
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2009,10 +1964,9 @@ button, input, select {
 .sb-bar-track {
   flex: 1;
   min-width: 40px;
-  height: 15px;
-  background: var(--sb-surface);
-  border: 3px solid var(--sb-line);
-  border-radius: 10px;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 999px;
   overflow: hidden;
   position: relative;
 }
@@ -2020,32 +1974,33 @@ button, input, select {
 .sb-bar-fill {
   position: absolute;
   inset: 0 auto 0 0;
-  background: var(--sb-blue);
+  border-radius: 999px;
+  background: var(--red);
 }
 
 .sb-bar-fill.top {
-  background: var(--sb-green);
+  background: var(--green);
 }
 
 .sb-delta {
   width: 24px;
   text-align: center;
-  font: 800 13px 'Poppins', sans-serif;
+  font: 700 13px 'Poppins', sans-serif;
   flex-shrink: 0;
 }
 
-.sb-delta.up { color: var(--sb-green); }
-.sb-delta.down { color: var(--sb-red); }
-.sb-delta.same { color: var(--sb-muted); }
+.sb-delta.up { color: var(--ink-green); }
+.sb-delta.down { color: var(--ink-red); }
+.sb-delta.same { color: var(--gray-soft); }
 
 .sb-detail {
-  margin: 0 0 0 88px;
+  margin: 0 0 6px 50px;
   padding: 12px 16px;
-  background: var(--sb-surface);
-  border: 3px solid var(--sb-line);
-  border-radius: 10px;
-  font: 500 12px 'Poppins', sans-serif;
-  color: var(--sb-ink);
+  background: var(--surface-2);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  font: 400 12.5px 'Inter', sans-serif;
+  color: var(--ink);
   display: none;
   flex-direction: column;
   gap: 6px;
@@ -2062,7 +2017,7 @@ button, input, select {
 }
 
 .sb-detail .sb-detail-muted {
-  color: var(--sb-muted);
+  color: var(--gray);
 }
 
 .sb-detail-title {
@@ -2072,24 +2027,24 @@ button, input, select {
 
 .sb-footer {
   text-align: center;
-  padding-top: 16px;
-  margin-top: 16px;
-  border-top: 3px solid var(--sb-line);
-  font: 500 12.5px 'Poppins', sans-serif;
-  color: var(--sb-muted);
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid var(--gray-light);
+  font: 400 12.5px 'Inter', sans-serif;
+  color: var(--gray);
 }
 
 .sb-unranked {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 3px dashed var(--sb-line);
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-light);
 }
 
 .sb-unranked-title {
-  font: 700 12.5px 'Poppins', sans-serif;
+  font: 700 12px 'Poppins', sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--sb-muted);
+  letter-spacing: 0.05em;
+  color: var(--gray);
   margin-bottom: 10px;
 }
 
@@ -2100,29 +2055,43 @@ button, input, select {
 }
 
 .sb-unranked-chip {
-  font: 600 13px 'Inter', sans-serif;
-  background: var(--sb-surface);
-  border: 2px solid var(--sb-line);
+  font: 500 13px 'Inter', sans-serif;
+  background: var(--surface-2);
   border-radius: 999px;
   padding: 5px 12px;
-  color: var(--sb-ink);
+  color: var(--ink);
 }
 
 @media (max-width: 640px) {
   .sb-panel {
-    padding: 20px 16px;
-    border-width: 4px;
-    box-shadow: 7px 7px 0 0 var(--sb-shadow);
+    padding: 18px 14px;
+    border-radius: 14px;
   }
   .sb-title {
-    font-size: 26px;
+    font-size: 21px;
+  }
+  .sb-row {
+    display: grid;
+    grid-template-columns: 28px 36px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 10px 6px;
   }
   .sb-name {
-    width: 84px;
+    width: auto;
+    min-width: 0;
+  }
+  .sb-bar-track {
+    grid-column: 3 / 5;
+    grid-row: 2;
   }
   .sb-detail {
     margin-left: 0;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-live-pill::before { animation: none; }
 }
 
 /* ==========================================================================
@@ -4440,25 +4409,6 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
   margin-bottom: 18px;
 }
 
-.sb-course-tabs .course-tab {
-  font: 700 12.5px 'Poppins', sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 7px 16px;
-  border: 3px solid var(--sb-line);
-  background: var(--sb-surface);
-  color: var(--sb-ink);
-}
-
-.sb-course-tabs .course-tab:hover {
-  background: var(--sb-bg);
-}
-
-.sb-course-tabs .course-tab.active {
-  background: var(--sb-red);
-  color: var(--sb-on-accent);
-}
-
 .course-retag {
   display: flex;
   flex-wrap: wrap;
@@ -6448,7 +6398,7 @@ body,
 /* -- Form controls --------------------------------------------------------- */
 
 :root[data-theme="dark"] input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]),
-:root[data-theme="dark"] select:not(.sb-month-select),
+:root[data-theme="dark"] select,
 :root[data-theme="dark"] textarea {
   background-color: var(--input-bg);
   color: var(--ink);
@@ -6456,7 +6406,7 @@ body,
 }
 
 :root[data-theme="dark"] input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]):focus,
-:root[data-theme="dark"] select:not(.sb-month-select):focus,
+:root[data-theme="dark"] select:focus,
 :root[data-theme="dark"] textarea:focus {
   border-color: var(--brand-primary);
   box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.28);
