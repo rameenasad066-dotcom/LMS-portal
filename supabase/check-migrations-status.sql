@@ -60,6 +60,9 @@ select * from (values
               join pg_attribute att on att.attrelid = con.conrelid and att.attnum = k) = array['class_date', 'student_id'])),
   (19, 'ai-practice.sql',
        exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'questions' and column_name = 'topic')
-   and to_regclass('public.student_attempts') is not null)
+   and to_regclass('public.student_attempts') is not null),
+  (20, 'examiner-scripts.sql',
+       to_regclass('public.examiner_scripts') is not null
+   and exists (select 1 from storage.buckets where id = 'examiner-scripts'))
 ) as t(step, migration, applied)
 order by step;

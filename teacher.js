@@ -32,6 +32,7 @@ const VIEW_TITLES = {
   content: "Manage Content",
   assignments: "Assignments",
   "weekly-test": "Weekly Test",
+  scripts: "Examiner Scripts",
   practice: "AI Practice",
   students: "Students",
   "student-report": "Student Report",

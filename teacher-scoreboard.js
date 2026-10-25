@@ -85,14 +85,14 @@ async function loadDetail(studentId, monthIso) {
   const [{ data: marks }, { data: attendance }] = await Promise.all([
     supabase
       .from("marks")
-      .select("marks, assignments(title, type, max_marks, due_date, subjects)")
+      .select("marks, assignments(title, type, max_marks, due_date, subjects, cohort_id)")
       .eq("student_id", studentId),
-    supabase.from("attendance").select("status, subject").eq("student_id", studentId),
+    supabase.from("attendance").select("status, subject").eq("student_id", studentId).eq("cohort_id", activeCohort),
   ]);
 
   const items = (marks || [])
     .filter((m) => {
-      if (!m.assignments || !coursesForItem(m.assignments.subjects).includes(course)) return false;
+      if (!m.assignments || m.assignments.cohort_id !== activeCohort || !coursesForItem(m.assignments.subjects).includes(course)) return false;
       const due = new Date(m.assignments.due_date + "T00:00:00");
       return due >= monthStart && due < monthEnd;
     })

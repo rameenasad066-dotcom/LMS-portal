@@ -120,14 +120,18 @@ async function loadStudentReport(studentId) {
     supabase.from("students").select("*").eq("id", studentId).single(),
     supabase
       .from("marks")
-      .select("marks, feedback, marked_at, assignments(title, type, max_marks, due_date, subjects)")
+      .select("marks, feedback, marked_at, assignments(title, type, max_marks, due_date, subjects, cohort_id)")
       .eq("student_id", studentId),
-    supabase.from("attendance").select("status, class_date, subject").eq("student_id", studentId),
+    supabase.from("attendance").select("status, class_date, subject, cohort_id").eq("student_id", studentId),
   ]);
 
   if (studentErr || markErr) return { studentId, error: (studentErr || markErr).message };
 
+  // A student moved to a new cohort starts clean: only work and classes that
+  // belong to their current cohort count. Earlier-cohort rows stay in the
+  // database, they're just not part of this report.
   const items = (marks || [])
+    .filter((m) => m.assignments && m.assignments.cohort_id === student.cohort_id)
     .map((m) => ({
       title: m.assignments.title,
       type: m.assignments.type,
@@ -141,7 +145,7 @@ async function loadStudentReport(studentId) {
     }))
     .sort(byChronology);
 
-  const attendanceRows = attendance || [];
+  const attendanceRows = (attendance || []).filter((a) => a.cohort_id === student.cohort_id);
   return {
     student,
     items,

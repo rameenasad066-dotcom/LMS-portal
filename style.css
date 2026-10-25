@@ -4462,6 +4462,284 @@ html:not(.identity-cached) body.auth-checking[data-portal="student"] #cohortPill
 }
 
 /* ==========================================================================
+   Examiner Scripts — grade-first cards + in-portal PDF reader (2026-10-25)
+   Student cards, the reader overlay, and the teacher's posted list share the
+   same card. Portal tokens only, so light and dark follow automatically.
+   ========================================================================== */
+
+.xs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+
+.xs-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--gray-light);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.06));
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+button.xs-card {
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+button.xs-card:hover {
+  border-color: var(--red-blush-line);
+  transform: translateY(-2px);
+}
+
+button.xs-card:focus-visible,
+.xs-reader button:focus-visible {
+  outline: 3px solid var(--brand-primary, var(--red));
+  outline-offset: 2px;
+}
+
+.xs-grade {
+  width: 74px;
+  height: 74px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font: 800 32px 'Poppins', sans-serif;
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.xs-grade.top { background: var(--green-light); color: var(--ink-green); }
+.xs-grade.low { background: var(--red-blush); color: var(--ink-red); }
+
+.xs-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.xs-body h3,
+.xs-title {
+  display: block;
+  font: 700 16px 'Poppins', sans-serif;
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.xs-meta {
+  display: block;
+  font-size: 12.5px;
+  color: var(--gray);
+  margin: 2px 0 10px;
+}
+
+.xs-marks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--gray);
+  margin-bottom: 5px;
+}
+
+.xs-marks b {
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink);
+}
+
+.xs-track {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.xs-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--red);
+}
+
+.xs-fill.top { background: var(--green); }
+
+.xs-go {
+  flex-shrink: 0;
+  font: 600 13px 'Inter', sans-serif;
+  color: var(--ink-red);
+  white-space: nowrap;
+}
+
+.xs-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.xs-form-note {
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .xs-grid { grid-template-columns: minmax(0, 1fr); }
+  .xs-card { gap: 12px; padding: 14px; }
+  .xs-grade { width: 60px; height: 60px; font-size: 26px; border-radius: 15px; }
+  .xs-go { display: none; }
+}
+
+/* Reader */
+
+body.xs-reading { overflow: hidden; }
+
+.xs-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.xs-reader[hidden] { display: none; }
+
+.xs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--gray-light);
+  flex-wrap: wrap;
+}
+
+.xs-bar-title {
+  flex: 1;
+  min-width: 140px;
+}
+
+.xs-bar-title strong {
+  display: block;
+  font: 700 15px 'Poppins', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xs-bar-title span {
+  display: block;
+  font-size: 12px;
+  color: var(--gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xs-ctl {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 700 16px 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.xs-ctl:hover { background: var(--surface-2); }
+.xs-ctl.close { border-color: var(--red-blush-line); color: var(--ink-red); font-size: 14px; }
+
+.xs-pageno {
+  font: 600 13px 'Inter', sans-serif;
+  color: var(--gray);
+  min-width: 72px;
+  text-align: center;
+}
+
+.xs-scroll {
+  flex: 1;
+  overflow: auto;
+  background: var(--surface-2);
+  padding: 16px 12px 40px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.xs-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  min-width: 100%;
+}
+
+.xs-page {
+  position: relative;
+  margin: 0 auto 14px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.xs-page canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.xs-state {
+  max-width: 420px;
+  margin: 60px auto;
+  text-align: center;
+  color: var(--gray);
+  font-size: 14px;
+}
+
+.xs-state .xs-spin {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 12px;
+  border: 3px solid var(--gray-light);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: xsSpin 0.8s linear infinite;
+}
+
+@keyframes xsSpin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .xs-state .xs-spin { animation-duration: 2.4s; }
+  button.xs-card { transition: none; }
+  button.xs-card:hover { transform: none; }
+}
+
+@media (max-width: 480px) {
+  .xs-bar {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    grid-template-areas: "title title title close" "page page zo zi";
+    gap: 6px 8px;
+    padding: 8px 10px;
+    align-items: center;
+  }
+  .xs-bar-title { grid-area: title; min-width: 0; }
+  .xs-ctl.close { grid-area: close; }
+  .xs-pageno { grid-area: page; text-align: left; }
+  #xsZoomOut { grid-area: zo; }
+  #xsZoomIn { grid-area: zi; }
+  .xs-scroll { padding: 10px 6px 40px; }
+}
+
+/* ==========================================================================
    AI Practice — student practice flow + teacher monitoring (2026-10-09)
    Brand tokens only, so light/dark follow automatically. The mark chip always
    prints the number, so colour is never the only cue.

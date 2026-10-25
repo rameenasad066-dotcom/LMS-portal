@@ -81,10 +81,10 @@ export async function renderStudentGrades() {
   if (!uid) return;
 
   const [{ data: marks, error: markErr }, { data: subs }, { data: attendance, error: attErr }] = await Promise.all([
-    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks, subjects)").eq("student_id", uid),
+    supabase.from("marks").select("*, assignments(title, type, due_date, max_marks, subjects, cohort_id)").eq("student_id", uid),
     // Assignment embedded so pending rows need no second round trip.
-    supabase.from("submissions").select("assignment_id, submitted_at, assignments(title, due_date, subjects)").eq("student_id", uid),
-    supabase.from("attendance").select("status, subject").eq("student_id", uid),
+    supabase.from("submissions").select("assignment_id, submitted_at, assignments(title, due_date, subjects, cohort_id)").eq("student_id", uid),
+    supabase.from("attendance").select("status, subject, cohort_id").eq("student_id", uid),
   ]);
 
   if (markErr) {
@@ -96,13 +96,16 @@ export async function renderStudentGrades() {
     return;
   }
 
+  // Only the current cohort's work and classes: a student moved to a new
+  // cohort starts with a clean record (earlier rows stay in the database).
+  const inCohort = (a) => a && a.cohort_id === STUDENT.cohortId;
   const markedAssignmentIds = new Set((marks || []).map((m) => m.assignment_id));
-  const pendingSubs = (subs || []).filter((s) => !markedAssignmentIds.has(s.assignment_id));
+  const pendingSubs = (subs || []).filter((s) => !markedAssignmentIds.has(s.assignment_id) && inCohort(s.assignments));
 
   // A mark whose assignment this student can no longer read (moved cohort,
   // or a course removed since it was graded) comes back with a null embed —
   // skip it rather than throw, which used to lock the whole portal.
-  const gradedRows = (marks || []).filter((m) => m.assignments).map((m) => ({
+  const gradedRows = (marks || []).filter((m) => inCohort(m.assignments)).map((m) => ({
     title: m.assignments.title,
     dueDate: m.assignments.due_date,
     markedAt: m.marked_at,
@@ -139,7 +142,7 @@ export async function renderStudentGrades() {
     gradeCourse = (own || courses[0] || COURSES[0]).id;
   }
 
-  gradeData = { gradedRows, pendingRows, courses, attendance: attErr ? null : attendance };
+  gradeData = { gradedRows, pendingRows, courses, attendance: attErr ? null : (attendance || []).filter((a) => a.cohort_id === STUDENT.cohortId) };
   renderGradesForCourse();
 }
 
