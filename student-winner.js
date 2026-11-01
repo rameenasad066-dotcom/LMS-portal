@@ -1,9 +1,10 @@
 /* Winner celebration (student.html) — a full-screen "you won" screen shown once
    to a student who has an unseen row in `winners` (supabase/migrations/
    winners.sql). Who gets it is decided entirely by those rows; there is no
-   name check here. Pressing Continue (or Escape) stamps seen_at so it never
-   shows again on any device. "View as a student" shows it too, so the teacher
-   can preview it, but never stamps anything.
+   name check here. It is shown ONCE: seen_at is stamped the moment the screen
+   appears, not when it's dismissed, so closing the tab or refreshing never
+   brings it back, on any device. "View as a student" shows it too, so the
+   teacher can preview it, but never stamps anything.
    Exported rather than self-running because it needs STUDENT.id/name —
    auth-guard.js calls initWinner() once the profile has resolved. */
 
@@ -43,6 +44,12 @@ export async function initWinner() {
     .limit(1);
   if (error || !data || !data.length) return;
   show(data[0]);
+}
+
+async function markSeen(win) {
+  if (STUDENT.isPreview) return;
+  const { error } = await supabase.from("winners").update({ seen_at: new Date().toISOString() }).eq("id", win.id);
+  if (error) console.warn("[winner] couldn't mark the notice as seen", error.message);
 }
 
 function firstName() {
@@ -89,6 +96,7 @@ function show(win) {
 
   document.body.appendChild(el);
   document.body.classList.add("win-open");
+  markSeen(win);
   const goBtn = el.querySelector("[data-win-go]");
   goBtn.focus({ preventScroll: true });
 
@@ -156,7 +164,7 @@ function show(win) {
     celebrate();
   });
 
-  async function dismiss() {
+  function dismiss() {
     if (closed) return;
     closed = true;
     timers.forEach(clearTimeout);
@@ -168,9 +176,6 @@ function show(win) {
       document.body.classList.remove("win-open");
       if (opener && document.contains(opener) && opener.focus) opener.focus({ preventScroll: true });
     }, reduce ? 0 : 340);
-    if (STUDENT.isPreview) return;
-    const { error } = await supabase.from("winners").update({ seen_at: new Date().toISOString() }).eq("id", win.id);
-    if (error) console.warn("[winner] couldn't mark the notice as seen", error.message);
   }
   goBtn.addEventListener("click", dismiss);
 
