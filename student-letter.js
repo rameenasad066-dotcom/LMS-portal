@@ -32,7 +32,7 @@ function renderBanner() {
   const unopened = !(views.get(l.id) || {}).opened_at;
   el.innerHTML = `
     <div class="lt-banner">
-      <span class="lt-seal" aria-hidden="true">RA</span>
+      <span class="lt-seal" aria-hidden="true">R</span>
       <div class="lt-banner-text">
         <span class="lt-kicker">${unopened ? '<span class="lt-new">New</span>' : ""}Sunday Letter · ${fmtShort(l.created_at)}</span>
         <h2>${escapeHTML(l.title)}</h2>
@@ -63,7 +63,7 @@ function showPopup() {
   const pop = $("letterPopup");
   if (!l || !pop || views.has(l.id)) return;
   pop.innerHTML = `
-    <span class="lt-seal small" aria-hidden="true">RA</span>
+    <span class="lt-seal small" aria-hidden="true">R</span>
     <div class="lt-pop-text"><b>New letter from Miss Rameen</b><span>${escapeHTML(l.title)}</span></div>
     <button type="button" class="btn btn-primary btn-sm" data-letter-open="${l.id}">Read</button>
     <button type="button" class="lt-pop-x" data-letter-dismiss aria-label="Dismiss">×</button>`;
