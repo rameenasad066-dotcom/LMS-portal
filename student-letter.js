@@ -36,7 +36,6 @@ function renderBanner() {
       <div class="lt-banner-text">
         <span class="lt-kicker">${unopened ? '<span class="lt-new">New</span>' : ""}Sunday Letter · ${fmtShort(l.created_at)}</span>
         <h2>${escapeHTML(l.title)}</h2>
-        <p>${escapeHTML(l.preview)}</p>
       </div>
       <button type="button" class="btn btn-primary lt-read" data-letter-open="${l.id}">Read it</button>
     </div>`;
@@ -65,7 +64,7 @@ function showPopup() {
   if (!l || !pop || views.has(l.id)) return;
   pop.innerHTML = `
     <span class="lt-seal small" aria-hidden="true">RA</span>
-    <div class="lt-pop-text"><b>New letter from Miss Rameen</b><span>${escapeHTML(l.preview)}</span></div>
+    <div class="lt-pop-text"><b>New letter from Miss Rameen</b><span>${escapeHTML(l.title)}</span></div>
     <button type="button" class="btn btn-primary btn-sm" data-letter-open="${l.id}">Read</button>
     <button type="button" class="lt-pop-x" data-letter-dismiss aria-label="Dismiss">×</button>`;
   pop.hidden = false;
@@ -139,7 +138,7 @@ export async function initLetters() {
   wire();
   if (!STUDENT.cohortId) return;
   const [{ data, error }, v] = await Promise.all([
-    supabase.from("sunday_letters").select("id, title, preview, body, created_at")
+    supabase.from("sunday_letters").select("id, title, body, created_at")
       .eq("cohort_id", STUDENT.cohortId).order("created_at", { ascending: false }).limit(20),
     supabase.from("letter_views").select("letter_id, seen_at, opened_at").eq("student_id", STUDENT.id),
   ]);

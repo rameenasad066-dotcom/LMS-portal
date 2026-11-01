@@ -12,7 +12,7 @@ select c.cohort_id, l.title, l.preview, l.body
 from (values ('on26'), ('mj27')) as c(cohort_id)
 cross join (select
   'Your effort is never wasted'::text as title,
-  'Before this week starts, I want you to know: your effort is never wasted.'::text as preview,
+  'Your effort is never wasted'::text as preview,
   $letter$Assalamu Alaikum, everyone,
 
 Starting today, every Sunday you’ll find a letter from me here. Some weeks it’ll be a verse, some weeks a story, and some weeks just something I think you need to hear. Read it with your chai, before the week starts running away from you.
