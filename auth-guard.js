@@ -31,6 +31,7 @@ import { renderStudentGrades } from "./student-grades.js";
 import { initStudentSettings } from "./student-settings.js";
 import { initPractice } from "./student-practice.js";
 import { initExaminerScripts } from "./student-examiner-scripts.js";
+import { initWinner } from "./student-winner.js";
 import { verifySession, startSessionWatch, clearLocalToken, cacheProfile } from "./session-guard.js";
 
 const REVEAL_CAP_MS = 4000;
@@ -94,6 +95,7 @@ function loadEverything() {
     safely("grades", renderStudentGrades),
     safely("ai practice", initPractice),
     safely("examiner scripts", initExaminerScripts),
+    safely("winner notice", initWinner),
     safely("settings", initStudentSettings),
   ]);
 }

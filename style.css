@@ -4851,6 +4851,235 @@ body.xs-reading { overflow: hidden; }
 }
 
 /* ==========================================================================
+   Winner celebration — full-screen "you won" screen (2026-11-01)
+   Shown once to a student who has an unseen row in `winners`. Deliberately its
+   own fixed celebratory palette (deep red, gold, white) in both themes, like a
+   congratulations card, so it reads the same in light and dark. Motion is
+   switched off for prefers-reduced-motion (the message still shows).
+   ========================================================================== */
+
+body.win-open { overflow: hidden; }
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  overflow-y: auto;
+  color: #fff;
+  background: radial-gradient(ellipse at 50% 28%, #D2303C 0%, #8F1D27 46%, #3A0C12 100%);
+  animation: win-fade 0.5s ease both;
+}
+
+.win-overlay.out { animation: win-fade-out 0.35s ease both; }
+
+@keyframes win-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes win-fade-out { to { opacity: 0; } }
+
+.win-rays {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  width: 170vmax;
+  height: 170vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.1) 0 7deg, transparent 7deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, transparent 52%);
+  mask-image: radial-gradient(circle, #000 0, transparent 52%);
+  animation: win-spin 46s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes win-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.win-fx {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.win-card {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 100%);
+  text-align: center;
+}
+
+.win-trophy-wrap {
+  position: relative;
+  width: 150px;
+  height: 165px;
+  margin: 0 auto 6px;
+  animation: win-drop 1s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.win-trophy {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.38));
+}
+
+@keyframes win-drop {
+  0% { transform: translateY(-120px) scale(0.4) rotate(-12deg); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+.win-sweep { animation: win-sweep 3.2s ease-in-out 1.2s infinite; }
+
+@keyframes win-sweep {
+  0% { transform: translateX(-140px); }
+  55%, 100% { transform: translateX(260px); }
+}
+
+.win-spark {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  color: #FFE9A8;
+  animation: win-twinkle 1.8s ease-in-out infinite;
+}
+
+.win-spark svg { width: 100%; height: 100%; display: block; }
+
+@keyframes win-twinkle {
+  0%, 100% { transform: scale(0.2) rotate(0); opacity: 0; }
+  50% { transform: scale(1) rotate(45deg); opacity: 1; }
+}
+
+.win-eyebrow {
+  font: 700 12.5px 'Inter', sans-serif;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #FFD98A;
+  animation: win-rise 0.8s 0.5s both;
+}
+
+.win-title {
+  margin: 8px 0 6px;
+  font: 800 clamp(30px, 8vw, 52px)/1.05 'Poppins', sans-serif;
+  letter-spacing: -0.01em;
+  color: #fff;
+  animation: win-rise 0.8s 0.7s both;
+}
+
+.win-title .win-name {
+  display: block;
+  background: linear-gradient(90deg, #FFE9A8, #F6C453 50%, #FFE9A8);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: win-gold 3s linear infinite;
+}
+
+@keyframes win-gold { to { background-position: -200% 0; } }
+
+.win-sub {
+  margin: 0 0 20px;
+  font-size: clamp(15px, 3.8vw, 18px);
+  color: rgba(255, 255, 255, 0.92);
+  animation: win-rise 0.8s 0.9s both;
+}
+
+.win-prize {
+  display: inline-block;
+  min-width: min(340px, 100%);
+  padding: 18px 26px 16px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  animation: win-rise 0.8s 1.1s both, win-float 4s ease-in-out 2s infinite;
+}
+
+.win-prize small {
+  display: block;
+  font: 600 12px 'Inter', sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #FFD98A;
+}
+
+.win-prize b {
+  display: block;
+  font: 800 clamp(40px, 11vw, 64px)/1.1 'Poppins', sans-serif;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(246, 196, 83, 0.55);
+}
+
+@keyframes win-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.win-note {
+  margin: 20px auto 22px;
+  max-width: 440px;
+  font-size: clamp(14px, 3.6vw, 16px);
+  color: rgba(255, 255, 255, 0.92);
+  animation: win-rise 0.8s 1.4s both;
+}
+
+.win-note strong { color: #fff; }
+
+.win-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: win-rise 0.8s 1.6s both;
+}
+
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: 999px;
+  font: 700 15px 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.win-btn.main {
+  background: #fff;
+  color: #8F1D27;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+.win-btn.main:hover { transform: translateY(-2px); }
+
+.win-btn.ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.win-btn:focus-visible {
+  outline: 3px solid #FFD98A;
+  outline-offset: 3px;
+}
+
+@keyframes win-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .win-overlay, .win-overlay * { animation: none !important; transition: none !important; }
+  .win-rays { display: none; }
+}
+
+/* ==========================================================================
    AI Practice — student practice flow + teacher monitoring (2026-10-09)
    Brand tokens only, so light/dark follow automatically. The mark chip always
    prints the number, so colour is never the only cue.

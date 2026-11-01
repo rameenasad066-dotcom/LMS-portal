@@ -63,6 +63,8 @@ select * from (values
    and to_regclass('public.student_attempts') is not null),
   (20, 'examiner-scripts.sql',
        to_regclass('public.examiner_scripts') is not null
-   and exists (select 1 from storage.buckets where id = 'examiner-scripts'))
+   and exists (select 1 from storage.buckets where id = 'examiner-scripts')),
+  (21, 'winners.sql',
+       to_regclass('public.winners') is not null)
 ) as t(step, migration, applied)
 order by step;
