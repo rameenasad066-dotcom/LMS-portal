@@ -30,6 +30,7 @@ const VIEW_TITLES = {
   dashboard: "Dashboard",
   uploads: "Upload Notes",
   content: "Manage Content",
+  syllabus: "Syllabus Confidence",
   assignments: "Assignments",
   "weekly-test": "Weekly Test",
   scripts: "Examiner Scripts",

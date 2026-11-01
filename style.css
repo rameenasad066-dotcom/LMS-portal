@@ -4851,6 +4851,236 @@ body.xs-reading { overflow: hidden; }
 }
 
 /* ==========================================================================
+   Syllabus checklist — My Syllabus (student) + Syllabus Confidence (teacher)
+   Three states, always with a text label so colour is never the only cue.
+   ========================================================================== */
+
+:root {
+  --syl-amber: #D99A1B;
+  --syl-amber-bg: #FEF3C7;
+  --syl-amber-ink: #7A4F00;
+}
+
+:root[data-theme="dark"] {
+  --syl-amber: #F2B84B;
+  --syl-amber-bg: #33290F;
+  --syl-amber-ink: #F2B84B;
+}
+
+.syl-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.syl-dot.g { background: var(--green); }
+.syl-dot.a { background: var(--syl-amber); }
+.syl-dot.r { background: var(--red); }
+
+.syl-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+}
+
+.syl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.syl-chip {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-light);
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 13px 'Inter', sans-serif;
+  cursor: pointer;
+}
+.syl-chip b { color: var(--gray); margin-left: 4px; }
+.syl-chip:hover { background: var(--surface-2); }
+.syl-chip.on,
+.syl-chip[aria-pressed="true"].on {
+  background: var(--red-blush);
+  border-color: var(--red);
+  color: var(--ink-red);
+}
+.syl-chip.on b { color: var(--ink-red); }
+
+.syl-group {
+  margin: 16px 0 4px;
+  font: 700 11px 'Inter', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
+.syl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.syl-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.syl-main b { font: 600 15px 'Inter', sans-serif; color: var(--ink); }
+
+.syl-links { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.syl-link {
+  padding: 0;
+  min-height: 24px;
+  border: 0;
+  background: none;
+  color: var(--ink-red);
+  font: 600 12.5px 'Inter', sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.syl-none { font-size: 12.5px; color: var(--gray); }
+
+.syl-rag { display: flex; gap: 6px; flex: none; }
+
+.syl-rate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gray-light);
+  background: var(--surface);
+  color: var(--gray);
+  font: 600 12.5px 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.syl-rate:hover { background: var(--surface-2); color: var(--ink); }
+.syl-rate[aria-pressed="true"].r { background: var(--red-blush); border-color: var(--red); color: var(--ink-red); }
+.syl-rate[aria-pressed="true"].a { background: var(--syl-amber-bg); border-color: var(--syl-amber); color: var(--syl-amber-ink); }
+.syl-rate[aria-pressed="true"].g { background: var(--green-light); border-color: var(--green); color: var(--ink-green); }
+
+.syl-side { display: grid; gap: 14px; position: sticky; top: 156px; }
+
+.syl-card {
+  padding: 16px;
+  border: 1px solid var(--gray-light);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.syl-card h3 { margin: 0 0 10px; font: 700 14px 'Poppins', sans-serif; }
+
+.syl-prog { display: flex; align-items: center; gap: 16px; }
+.syl-prog ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; color: var(--gray); flex: 1; }
+.syl-prog li { display: flex; align-items: center; gap: 8px; }
+.syl-prog li b { color: var(--ink); margin-left: auto; padding-left: 10px; }
+
+.syl-ring {
+  --p: 0;
+  flex: none;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--green) calc(var(--p) * 1%), var(--gray-light) 0);
+}
+.syl-ring span {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--surface);
+  font: 700 17px 'Poppins', sans-serif;
+  color: var(--ink);
+}
+
+.syl-next { background: var(--red-blush); border-color: var(--red-blush-line); }
+.syl-next h3 { color: var(--ink-red); }
+.syl-next ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13.5px; color: var(--ink-red); font-weight: 600; }
+.syl-next p { margin: 0; font-size: 13.5px; color: var(--ink-red); }
+
+/* Teacher: class-wide view */
+.syl-tsummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  margin-bottom: 14px;
+}
+.syl-tsummary > div:not(.syl-tlegend) { display: flex; flex-direction: column; }
+.syl-tsummary b { font: 700 22px 'Poppins', sans-serif; color: var(--ink); }
+.syl-tsummary span { font-size: 12.5px; color: var(--gray); }
+.syl-tlegend { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--gray); margin-left: auto; }
+.syl-tlegend .syl-dot { margin-left: 8px; }
+
+.syl-trow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(120px, 1fr) 170px;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.syl-tmain { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.syl-tmain b { font: 600 14.5px 'Inter', sans-serif; color: var(--ink); }
+.syl-tgroup { font-size: 12px; color: var(--gray); }
+
+.syl-tbar {
+  display: flex;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.syl-tbar i { display: block; height: 100%; }
+.syl-tbar i.g { background: var(--green); }
+.syl-tbar i.a { background: var(--syl-amber); }
+.syl-tbar i.r { background: var(--red); opacity: 0.55; }
+
+.syl-tnum { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--gray); }
+.syl-tnum b { color: var(--ink); }
+
+.syl-reteach {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--red-blush);
+  color: var(--ink-red);
+  font: 700 11px 'Inter', sans-serif;
+}
+
+@media (max-width: 900px) {
+  .syl-grid { grid-template-columns: minmax(0, 1fr); }
+  .syl-side { position: static; order: -1; grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .syl-row { flex-direction: column; align-items: stretch; }
+  .syl-rag { width: 100%; }
+  .syl-rate { flex: 1; justify-content: center; padding: 0 6px; }
+  .syl-side { grid-template-columns: 1fr; }
+  .syl-trow { grid-template-columns: minmax(0, 1fr); }
+  .syl-tlegend { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .syl-rate { transition: none; }
+}
+
+/* ==========================================================================
    Winner celebration — full-screen "you won" screen (2026-11-01)
    Shown once to a student who has an unseen row in `winners`. Deliberately its
    own fixed celebratory palette (deep red, gold, white) in both themes, like a

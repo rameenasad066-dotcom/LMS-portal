@@ -32,6 +32,7 @@ import { initStudentSettings } from "./student-settings.js";
 import { initPractice } from "./student-practice.js";
 import { initExaminerScripts } from "./student-examiner-scripts.js";
 import { initWinner } from "./student-winner.js";
+import { initSyllabus } from "./student-syllabus.js";
 import { verifySession, startSessionWatch, clearLocalToken, cacheProfile } from "./session-guard.js";
 
 const REVEAL_CAP_MS = 4000;
@@ -88,6 +89,7 @@ function loadEverything() {
       renderVault();
       // Syllabus Tracker rings read LECTURES + WATCHED_LECTURE_IDS.
       renderDashboard();
+      await safely("syllabus", initSyllabus);
     }),
     safely("assignments", renderStudentAssignments),
     safely("weekly test", renderStudentWeeklyTest),

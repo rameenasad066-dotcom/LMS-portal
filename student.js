@@ -21,7 +21,8 @@ const VIEW_TITLES = {
   dashboard:  'Dashboard',
   vault:      'Lecture Vault',
   notes:      'Notes',
-  scripts:    'Examiner Scripts',
+  syllabus:   'My Syllabus',
+  scripts:   'Examiner Scripts',
   practice:   'AI Practice',
   weekly:     'Weekly Test',
   assignments: 'Assignments & Homework',
@@ -256,6 +257,18 @@ function renderDrill(view) {
   }).join('') + '</div>';
 }
 
+/* Used by My Syllabus: open the Vault/Notes drill-down already expanded on a topic. */
+window.openInLibrary = function (view, chapterId) {
+  const c = CHAPTERS.find(x => x.id === chapterId);
+  if (!c || !drill[view]) return;
+  const st = drill[view];
+  st.subject = c.subject;
+  st.chapter = c.parentId || c.id;
+  st.subChapter = c.parentId ? c.id : null;
+  renderDrill(view);
+  location.hash = '#' + view;
+};
+
 function renderVault() { renderDrill('vault'); }
 function renderNotes() { renderDrill('notes'); }
 
@@ -284,6 +297,7 @@ function renderAll() {
   renderDashboard();
   renderVault();
   renderNotes();
+  if (window.renderSyllabus) window.renderSyllabus();
 }
 
 /* ==========================================================================
