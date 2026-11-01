@@ -33,6 +33,7 @@ import { initPractice } from "./student-practice.js";
 import { initExaminerScripts } from "./student-examiner-scripts.js";
 import { initWinner } from "./student-winner.js";
 import { initSyllabus } from "./student-syllabus.js";
+import { initLetters } from "./student-letter.js";
 import { verifySession, startSessionWatch, clearLocalToken, cacheProfile } from "./session-guard.js";
 
 const REVEAL_CAP_MS = 4000;
@@ -98,6 +99,7 @@ function loadEverything() {
     safely("ai practice", initPractice),
     safely("examiner scripts", initExaminerScripts),
     safely("winner notice", initWinner),
+    safely("sunday letter", initLetters),
     safely("settings", initStudentSettings),
   ]);
 }

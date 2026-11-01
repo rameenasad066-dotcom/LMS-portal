@@ -40,8 +40,28 @@ function showView() {
   document.querySelectorAll('.snav-item[data-view]').forEach(a => {
     a.classList.toggle('active', a.dataset.view === view);
   });
+  // The group holding the current page always opens; others keep whatever
+  // the student last chose.
+  document.querySelectorAll('.snav-group').forEach(g => {
+    const here = !!g.querySelector(`.snav-item[data-view="${view}"]`);
+    g.classList.toggle('has-active', here);
+    if (here) setGroupOpen(g, true);
+  });
   $('viewTitle').textContent = VIEW_TITLES[view];
 }
+
+function setGroupOpen(group, open) {
+  group.classList.toggle('open', open);
+  group.querySelector('.snav-group-h').setAttribute('aria-expanded', String(open));
+}
+
+document.addEventListener('click', e => {
+  const head = e.target.closest('.snav-group-h');
+  if (head) {
+    const g = head.closest('.snav-group');
+    setGroupOpen(g, !g.classList.contains('open'));
+  }
+});
 
 window.addEventListener('hashchange', showView);
 
