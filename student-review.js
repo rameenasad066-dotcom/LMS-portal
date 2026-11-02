@@ -45,7 +45,7 @@ function formHTML() {
     <textarea id="rvComment" rows="4" maxlength="2000" placeholder="What's working well? How do you find the classes, notes, tests?"></textarea>
     <label for="rvChange">Anything you'd like changed, or more of? <span class="rv-opt">optional</span></label>
     <textarea id="rvChange" rows="3" maxlength="2000" placeholder="Something you'd like more of, less of, or a problem you've had"></textarea>
-    <p class="rv-private"><span aria-hidden="true">🔒</span> Only Miss Rameen can see this. Other students never will.</p>
+    <p class="rv-private"><span aria-hidden="true">🔒</span> Your review stays private, just between you and Miss Rameen.</p>
     <button type="submit" class="btn btn-primary" ${sending ? "disabled" : ""}>${sending ? "Sending…" : "Send review"}</button>
   </form>`;
 }
