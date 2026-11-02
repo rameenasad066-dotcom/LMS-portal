@@ -2478,6 +2478,42 @@ button, input, select {
   font-size: 12px;
 }
 
+/* The question and/or PDF Miss Rameen attached to an assignment: on the student's card and
+   at the top of the teacher's open assignment (2026-11-02). Portal tokens only. */
+.asg-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asg-detail-head + .asg-brief {
+  margin: 12px 0;
+}
+
+.asg-brief .btn {
+  align-self: flex-start;
+}
+
+.asg-question {
+  margin: 0;
+  padding: 11px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Two date boxes side by side: neither one stretches like the Weekly Test form's first box (phones stay full width) */
+@media (min-width: 641px) {
+  #asgDatesForm .wt-edit-field:first-child {
+    flex: 0 1 auto;
+  }
+}
+
 /* Weekly-test paper download — a big, tactile download card (brand green)
    in place of a thin outline button. The whole tile is the click target. */
 .wt-paper {

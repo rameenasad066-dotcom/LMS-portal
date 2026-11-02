@@ -1,11 +1,13 @@
 /* Assignments & marking (teacher.html) — Phase 1 of the progress system.
-   Post homework/assignments/tests to the active cohort, see who submitted,
+   Post homework/assignments to the active cohort (weekly tests have their own
+   section and are left out of this board), see who submitted,
    open their files, and enter marks (+ optional feedback). Marks can be
    entered without a portal submission too, since weekly tests arrive on
    WhatsApp. Runs as a module — see teacher-auth-guard.js for the
    script-order reasoning. */
 
 import { supabase, COURSES, ALL_SUBJECT_IDS, subjectsForCourses, courseLabel, courseSelectHTML, subjectsForCourseChoice } from "./supabase-config.js";
+import { safeFileName } from "./storage-upload.js";
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABEL = { homework: "Homework", assignment: "Assignment", test: "Test" };
@@ -34,6 +36,20 @@ function isLate(submittedAt, dueDate) {
   return new Date(submittedAt) > new Date(dueDate + "T23:59:59");
 }
 
+/* The question, the PDF and the last upload date need the fields and the private
+   bucket from supabase/migrations/assignment-question-pdf.sql. They are only sent
+   when used, so posting a plain assignment keeps working before that SQL is run. */
+const PDF_BUCKET = "assignment-files";
+const SQL_HINT = "The database needs the new assignment fields first. Run supabase/migrations/assignment-question-pdf.sql once in the Supabase SQL editor, then try again.";
+
+function friendlyError(err, fallback) {
+  const m = (err && err.message) || "";
+  if (/Could not find the '(question|file_path|last_upload_date)' column|Bucket not found/i.test(m)) return SQL_HINT;
+  return m || fallback;
+}
+
+let currentAsg = null; // the assignment open in the marking view
+
 async function renderArea() {
   if (openAssignmentId) await renderMarkingView();
   else await renderListView();
@@ -47,6 +63,8 @@ async function renderListView() {
     .from("assignments")
     .select("*")
     .eq("cohort_id", activeCohort)
+    // Weekly tests keep a hidden type='test' row for their marks; they have their own section
+    .neq("type", "test")
     .order("due_date", { ascending: false });
 
   if (error) {
@@ -72,8 +90,8 @@ async function renderListView() {
       <select id="caType" class="tool-select">
         <option value="homework">Homework</option>
         <option value="assignment">Assignment</option>
-        <option value="test">Test</option>
       </select>
+      <span class="date-hint">Weekly tests are posted in Weekly Test, not here.</span>
       <label for="caCourse">Course</label>
       <select id="caCourse" class="tool-select" required>
         <option value="">Choose a course…</option>
@@ -81,8 +99,16 @@ async function renderListView() {
       </select>
       <label for="caTitle">Title</label>
       <input type="text" id="caTitle" required placeholder="e.g. Homework 2 — Causes of the War of Independence">
+      <label for="caQuestion">Question or instructions (optional)</label>
+      <textarea id="caQuestion" rows="4" maxlength="5000" placeholder="Write the question here, or attach a PDF below, or both"></textarea>
+      <label for="caFile">Assignment PDF (optional)</label>
+      <input type="file" id="caFile" accept="application/pdf">
       <label for="caDue">Due date</label>
       <input type="date" id="caDue" class="tool-select" required>
+      <span class="date-hint">Work uploaded after this day is flagged Late.</span>
+      <label for="caLast">Last upload date (optional)</label>
+      <input type="date" id="caLast" class="tool-select">
+      <span class="date-hint">After this day students can't upload any more. Leave it empty to keep uploads open.</span>
       <label for="caMax">Max marks</label>
       <input type="number" id="caMax" required min="1" value="10">
       <p class="auth-error" id="caError" hidden></p>
@@ -95,7 +121,7 @@ async function renderListView() {
       <li class="upload-item">
         <span class="u-info">
           <strong></strong>
-          <small>${TYPE_LABEL[a.type] || a.type} · ${esc(audienceLabel(a.subjects))} · due ${fmtDue(a.due_date)} · out of ${a.max_marks} · ${subCounts[a.id] || 0} submitted · ${markCounts[a.id] || 0} marked</small>
+          <small>${TYPE_LABEL[a.type] || a.type} · ${esc(audienceLabel(a.subjects))} · due ${fmtDue(a.due_date)}${a.last_upload_date ? ` · last upload ${fmtDue(a.last_upload_date)}` : ""} · out of ${a.max_marks} · ${subCounts[a.id] || 0} submitted · ${markCounts[a.id] || 0} marked${a.file_path ? " · PDF attached" : ""}</small>
         </span>
         <button class="btn btn-outline btn-sm" data-open-asg="${a.id}">Open →</button>
       </li>`).join("")}
@@ -114,7 +140,8 @@ async function renderMarkingView() {
     openAssignmentId = null;
     return renderListView();
   }
-  $("asgHint").textContent = `${TYPE_LABEL[a.type] || a.type} · ${audienceLabel(a.subjects)} · due ${fmtDue(a.due_date)} · out of ${a.max_marks}`;
+  currentAsg = a;
+  $("asgHint").textContent = `${TYPE_LABEL[a.type] || a.type} · ${audienceLabel(a.subjects)} · due ${fmtDue(a.due_date)}${a.last_upload_date ? ` · last upload ${fmtDue(a.last_upload_date)}` : ""} · out of ${a.max_marks}`;
 
   const [{ data: allStudents }, { data: subs }, { data: mks }] = await Promise.all([
     supabase.from("students").select("id, name, initials, subjects").eq("cohort_id", a.cohort_id).order("name"),
@@ -152,12 +179,34 @@ async function renderMarkingView() {
     </tr>`;
   }).join("");
 
+  // What she attached (the question and/or a PDF) and the two dates. The date form only appears once the new
+  // fields exist in the database (a row from before that has no last_upload_date key at all).
+  const brief = a.question || a.file_path
+    ? `<div class="asg-brief">${a.question ? '<p class="asg-question"></p>' : ""}${a.file_path ? '<button type="button" class="btn btn-outline btn-sm" data-view-asg-pdf>View assignment PDF</button>' : ""}</div>`
+    : "";
+  const dates = "last_upload_date" in a
+    ? `<form class="wt-edit" id="asgDatesForm">
+      <div class="wt-edit-field">
+        <label for="asgEditDue">Due date</label>
+        <input type="date" id="asgEditDue" required value="${a.due_date}">
+      </div>
+      <div class="wt-edit-field">
+        <label for="asgEditLast">Last upload date</label>
+        <input type="date" id="asgEditLast" value="${a.last_upload_date || ""}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Save dates</button>
+      <span class="date-hint">Work uploaded after the due date is flagged Late. After the last upload date students can't upload any more; leave it empty to keep uploads open. Changing it reopens or closes uploads straight away.</span>
+    </form>`
+    : '<p class="date-hint">Run supabase/migrations/assignment-question-pdf.sql once to add last upload dates, questions and PDFs.</p>';
+
   area.innerHTML = `
     <div class="asg-detail-head">
       <button class="btn btn-outline btn-sm" data-back-asg>← All assignments</button>
       <strong class="asg-detail-title"></strong>
       <button class="btn btn-outline btn-sm asg-delete" data-delete-asg>Delete</button>
     </div>
+    ${brief}
+    ${dates}
     <div class="course-retag">
       <label for="asgCourse">Course</label>
       ${courseSelectHTML("asgCourse", a.subjects)}
@@ -181,31 +230,69 @@ async function renderMarkingView() {
     ${students.length ? "" : `<p class="empty-note">No students in this cohort are taking ${esc(audienceLabel(a.subjects))}.</p>`}`;
 
   area.querySelector(".asg-detail-title").textContent = a.title;
+  if (a.question) area.querySelector(".asg-question").textContent = a.question;
 }
 
 $("assignmentsArea").addEventListener("submit", async (e) => {
+  // Change the due date / last upload date of the assignment that is open
+  if (e.target.id === "asgDatesForm") {
+    e.preventDefault();
+    const due = $("asgEditDue").value;
+    const last = $("asgEditLast").value;
+    if (!due) return showToast("Due date needed", "Pick the due date.");
+    if (last && last < due) return showToast("Check the dates", "The last upload date can't be before the due date.");
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true;
+    const { error } = await supabase.from("assignments").update({ due_date: due, last_upload_date: last || null }).eq("id", openAssignmentId);
+    btn.disabled = false;
+    if (error) return showToast("Couldn't save", friendlyError(error, "Please try again."));
+    showToast("Dates saved", last ? "Students can upload until the last upload date." : "Uploads stay open (no last upload date).");
+    await renderMarkingView();
+    return;
+  }
+
   if (e.target.id !== "createAsgForm") return;
   e.preventDefault();
   $("caError").hidden = true;
 
   const btn = e.target.querySelector("button[type=submit]");
   btn.disabled = true;
+  let path = null;
   try {
     const course = $("caCourse").value;
     if (!course) throw new Error("Choose which course this is for.");
-    const { error } = await supabase.from("assignments").insert({
+    const due = $("caDue").value;
+    const last = $("caLast").value;
+    if (last && last < due) throw new Error("The last upload date can't be before the due date.");
+    const file = $("caFile").files[0];
+    if (file && file.type !== "application/pdf") throw new Error("Only PDF files are supported.");
+    const question = $("caQuestion").value.trim();
+
+    if (file) {
+      path = `${activeCohort}/${Date.now()}-${safeFileName(file.name)}`;
+      const { error: uploadError } = await supabase.storage.from(PDF_BUCKET).upload(path, file);
+      if (uploadError) { path = null; throw uploadError; }
+    }
+
+    const row = {
       cohort_id: activeCohort,
       type: $("caType").value,
       title: $("caTitle").value.trim(),
-      due_date: $("caDue").value,
+      due_date: due,
       max_marks: Number($("caMax").value),
       subjects: subjectsForCourses([course]),
-    });
+    };
+    if (question) row.question = question;
+    if (path) row.file_path = path;
+    if (last) row.last_upload_date = last;
+    const { error } = await supabase.from("assignments").insert(row);
     if (error) throw error;
     showToast("Posted", `Now visible to ${COHORT_DATA[activeCohort].name} students.`);
     await renderListView();
   } catch (err) {
-    $("caError").textContent = err.message || "Couldn't post — please try again.";
+    // The row was not saved, so the PDF that was just uploaded would be left behind: remove it
+    if (path) await supabase.storage.from(PDF_BUCKET).remove([path]);
+    $("caError").textContent = friendlyError(err, "Couldn't post — please try again.");
     $("caError").hidden = false;
     btn.disabled = false;
   }
@@ -228,14 +315,27 @@ $("assignmentsArea").addEventListener("click", async (e) => {
   const delBtn = e.target.closest("[data-delete-asg]");
   if (delBtn) {
     if (!confirm("Delete this assignment? All its submissions and marks go with it. This can't be undone.")) return;
+    const pdfPath = currentAsg && currentAsg.id === openAssignmentId ? currentAsg.file_path : null;
     const { error } = await supabase.from("assignments").delete().eq("id", openAssignmentId);
     if (error) {
       showToast("Couldn't delete", error.message);
       return;
     }
+    if (pdfPath) await supabase.storage.from(PDF_BUCKET).remove([pdfPath]);
     openAssignmentId = null;
     showToast("Assignment deleted", "Its submissions and marks were removed too.");
     await renderListView();
+    return;
+  }
+
+  if (e.target.closest("[data-view-asg-pdf]")) {
+    const pdfPath = currentAsg && currentAsg.file_path;
+    const { data, error } = pdfPath ? await supabase.storage.from(PDF_BUCKET).createSignedUrl(pdfPath, 60) : { error: true };
+    if (error || !data) {
+      showToast("Couldn't open file", "Please try again in a moment.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
     return;
   }
 
