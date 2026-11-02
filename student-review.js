@@ -5,13 +5,16 @@
 
 import { supabase } from "./supabase-config.js";
 
+// Her four faces (img/reviews). Stored on the 1–5 scale so averages still
+// read "out of 5"; 2 only exists on reviews sent before these faces.
 const FACES = [
-  { v: 1, face: "😟", label: "Not good" },
-  { v: 2, face: "🙁", label: "Could be better" },
-  { v: 3, face: "😐", label: "Okay" },
-  { v: 4, face: "🙂", label: "Good" },
-  { v: 5, face: "😄", label: "Loving it" },
+  { v: 1, img: "not-good", label: "Not good" },
+  { v: 3, img: "figuring-out", label: "Okay, I'm still in the figuring out phase" },
+  { v: 4, img: "good", label: "Good" },
+  { v: 5, img: "loving-it", label: "Loving it" },
 ];
+const LEGACY = { 2: { v: 2, img: "not-good", label: "Could be better" } };
+const faceImg = (f, size) => `<img src="img/reviews/${f.img}.png" alt="" width="${size}" height="${size}">`;
 
 let mine = [];
 let rating = 0;
@@ -23,7 +26,7 @@ let wired = false;
 const area = () => document.getElementById("reviewArea");
 const escapeHTML = (v) => String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const faceOf = (v) => FACES.find((f) => f.v === v) || FACES[2];
+const faceOf = (v) => FACES.find((f) => f.v === v) || LEGACY[v] || FACES[1];
 
 function formHTML() {
   if (justSent) {
@@ -38,7 +41,7 @@ function formHTML() {
     <fieldset class="rv-rate">
       <legend>How are your classes going?</legend>
       <div class="rv-faces">
-        ${FACES.map((f) => `<button type="button" class="rv-face" data-rv-rate="${f.v}" aria-pressed="${rating === f.v}"><span class="rv-emoji" aria-hidden="true">${f.face}</span><span>${f.label}</span></button>`).join("")}
+        ${FACES.map((f) => `<button type="button" class="rv-face" data-rv-rate="${f.v}" aria-pressed="${rating === f.v}"><span class="rv-emoji" aria-hidden="true">${faceImg(f, 64)}</span><span>${f.label}</span></button>`).join("")}
       </div>
     </fieldset>
     <label for="rvComment">Your review <span class="rv-opt">optional</span></label>
@@ -57,7 +60,7 @@ function render() {
   const past = mine.length
     ? `<div class="rv-past"><h3>Your past reviews</h3>${mine.map((r) => `
         <div class="rv-past-row">
-          <span class="rv-past-face" aria-hidden="true">${faceOf(r.rating).face}</span>
+          <span class="rv-past-face" aria-hidden="true">${faceImg(faceOf(r.rating), 36)}</span>
           <div><b>${faceOf(r.rating).label}</b><small>${fmt(r.created_at)}${r.read_at ? " · read by Miss Rameen" : ""}</small>
           ${r.comment ? `<p>${escapeHTML(r.comment)}</p>` : ""}${r.change_request ? `<p><i>Would like:</i> ${escapeHTML(r.change_request)}</p>` : ""}</div>
         </div>`).join("")}</div>`

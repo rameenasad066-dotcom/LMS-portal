@@ -10,7 +10,8 @@ import { supabase } from "./supabase-config.js";
 const $ = (id) => document.getElementById(id);
 const view = document.querySelector('[data-view="reviews"]');
 const POLL_MS = 120000;
-const FACES = { 1: ["😟", "Not good"], 2: ["🙁", "Could be better"], 3: ["😐", "Okay"], 4: ["🙂", "Good"], 5: ["😄", "Loving it"] };
+const FACES = { 1: ["not-good", "Not good"], 2: ["not-good", "Could be better"], 3: ["figuring-out", "Okay, still figuring it out"], 4: ["good", "Good"], 5: ["loving-it", "Loving it"] };
+const faceImg = (name, size) => `<img src="img/reviews/${name}.png" alt="" width="${size}" height="${size}" loading="lazy">`;
 
 let reviews = [];
 let freshIds = new Set();
@@ -73,16 +74,16 @@ function render() {
 
   area.innerHTML = `
     <div class="rv-summary">
-      <div><b>${face[0]} ${avg.toFixed(1)}</b><span>average out of 5</span></div>
+      <div><b class="rv-avg">${faceImg(face[0], 28)} ${avg.toFixed(1)}</b><span>average out of 5</span></div>
       <div><b>${reviews.length}</b><span>review${reviews.length === 1 ? "" : "s"} in total</span></div>
       <div><b>${thisMonth}</b><span>this month</span></div>
     </div>
     <div class="rv-list">${reviews.map((r) => {
-      const [emoji, label] = FACES[r.rating] || FACES[3];
+      const [img, label] = FACES[r.rating] || FACES[3];
       return `
       <article class="rv-card ${freshIds.has(r.id) ? "fresh" : ""}">
         <div class="rv-card-head">
-          <span class="rv-card-face" aria-hidden="true">${emoji}</span>
+          <span class="rv-card-face" aria-hidden="true">${faceImg(img, 40)}</span>
           <div class="rv-card-who"><b>${escapeHTML(r.students ? r.students.name : "A former student")}</b><small>${fmt(r.created_at)} · ${label}</small></div>
           ${freshIds.has(r.id) ? '<span class="rv-new">New</span>' : ""}
           <button type="button" class="btn btn-outline btn-sm asg-delete" data-rv-delete="${r.id}">Delete</button>
