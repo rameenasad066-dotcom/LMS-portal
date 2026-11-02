@@ -39,6 +39,7 @@ const VIEW_TITLES = {
   "student-report": "Student Report",
   attendance: "Attendance",
   scoreboard: "Scoreboard",
+  reviews: "Student Reviews",
   settings: "Settings",
 };
 

@@ -28,6 +28,7 @@ const VIEW_TITLES = {
   assignments: 'Assignments & Homework',
   grades:     'My Grades',
   scoreboard: 'Scoreboard',
+  review:     'Review',
   settings:   'Settings',
 };
 
